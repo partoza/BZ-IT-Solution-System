@@ -1,4 +1,4 @@
-@extends('layout.blank')
+@extends('layout.auth')
 
 @section('title', 'Login - BZ IT Solutions')
 
@@ -18,8 +18,8 @@
                 <div class="hidden md:block md:col-span-1"></div>
 
                 <!-- Welcome Section (col-2 toY col-7) -->
-                <div class="col-span-1 md:col-span-6 flex items-center justify-center p-8 md:p-0">
-                    <div class="w-full space-y-6">
+                <div class="col-span-1 md:col-span-6 flex items-center justify-center p-8 md:p-0 js-anim-welcome">
+                    <div class="w-full space-y-6 ani-fade" style="--ani-delay:80ms">
                         <div class="space-y-3">
                             <div class="inline-block">
                                 <span
@@ -38,7 +38,7 @@
 
                         <!-- Feature List -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                            <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-3 js-anim-feature" style="--ani-delay:160ms">
                                 <div
                                     class="h-8 w-8 rounded-lg bg-primary/10 flex-shrink-0 flex items-center justify-center mt-0.5">
                                     <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,9 +46,9 @@
                                             d="M5 13l4 4L19 7" />
                                     </svg>
                                 </div>
-                                <span class="text-sm" style="color: #2B2B2B;">Real-time inventory management</span>
+                                <span class="text-sm" style="color: #2B2B2B;">Real-Time Inventory Management</span>
                             </div>
-                            <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-3 js-anim-feature" style="--ani-delay:240ms">
                                 <div
                                     class="h-8 w-8 rounded-lg bg-primary/10 flex-shrink-0 flex items-center justify-center mt-0.5">
                                     <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -56,9 +56,9 @@
                                             d="M5 13l4 4L19 7" />
                                     </svg>
                                 </div>
-                                <span class="text-sm" style="color: #2B2B2B;">Advanced analytics & reporting</span>
+                                <span class="text-sm" style="color: #2B2B2B;">Point of Sales System</span>
                             </div>
-                            <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-3 js-anim-feature" style="--ani-delay:320ms">
                                 <div
                                     class="h-8 w-8 rounded-lg bg-primary/10 flex-shrink-0 flex items-center justify-center mt-0.5">
                                     <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,7 +66,7 @@
                                             d="M5 13l4 4L19 7" />
                                     </svg>
                                 </div>
-                                <span class="text-sm" style="color: #2B2B2B;">Secure 24/7 access</span>
+                                <span class="text-sm" style="color: #2B2B2B;">Service Automation Process</span>
                             </div>
                         </div>
                     </div>
@@ -75,64 +75,86 @@
                 <!-- Login Form Section (col-8 to col-11) -->
                 <div class="col-span-1 md:col-span-4 flex items-center justify-center p-8 md:p-0">
                     <div class="w-full max-w-md">
-                        <div class="bg-white rounded-lg shadow-2xl p-8 backdrop-blur-sm"
-                            style="box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);">
+                        <div class="bg-white rounded-lg shadow-2xl p-8 backdrop-blur-sm ani-pop js-anim-form"
+                            style="box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1); --ani-delay:200ms">
                             <div class="mb-4">
                                 <h3 class="text-2xl md:text-3xl font-bold text-primary mb-2">Sign In</h3>
                                 <p class="text-sm" style="color: #666;">Access your dashboard securely</p>
                             </div>
 
                             <div class="space-y-5">
-                                <!-- Username Input -->
-                                <div class="space-y-2">
-                                    <label for="username" class="block text-xs md:text-sm font-semibold"
-                                        style="color: #2B2B2B;">Username</label>
-                                    <input type="text" id="username" name="username"
-                                        class="w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 font-poppins text-xs md:text-sm"
-                                        style="border-color: #E0E0E0; color: #2B2B2B;" placeholder="Enter your username"
-                                        onfocus="this.style.borderColor='#2F7D6D';"
-                                        onblur="this.style.borderColor='#E0E0E0';">
-                                </div>
-
-                                <!-- Password Input -->
-                                <div class="space-y-2">
-                                    <label for="password" class="block text-xs md:text-sm font-semibold"
-                                        style="color: #2B2B2B;">Password</label>
-                                    <input type="password" id="password" name="password"
-                                        class="w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 font-poppins text-xs md:text-sm"
-                                        style="border-color: #E0E0E0; color: #2B2B2B;" placeholder="Enter your password"
-                                        onfocus="this.style.borderColor='#2F7D6D';"
-                                        onblur="this.style.borderColor='#E0E0E0';">
-                                </div>
-
-
-                                <!-- Remember Me Checkbox -->
-                                <div class="flex items-center gap-4">
-                                    <div class="flex items-start mb-3 font-poppins">
-                                        <input id="terms" type="checkbox" required class="mt-1 h-4 w-4 appearance-none rounded border border-gray-300 cursor-pointer 
-                                         transition-all duration-200 ease-in-out
-                                         checked:bg-[#2F7D6D] checked:border-[#2F7D6D]
-                                         checked:[&:after]:content-['✔'] checked:[&:after]:text-white 
-                                         checked:[&:after]:text-[10px] checked:[&:after]:flex checked:[&:after]:items-center 
-                                         checked:[&:after]:justify-center focus:ring-2 focus:ring-primary" />
-                                        <label for="terms" class="ml-2 text-sm text-gray-700">
-                                            I agree to
-                                            <a href="#" class="text-primary font-semibold hover:underline">Terms of
-                                                Service</a>
-                                            and
-                                            <a href="#" class="text-primary font-semibold hover:underline">Privacy
-                                                Policy</a>
-                                        </label>
+                                <form method="POST" action="{{ route('login') }}" class="space-y-5">
+                                    @csrf
+                                    <!-- Username Input -->
+                                    <div class="space-y-2">
+                                        <label for="username" class="block text-xs md:text-sm font-semibold"
+                                            style="color: #2B2B2B;">Username</label>
+                                        <input type="text" id="username" name="username" required autocomplete="username"
+                                            class="w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 font-poppins text-xs md:text-sm"
+                                            style="border-color: #E0E0E0; color: #2B2B2B;" placeholder="Enter your username"
+                                            onfocus="this.style.borderColor='#2F7D6D';"
+                                            onblur="this.style.borderColor='#E0E0E0';">
                                     </div>
-                                </div>
 
+                                    <!-- Password Input -->
+                                    <div class="space-y-2">
+                                        <label for="password" class="block text-xs md:text-sm font-semibold"
+                                            style="color: #2B2B2B;">Password</label>
+                                        <input type="password" id="password" name="password" required
+                                            autocomplete="current-password"
+                                            class="w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 font-poppins text-xs md:text-sm"
+                                            placeholder="Enter your password" onfocus="this.style.borderColor='#2F7D6D';"
+                                            onblur="this.style.borderColor='#E0E0E0';">
+                                    </div>
 
-                                <!-- Sign In Button -->
-                                <button
-                                    class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-xl font-poppins"
-                                    onclick="alert('Login form - Ready for backend integration')">
-                                    Sign In
-                                </button>
+                                    <!-- Remember Me Checkbox -->
+                                    <div class="flex items-center gap-4">
+                                        <div class="flex items-start mb-3 font-poppins">
+                                            <input id="terms" type="checkbox" name="terms" value="1" required class="mt-1 h-4 w-4 appearance-none rounded border border-gray-300 cursor-pointer 
+                                                     transition-all duration-200 ease-in-out
+                                                     checked:bg-[#2F7D6D] checked:border-[#2F7D6D]
+                                                     checked:[&:after]:content-['✔'] checked:[&:after]:text-white 
+                                                     checked:[&:after]:text-[10px] checked:[&:after]:flex checked:[&:after]:items-center 
+                                                     checked:[&:after]:justify-center focus:ring-2 focus:ring-primary" />
+                                            <label for="terms" class="ml-2 text-sm text-gray-700">
+                                                I agree to
+                                                <a href="#" class="text-primary font-semibold hover:underline">Terms of
+                                                    Service</a>
+                                                and
+                                                <a href="#" class="text-primary font-semibold hover:underline">Privacy
+                                                    Policy</a>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Sign In Button -->
+                                    <button type="submit"
+                                        class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-xl font-poppins ani-fade"
+                                        style="--ani-delay:520ms">
+                                        Sign In
+                                    </button>
+
+                                    <!-- Need Help divider -->
+                                    <div class="flex items-center gap-4 my-4">
+                                        <div class="flex-1 border-t border-gray-200"></div>
+                                        <div class="text-xs text-gray-500 px-2">Need Help?</div>
+                                        <div class="flex-1 border-t border-gray-200"></div>
+                                    </div>
+
+                                    <!-- Contact Support Button (outlined secondary) -->
+                                    <div class="text-center">
+                                        <a href="tel:+1234567890"
+                                            class="inline-flex items-center gap-2 px-4 py-2 border rounded-lg text-sm font-medium transition-colors duration-200 hover:bg-gray-50"
+                                            style="border-color: rgba(47,125,109,0.2); color: #2F7D6D;">
+                                            <!-- Phone icon -->
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M22 16.92v3a2 2 0 01-2.18 2 19.86 19.86 0 01-8.63-3.07A19.51 19.51 0 014.11 9.81 19.86 19.86 0 011 1.18 2 2 0 013 0h3a2 2 0 012 1.72c.12.81.3 1.6.55 2.35a2 2 0 01-.45 2.11L7 8a16 16 0 007 7l1.82-1.11a2 2 0 012.11-.45c.75.25 1.54.43 2.35.55A2 2 0 0122 16.92z" />
+                                            </svg>
+                                            Contact Support
+                                        </a>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -145,8 +167,8 @@
         </div>
 
         <!-- Footer -->
-        <footer class="mt-auto relative z-10 mx-0 backdrop-blur-lg"
-            style="background: radial-gradient(ellipse at center, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.95) 40%, rgba(47, 125, 109, 0.05) 100%); border-top: 1px solid rgba(47, 125, 109, 0.15);">
+        <footer class="mt-auto relative z-10 mx-0 backdrop-blur-lg ani-fade-slow"
+            style="--ani-delay:640ms; background: radial-gradient(ellipse at center, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.95) 40%, rgba(47, 125, 109, 0.05) 100%); border-top: 1px solid rgba(47, 125, 109, 0.15);">
             <!-- Wavy Divider -->
             <svg class="w-full h-auto" viewBox="0 0 1200 100" preserveAspectRatio="none" style="display: block;">
                 <defs>
@@ -192,7 +214,7 @@
                                             d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                             clip-rule="evenodd" />
                                     </svg>
-                                    24/7 Support
+                                    Premium Services
                                 </span>
                                 <span
                                     class="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-xs font-semibold border border-primary/20 hover:bg-primary/20 transition-colors duration-200">
@@ -200,7 +222,7 @@
                                         <path
                                             d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.381-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                     </svg>
-                                    Premium Service
+                                    Excellent After Sales Support
                                 </span>
                             </div>
                         </div>
@@ -251,7 +273,7 @@
                                     </svg>
                                 </a>
                             </div>
-                            <p class="text-xs mt-4" style="color: #666;">Join our community for updates and latest news</p>
+                            <p class="text-xs mt-4" style="color: #666;">Follow us for updates and latest offerings</p>
                         </div>
                     </div>
                 </div>
@@ -276,6 +298,5 @@
                 </div>
             </div>
         </footer>
-    </div>
     </div>
 @endsection

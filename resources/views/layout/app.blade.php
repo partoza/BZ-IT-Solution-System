@@ -10,24 +10,20 @@
 
   <!-- Vite Assets -->
   @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+  <!-- Favicon / Touch Icon -->
+  <link rel="icon" type="image/png" href="{{ asset('assets/img/logo/bz-logo-green.png') }}" />
+  <link rel="apple-touch-icon" href="{{ asset('assets/img/logo/bz-logo-green.png') }}" />
+
+  {{-- Extra head content (optional) --}}
+  @stack('head')
 </head>
 
-<body class="font-poppins bg-gray-50 text-gray-800">
-  <div class="flex min-h-screen">
-    <!-- Sidebar -->
-    <aside class="w-64 bg-primary text-white p-6">
-      <h1 class="text-xl font-semibold mb-8">BZ IT Solutions</h1>
-      <nav class="space-y-3">
-        <a href="#" class="block py-2 px-3 rounded-lg bg-white/10">Dashboard</a>
-        <a href="#" class="block py-2 px-3 rounded-lg hover:bg-white/10">Inventory</a>
-        <a href="#" class="block py-2 px-3 rounded-lg hover:bg-white/10">Customer</a>
-      </nav>
-    </aside>
+<body class="@yield('body-class', 'font-poppins bg-gray-50 text-gray-800')">
+  {{-- Primary content yield for all pages --}}
+  @yield('content')
 
-    <!-- Main content -->
-    <main class="flex-1 p-8">
-      @yield('content')
-    </main>
-  </div>
+  {{-- Optional page scripts --}}
+  @stack('scripts')
 </body>
 </html>
