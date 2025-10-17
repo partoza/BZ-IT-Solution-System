@@ -180,15 +180,15 @@
                 <path d="M0,30 Q300,10 600,30 T1200,30 L1200,0 L0,0 Z" fill="url(#waveGradient)" />
                 <path d="M0,40 Q300,20 600,40 T1200,40 L1200,30 Q600,50 0,30 Z" fill="#2F7D6D" opacity="0.5" />
             </svg>
-            <div class="w-full">
+            <div class="w-full js-anim-welcome">
                 <!-- Main Content Section -->
                 <div class="max-w-7xl mx-auto py-10 md:py-5 px-4 md:px-8 lg:px-12">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-16 justify-center">
                         <!-- Company Info & Badges -->
-                        <div class="col-span-1 text-center md:text-left">
+                        <div class="col-span-1 text-center md:text-left ani-fade" style="--ani-delay:720ms">
                             <div class="flex md:flex-row flex-col items-center md:items-start gap-4 mb-8">
                                 <img src="{{ asset('assets/img/logo/bz-logo-green.png') }}" alt="BZ IT Solutions"
-                                    class="h-24 w-auto object-contain flex-shrink-0">
+                                    class="h-24 w-auto object-contain flex-shrink-0 ani-fade" style="--ani-delay:760ms">
                                 <div>
                                     <h5 class="text-primary font-bold text-lg mb-2">BZ IT Solutions</h5>
                                     <p class="text-sm leading-relaxed mb-3" style="color: #2B2B2B;">Affordable Computer and
@@ -228,7 +228,7 @@
                         </div>
 
                         <!-- Contact Information -->
-                        <div class="col-span-1 md:col-span-1 lg:col-span-1 text-center md:text-left">
+                        <div class="col-span-1 md:col-span-1 lg:col-span-1 text-center md:text-left ani-fade" style="--ani-delay:780ms">
                             <h6 class="font-semibold text-sm mb-6 uppercase tracking-wide" style="color: #2B2B2B;">Contact
                                 Us</h6>
                             <div class="space-y-5">
@@ -247,7 +247,7 @@
                         </div>
 
                         <!-- Social Media -->
-                        <div class="col-span-1 md:col-span-1 lg:col-span-1 text-center md:text-left">
+                        <div class="col-span-1 md:col-span-1 lg:col-span-1 text-center md:text-left ani-fade" style="--ani-delay:800ms">
                             <h6 class="font-semibold text-sm mb-6 uppercase tracking-wide" style="color: #2B2B2B;">Follow Us
                             </h6>
                             <div class="flex flex-wrap gap-3 justify-center md:justify-start">
@@ -273,7 +273,7 @@
                                     </svg>
                                 </a>
                             </div>
-                            <p class="text-xs mt-4" style="color: #666;">Follow us for updates and latest offerings</p>
+                            <p class="text-xs mt-4" style="color: #666;">Follow us for more updates</p>
                         </div>
                     </div>
                 </div>
@@ -282,7 +282,7 @@
                 <div class="border-t border-gray-200"></div>
 
                 <!-- Bottom Section -->
-                <div class="max-w-7xl mx-auto py-8 px-4 md:px-8 lg:px-12">
+                <div class="max-w-7xl mx-auto py-8 px-4 md:px-8 lg:px-12 ani-fade" style="--ani-delay:860ms">
                     <div class="flex flex-col md:flex-row justify-between items-center gap-6">
                         <p class="text-xs text-center md:text-left" style="color: #666;">
                             &copy; 2025 BZ IT Solutions. All rights reserved.

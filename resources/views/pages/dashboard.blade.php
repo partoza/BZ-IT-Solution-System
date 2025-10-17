@@ -1,8 +1,8 @@
-@extends('layout.app_with_nav')
+@extends('layout.sidebarmenu')
 
 @section('title', 'Dashboard')
 
-@section('content')
+@section('pages-content')
   <h1 class="text-3xl font-semibold text-primary mb-6">Hello John Rex 👋</h1>
 
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

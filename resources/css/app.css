@@ -39,6 +39,21 @@
     /* subtle wave translate for footer SVG */
     .animate-wave-shift { animation: float 4s ease-in-out infinite; }
 
+    /* horizontal wave movement for SVG paths */
+    @keyframes wave-horizontal {
+        0% { transform: translateX(0); }
+        50% { transform: translateX(-8px); }
+        100% { transform: translateX(0); }
+    }
+
+    .animate-wave-horizontal { animation: wave-horizontal 6s ease-in-out infinite; transform-origin: center; }
+
+    /* stagger helpers */
+    .ani-delay-100 { animation-delay: 100ms; }
+    .ani-delay-200 { animation-delay: 200ms; }
+    .ani-delay-300 { animation-delay: 300ms; }
+    .ani-delay-400 { animation-delay: 400ms; }
+
         @keyframes slide-left {
             from { opacity: 0; transform: translateX(8px); }
             to { opacity: 1; transform: translateX(0); }
