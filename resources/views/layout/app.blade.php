@@ -14,6 +14,7 @@
   <!-- Favicon / Touch Icon -->
   <link rel="icon" type="image/png" href="{{ asset('assets/img/logo/bz-logo-green.png') }}" />
   <link rel="apple-touch-icon" href="{{ asset('assets/img/logo/bz-logo-green.png') }}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   {{-- Extra head content (optional) --}}
   @stack('head')
