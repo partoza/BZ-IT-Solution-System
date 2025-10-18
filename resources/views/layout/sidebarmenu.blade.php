@@ -38,8 +38,8 @@
             </ul>
         </nav>
         <div class="p-4 border-t border-neutral-100">
-            <div class="text-sm">John Rex</div>
-            <div class="text-xs text-neutral-500">Admin</div>
+            <div class="text-sm">{{ Auth::guard('employee')->user()->full_name }}</div>
+            <div class="text-xs text-neutral-500">{{ Auth::guard('employee')->user()->role }}</div>
         </div>
     </aside>
 
@@ -69,8 +69,8 @@
                     <!-- Right side: profile only (no dark mode icon) -->
                     <div class="flex items-center gap-4">
                         <div class="text-right hidden sm:block">
-                            <div class="font-medium">John Rex</div>
-                            <div class="text-xs text-neutral-500">Admin</div>
+                            <div class="font-medium">{{ Auth::guard('employee')->user()->full_name }}</div>
+                            <div class="text-xs text-neutral-500">{{ Auth::guard('employee')->user()->role }}</div>
                         </div>
                         <div class="flex items-center gap-2">
                             <img src="/assets/img/avatar.png" alt="avatar" class="w-10 h-10 rounded-full object-cover">

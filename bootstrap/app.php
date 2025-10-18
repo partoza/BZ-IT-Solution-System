@@ -10,9 +10,17 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
-        //
+    ->withMiddleware(function (Middleware $middleware) {
+        // Register your custom middleware
+        $middleware->alias([
+            'admin' => App\Http\Middleware\AdminMiddleware::class,
+            'manager' => App\Http\Middleware\ManagerMiddleware::class,
+            'staff' => App\Http\Middleware\StaffMiddleware::class,
+            'guest' => App\Http\Middleware\RedirectIfAuthenticated::class,
+        ]);
+        
+        // You can also add global middleware here if needed
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
+    ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
