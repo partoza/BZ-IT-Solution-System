@@ -1,6 +1,6 @@
 @extends('layout.sidebarmenu')
 
-@section('title', 'Dashboard')
+@section('title', 'Overview')
 
 @section('pages-content')
   <h1 class="text-3xl font-semibold text-primary mb-6">Hello John Rex 👋</h1>
