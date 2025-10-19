@@ -20,7 +20,7 @@
   @stack('head')
 </head>
 
-<body class="@yield('body-class', 'font-poppins bg-gray-50 text-gray-800')">
+<body class="@yield('body-class', 'font-poppins bg-[#F5F5F5] text-gray-800')">
   {{-- Primary content yield for all pages --}}
   @yield('content')
 
