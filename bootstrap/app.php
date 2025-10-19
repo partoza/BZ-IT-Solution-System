@@ -13,11 +13,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         // Register your custom middleware
         $middleware->alias([
-            'superadmin' => App\Http\Middleware\SuperAdminMiddleware::class,
-            'admin'      => App\Http\Middleware\AdminMiddleware::class,
-            'manager'    => App\Http\Middleware\ManagerMiddleware::class,
-            'staff'      => App\Http\Middleware\StaffMiddleware::class,
-            'guest'      => App\Http\Middleware\RedirectIfAuthenticated::class,
+            'role' => App\Http\Middleware\RoleMiddleware::class,
+            'guest' => App\Http\Middleware\RedirectIfAuthenticated::class,
         ]);
         
         // You can also add global middleware here if needed

@@ -163,7 +163,7 @@
                                 <div class="text-xs text-neutral-500">{{ $user->role ?? 'Admin' }}</div>
                             </div>
                             <div class="flex items-center gap-2">
-                                <img src="/assets/img/avatar.png" alt="avatar" class="w-10 h-10 rounded-full object-cover">
+                                <img src="#" alt="avatar" class="w-10 h-10 rounded-full object-cover">
                             </div>
                         </div>
                     </div>

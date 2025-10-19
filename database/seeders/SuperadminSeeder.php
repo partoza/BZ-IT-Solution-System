@@ -2,14 +2,18 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
 use App\Models\Employee;
 use App\Models\Branch;
-use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Carbon;
 
-class AdminSeeder extends Seeder
+class SuperadminSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run()
     {
         // Create or get the main branch
@@ -21,16 +25,16 @@ class AdminSeeder extends Seeder
         );
 
         // Seed admin only if not existing
-        if (!Employee::where('username', 'admin')->exists()) {
+        if (!Employee::where('username', 'superadmin')->exists()) {
             Employee::create([
                 'branch_id'         => $branch->branch_id,
-                'first_name'        => 'Manager',
+                'first_name'        => 'Super',
                 'last_name'         => 'Admin',
-                'role'              => 'admin',
-                'phone_number'      => '09123123112',
-                'email_address'     => 'admin@account.com',
-                'username'          => 'admin',
-                'password'          => Hash::make('bzadmin'),
+                'role'              => 'superadmin',
+                'phone_number'      => '0923123112',
+                'email_address'     => 'superadmin@account.com',
+                'username'          => 'superadmin',
+                'password'          => Hash::make('bzsuperadmin'),
                 'active_status'     => true,
                 'created_date'      => Carbon::now(),
                 'updated_date'      => Carbon::now(),
@@ -39,8 +43,8 @@ class AdminSeeder extends Seeder
             ]);
             
             $this->command->info('Admin user created successfully!');
-            $this->command->info('Username: admin');
-            $this->command->info('Password: bzadmin');
+            $this->command->info('Username: superadmin');
+            $this->command->info('Password: bzsuperadmin');
         } else {
             $this->command->info('Admin user already exists.');
         }

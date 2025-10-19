@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EmployeeController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -20,17 +21,15 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware(['auth:employee'])->group(function () {
     // Generic section routes for other sidebar menus. These render blade views under
     // resources/views/pages/{section}/{page}.blade.php when present.
-    $sections = ['dashboard','inventory', 'services', 'customer', 'employee', 'history', 'settings'];
+    $sections = ['dashboard','inventory', 'services', 'customer', 'history', 'settings'];
     foreach ($sections as $section) {
-        // index route for the section: /{section} -> first available page in that folder
+        // index route for the section: /{section}
         Route::get("/{$section}", function () use ($section) {
             $dir = resource_path('views/pages/' . $section);
             if (!\Illuminate\Support\Facades\File::isDirectory($dir)) abort(404);
             $files = \Illuminate\Support\Facades\File::files($dir);
             if (!count($files)) abort(404);
-            // take first file in the directory
             $filename = pathinfo($files[0]->getFilename(), PATHINFO_FILENAME);
-            // strip potential .blade or .php suffixes just in case
             $slug = preg_replace('/(\.blade|\.php)$/', '', $filename);
             $view = "pages.{$section}.{$slug}";
             if (view()->exists($view)) return view($view);
@@ -45,20 +44,14 @@ Route::middleware(['auth:employee'])->group(function () {
             abort(404);
         })->name("{$section}.page");
     }
-});
 
+    // Employee Staff Management route (only superadmin & admin)
+    Route::middleware(['role:superadmin,admin'])->group(function () {
+        Route::get('/employee/staff-management', [EmployeeController::class, 'index'])
+            ->name('employee.staff-management');
 
-// SuperAdmin routes
-Route::middleware(['auth:employee', 'superadmin'])->group(function () {
-    // routes exclusive to SuperAdmin
-});
-
-// Admin/Manager routes
-Route::middleware(['auth:employee', 'admin'])->group(function () {
-    // routes exclusive to Admin/Manager
-});
-
-// Staff routes
-Route::middleware(['auth:employee', 'staff'])->group(function () {
-    // routes exclusive to Staff
+        Route::post('/employee', [EmployeeController::class, 'store'])
+            ->name('employees.store');
+    });
+    
 });
