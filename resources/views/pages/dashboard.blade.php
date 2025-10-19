@@ -1,6 +1,6 @@
 @extends('layout.sidebarmenu')
 
-@section('title', 'Overview')
+@section('title', 'Dashboard')
 
 @section('pages-content')
   <div class="min-h-screen bg-gray-50">
