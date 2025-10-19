@@ -72,11 +72,13 @@
                     </div>
                 </div>
 
-                <!-- Login Form Section (col-8 to col-11) -->
+                <!-- Login Form Section -->
                 <div class="col-span-1 md:col-span-4 flex items-center justify-center p-8 md:p-0">
                     <div class="w-full max-w-md">
                         <div class="bg-white rounded-lg shadow-2xl p-8 backdrop-blur-sm ani-pop js-anim-form"
                             style="box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1); --ani-delay:200ms">
+                            
+                            <!-- Title -->
                             <div class="mb-4">
                                 <h3 class="text-2xl md:text-3xl font-bold text-primary mb-2">Sign In</h3>
                                 <p class="text-sm" style="color: #666;">Access your dashboard securely</p>
@@ -85,85 +87,89 @@
                             <div class="space-y-5">
                                 <form method="POST" action="{{ route('login') }}" class="space-y-5">
                                     @csrf
+
                                     <!-- Username Input -->
                                     <div class="space-y-2">
-                                        <label for="username" class="block text-xs md:text-sm font-semibold"
-                                            style="color: #2B2B2B;">Username</label>
-                                        <input type="text" id="username" name="username" required autocomplete="username"
-                                            class="w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 font-poppins text-xs md:text-sm"
-                                            style="border-color: #E0E0E0; color: #2B2B2B;" placeholder="Enter your username"
-                                            onfocus="this.style.borderColor='#2F7D6D';"
-                                            onblur="this.style.borderColor='#E0E0E0';">
+                                        <label for="username" class="block text-xs md:text-sm font-semibold text-gray-800">
+                                            Username
+                                        </label>
+                                        <input
+                                        type="text"
+                                        id="username"
+                                        name="username"
+                                        value="{{ old('username') }}"
+                                        required
+                                        autocomplete="username"
+                                        class="w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 font-poppins text-xs md:text-sm
+                                                {{ $errors->any() ? 'border-red-600' : 'border-gray-300' }}
+                                                focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                        placeholder="Enter your username">
                                     </div>
 
-                                    <!-- Password Input -->
+                                    <!-- Password Input with Toggle -->
                                     <div class="space-y-2">
-                                        <label for="password" class="block text-xs md:text-sm font-semibold"
-                                            style="color: #2B2B2B;">Password</label>
-                                        <input type="password" id="password" name="password" required
+                                        <label for="password" class="block text-xs md:text-sm font-semibold text-gray-800">
+                                            Password
+                                        </label>
+                                        <div class="relative">
+                                            <input
+                                            type="password"
+                                            id="password"
+                                            name="password"
+                                            required
                                             autocomplete="current-password"
-                                            class="w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 font-poppins text-xs md:text-sm"
-                                            placeholder="Enter your password" onfocus="this.style.borderColor='#2F7D6D';"
-                                            onblur="this.style.borderColor='#E0E0E0';">
-                                    </div>
-
-                                    <!-- Remember Me Checkbox -->
-                                    <div class="flex items-center gap-4">
-                                        <div class="flex items-start mb-3 font-poppins">
-                                            <input id="terms" type="checkbox" name="terms" value="1" required class="mt-1 h-4 w-4 appearance-none rounded border border-gray-300 cursor-pointer 
-                                                     transition-all duration-200 ease-in-out
-                                                     checked:bg-[#2F7D6D] checked:border-[#2F7D6D]
-                                                     checked:[&:after]:content-['✔'] checked:[&:after]:text-white 
-                                                     checked:[&:after]:text-[10px] checked:[&:after]:flex checked:[&:after]:items-center 
-                                                     checked:[&:after]:justify-center focus:ring-2 focus:ring-primary" />
-                                            <label for="terms" class="ml-2 text-sm text-gray-700">
-                                                I agree to
-                                                <a href="#" class="text-primary font-semibold hover:underline">Terms of
-                                                    Service</a>
-                                                and
-                                                <a href="#" class="text-primary font-semibold hover:underline">Privacy
-                                                    Policy</a>
-                                            </label>
+                                            class="w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 font-poppins text-xs md:text-sm
+                                                    {{ $errors->any() ? 'border-red-600' : 'border-gray-300' }}
+                                                    focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                            placeholder="Enter your password">
+                                            <!-- Eye Icon -->
+                                            <button type="button" 
+                                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                                                    onclick="togglePasswordVisibility()">
+                                                <svg id="eye-icon" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 
+                                                            8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 
+                                                            7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                                <svg id="eye-off-icon" class="h-4 w-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 
+                                                            0-8.268-2.943-9.543-7a9.97 9.97 0 
+                                                            011.563-3.029m5.858.908a3 3 0 
+                                                            114.243 4.243M9.878 9.878l4.242 
+                                                            4.242M9.88 9.88l-3.29-3.29m7.532 
+                                                            7.532l3.29 3.29M3 3l3.59 
+                                                            3.59m0 0A9.953 9.953 0 0112 5c4.478 
+                                                            0 8.268 2.943 9.543 7a10.025 
+                                                            10.025 0 01-4.132 5.411m0 
+                                                            0L21 21" />
+                                                </svg>
+                                            </button>
                                         </div>
                                     </div>
 
+                                    <!-- Error message (for any login error) -->
+                                    @if ($errors->any())
+                                        <div class="mb-4">
+                                            <p class="text-sm text-red-600 font-medium">
+                                                {{ $errors->first() }}
+                                            </p>
+                                        </div>
+                                    @endif
+
                                     <!-- Sign In Button -->
                                     <button type="submit"
-                                        class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-xl font-poppins ani-fade"
-                                        style="--ani-delay:520ms">
+                                        class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-xl font-poppins">
                                         Sign In
                                     </button>
-
-                                    <!-- Need Help divider -->
-                                    <div class="flex items-center gap-4 my-4">
-                                        <div class="flex-1 border-t border-gray-200"></div>
-                                        <div class="text-xs text-gray-500 px-2">Need Help?</div>
-                                        <div class="flex-1 border-t border-gray-200"></div>
-                                    </div>
-
-                                    <!-- Contact Support Button (outlined secondary) -->
-                                    <div class="text-center">
-                                        <a href="tel:+1234567890"
-                                            class="inline-flex items-center gap-2 px-4 py-2 border rounded-lg text-sm font-medium transition-colors duration-200 hover:bg-gray-50"
-                                            style="border-color: rgba(47,125,109,0.2); color: #2F7D6D;">
-                                            <!-- Phone icon -->
-                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M22 16.92v3a2 2 0 01-2.18 2 19.86 19.86 0 01-8.63-3.07A19.51 19.51 0 014.11 9.81 19.86 19.86 0 011 1.18 2 2 0 013 0h3a2 2 0 012 1.72c.12.81.3 1.6.55 2.35a2 2 0 01-.45 2.11L7 8a16 16 0 007 7l1.82-1.11a2 2 0 012.11-.45c.75.25 1.54.43 2.35.55A2 2 0 0122 16.92z" />
-                                            </svg>
-                                            Contact Support
-                                        </a>
-                                    </div>
                                 </form>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Empty right space (col-12) - hidden on mobile -->
-                <div class="hidden md:block md:col-span-1"></div>
-
-            </div>
         </div>
 
         <!-- Footer -->
@@ -299,4 +305,26 @@
             </div>
         </footer>
     </div>
+
+<script>
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eye-icon');
+        const eyeOffIcon = document.getElementById('eye-off-icon');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeIcon.classList.add('hidden');
+            eyeOffIcon.classList.remove('hidden');
+        } else {
+            passwordInput.type = 'password';
+            eyeIcon.classList.remove('hidden');
+            eyeOffIcon.classList.add('hidden');
+        }
+    }
+</script>
+
 @endsection
+
+
+
