@@ -153,7 +153,7 @@
 
                                     <!-- Error message (for any login error) -->
                                     @if ($errors->any())
-                                        <div class="mb-4">
+                                       <div class="mb-4">
                                             <p class="text-sm text-red-600 font-medium">
                                                 {{ $errors->first() }}
                                             </p>
