@@ -154,10 +154,31 @@
                                     <!-- Error message (for any login error) -->
                                     @if ($errors->any())
                                         <div class="mb-4">
-                                            <p class="text-sm text-red-600 font-medium">
+                                            <p class="text-sm text-red-600 font-medium" id="lockout-message">
                                                 {{ $errors->first() }}
+                                                @if (session('lockout_seconds'))
+                                                    Please try again in <span id="countdown">{{ session('lockout_seconds') }}</span> seconds.
+                                                @endif
                                             </p>
                                         </div>
+
+                                        @if (session('lockout_seconds'))
+                                            <script>
+                                                let countdown = {{ session('lockout_seconds') }};
+                                                const countdownElement = document.getElementById('countdown');
+                                                const lockoutMessage = document.getElementById('lockout-message');
+
+                                                const timer = setInterval(() => {
+                                                    countdown--;
+                                                    if (countdown <= 0) {
+                                                        clearInterval(timer);
+                                                        lockoutMessage.innerText = "";
+                                                    } else {
+                                                        countdownElement.innerText = countdown;
+                                                    }
+                                                }, 1000);
+                                            </script>
+                                        @endif
                                     @endif
 
                                     <!-- Sign In Button -->

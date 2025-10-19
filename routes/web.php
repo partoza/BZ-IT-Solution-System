@@ -11,7 +11,7 @@ Route::get('/', function () {
 Route::middleware(['guest:employee'])->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
-});
+}); 
 
 // Logout route
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -21,4 +21,20 @@ Route::middleware(['auth:employee'])->group(function () {
     Route::get('/dashboard', function () {
         return view('pages.dashboard');
     })->name('dashboard');
+});
+
+
+// SuperAdmin routes
+Route::middleware(['auth:employee', 'superadmin'])->group(function () {
+    // routes exclusive to SuperAdmin
+});
+
+// Admin/Manager routes
+Route::middleware(['auth:employee', 'admin'])->group(function () {
+    // routes exclusive to Admin/Manager
+});
+
+// Staff routes
+Route::middleware(['auth:employee', 'staff'])->group(function () {
+    // routes exclusive to Staff
 });
