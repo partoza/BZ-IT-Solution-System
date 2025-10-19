@@ -1,22 +1,27 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
 Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
+// Authentication Routes - only accessible to guests
+Route::middleware(['guest:employee'])->group(function () {
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+});
 
-Route::post('/login', function () {
-    return redirect('/overview');
-})->name('login.submit');
+// Logout route
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/overview', function () {
-    return view('pages.dashboard.overview');
-})->name('overview');
+// Protected Routes
+Route::middleware(['auth:employee'])->group(function () {
+    Route::get('/overview', function () {
+        return view('pages.overview');
+    })->name('overview');
+});
 
 // Dynamic route to render pages located under resources/views/pages/{section}/{page}.blade.php
 Route::get('/{section}/{page}', function ($section, $page) {
