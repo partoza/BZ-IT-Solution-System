@@ -20,6 +20,6 @@ class RoleMiddleware
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
-        return response()->view('errors.unauthorized', [], 403);
+        return response()->view('pages.errors.unauthorized', [], 403);
     }
 }
