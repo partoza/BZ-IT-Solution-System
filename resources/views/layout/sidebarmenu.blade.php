@@ -170,10 +170,9 @@
                 </div>
             </header>
 
-            <main class="flex-1 overflow-y-auto bg-neutral-50 p-6 mx-8 mb-5 rounded-lg">
-                <div class="max-w-7xl mx-auto">
+            <main class="flex-1 overflow-y-auto mx-8 mb-5 rounded-lg">
                     @yield('pages-content')
-                </div>
+                
             </main>
         </div>
     </div>

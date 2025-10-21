@@ -1,7 +1,6 @@
 @extends('layout.sidebarmenu')
 
 @section('pages-content')
-<div class="p-6">
     <!-- Stats Section -->
     <div class="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 gap-5 mb-8">
         <!-- Total Employee Card -->
@@ -165,7 +164,7 @@
             {{ $employees->links() }}
         </div>
     </div>
-</div>
+
 
 <!-- Add Employee Modal -->
 <div id="addEmployeeModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">

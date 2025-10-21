@@ -150,7 +150,11 @@ class Employee extends Authenticatable
      */
     public function getAuthIdentifierName()
     {
-        return 'username';
+        // Return the model's primary key name so Laravel stores the numeric
+        // primary key in the session `user_id` column instead of the
+        // username (which is a string and caused an "Incorrect integer value"
+        // error when sessions are stored in the database).
+        return $this->getKeyName();
     }
 
     /**

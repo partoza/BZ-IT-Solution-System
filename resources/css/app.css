@@ -13,6 +13,19 @@
     }
 }
 
+@layer components {
+  .global-focus input:focus,
+  .global-focus textarea:focus,
+  .global-focus select:focus,
+  .global-focus button:focus,
+  .global-focus input:focus-visible,
+  .global-focus textarea:focus-visible,
+  .global-focus select:focus-visible,
+  .global-focus button:focus-visible {
+    @apply outline-none ring-1 ring-primary border-primary;
+  }
+}
+
 /* Animations */
 @layer utilities {
     @keyframes fade-in-up {
@@ -115,5 +128,73 @@
                 .animate-wave-shift {
                     animation: none !important;
                 }
+
+                /* Custom select component
+                     Usage:
+                     <div class="custom-select">
+                         <select class="custom-select-select">...</select>
+                         <span class="custom-select-icon">▾</span>
+                     </div>
+
+                     The icon is positioned at the end with the same horizontal padding as select text.
+                     On focus the icon rotates with a smooth transition.
+                */
             }
         }
+
+/* Custom select component */
+.custom-select {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+
+/* horizontal padding used by your Tailwind px-3 = 0.75rem */
+.custom-select-select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 100%;
+    padding-left: 0.75rem; /* same left padding */
+    /* reserve space on the right for the icon (0.75rem + icon width ~1.25rem) */
+    padding-right: calc(0.75rem + 1.25rem);
+    background-color: transparent;
+    border: none; /* keep border via utility class on wrapper if needed */
+    line-height: 1.5;
+}
+
+/* If you keep Tailwind border classes on select, you can remove border:none above. */
+
+/* Icon placed at the same horizontal distance from the right border as text from left */
+.custom-select-icon {
+    position: absolute;
+    right: 0.75rem;          /* same inset as select text left padding */
+    top: 50%;
+    transform: translateY(-50%) rotate(0deg) scale(1);
+    transform-origin: center;
+    transition: transform 220ms cubic-bezier(.2,.9,.3,1), color 160ms;
+    pointer-events: none;    /* clicks pass to select */
+    color: rgba(55,65,81,1); /* text-gray-700 fallback */
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Open / clicked state — rotate + enlarge the icon */
+.custom-select.is-open .custom-select-icon {
+    transform: translateY(-50%) rotate(180deg) scale(1.25);
+    color: #2563eb; /* primary, adjust to your variable if needed */
+}
+
+/* Keep accessibility: focus ring on select itself */
+.custom-select-select:focus {
+    outline: none;
+}
+
+/* Disabled state */
+.custom-select-select:disabled + .custom-select-icon,
+.custom-select-select:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}

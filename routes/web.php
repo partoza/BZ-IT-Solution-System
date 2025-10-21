@@ -19,6 +19,12 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Protected Routes
 Route::middleware(['auth:employee'])->group(function () {
+    // Dedicated route for Add Product page (inventory/addproduct)
+    // Put this before the generic section routes so it doesn't get shadowed by /{section}/{page}
+    Route::get('/inventory/addproduct', function () {
+        return view('nonmenu.inventory.addproduct');
+    })->name('products.add');
+
     // Generic section routes for other sidebar menus. These render blade views under
     // resources/views/pages/{section}/{page}.blade.php when present.
     $sections = ['dashboard','inventory', 'services', 'customer', 'history', 'settings'];
@@ -45,6 +51,7 @@ Route::middleware(['auth:employee'])->group(function () {
         })->name("{$section}.page");
     }
 
+
     // Employee Staff Management route (only superadmin & admin)
     Route::middleware(['role:superadmin,admin'])->group(function () {
         Route::get('/employee/staff-management', [EmployeeController::class, 'index'])
@@ -53,5 +60,7 @@ Route::middleware(['auth:employee'])->group(function () {
         Route::post('/employee', [EmployeeController::class, 'store'])
             ->name('employees.store');
     });
+
+
     
 });
