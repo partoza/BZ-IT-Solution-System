@@ -3,24 +3,23 @@
 @section('pages-content')
     <!-- Stats Section -->
     <div class="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 gap-5 mb-8">
-        <!-- Total Suppliers Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
             <h2 class="text-base font-medium text-gray-700 mb-1">Total Suppliers</h2>
             <div class="flex items-end justify-between">
                 <div>
-                    <h3 class="text-2xl font-semibold text-gray-900">325</h3>
+                    <h3 class="text-2xl font-semibold text-gray-900">{{ $totalSuppliers }}</h3>
                     <div class="mt-1 space-y-0.5">
                         <div class="flex items-center text-xs text-green-600">
                             <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                             </svg>
-                            85% Active
+                            {{ round(($activeSuppliers / max($totalSuppliers, 1)) * 100, 0) }}% Active
                         </div>
                         <div class="flex items-center text-xs text-red-600">
                             <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                             </svg>
-                            15% Inactive
+                            {{ round(($inactiveSuppliers / max($totalSuppliers, 1)) * 100, 0) }}% Inactive
                         </div>
                     </div>
                 </div>
@@ -28,35 +27,16 @@
             </div>
         </div>
 
-        <!-- Total Orders Card -->
-        <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
-            <h2 class="text-base font-medium text-gray-700 mb-1">Total Orders</h2>
-            <div class="flex items-end justify-between">
-                <div>
-                    <h3 class="text-2xl font-semibold text-gray-900">500</h3>
-                    <div class="flex items-center text-xs text-green-600 mt-1">
-                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                        </svg>
-                        +10 Last Month
-                    </div>
-                </div>
-                <p class="text-xs text-gray-500">Real Time Total</p>
-            </div>
-        </div>
-
-        <!-- Active Suppliers Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
             <h2 class="text-base font-medium text-gray-700 mb-1">Active Suppliers</h2>
-            <h3 class="text-2xl font-semibold text-gray-900">276</h3>
+            <h3 class="text-2xl font-semibold text-gray-900">{{ $activeSuppliers }}</h3>
             <p class="text-sm text-gray-500 mt-1">Currently Active</p>
         </div>
 
-        <!-- Pending Orders Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
-            <h2 class="text-base font-medium text-gray-700 mb-1">Pending Orders</h2>
-            <h3 class="text-2xl font-semibold text-gray-900">24</h3>
-            <p class="text-sm text-gray-500 mt-1">Awaiting Delivery</p>
+            <h2 class="text-base font-medium text-gray-700 mb-1">Inactive Suppliers</h2>
+            <h3 class="text-2xl font-semibold text-gray-900">{{ $inactiveSuppliers }}</h3>
+            <p class="text-sm text-gray-500 mt-1">Currently Inactive</p>
         </div>
     </div>
 
@@ -109,43 +89,33 @@
             <table class="min-w-full divide-y divide-gray-200 text-sm">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Supplier Name</th>
-                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Contact Person</th>
-                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Phone Number</th>
-                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Total Cost</th>
-                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Expected Arrival</th>
-                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Date Received</th>
-                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Status</th>
-                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Actions</th>
+                        <th class="px-6 py-3 text-left font-medium text-gray-700">Company Name</th>
+                        <th class="px-6 py-3 text-left font-medium text-gray-700">Contact Person</th>
+                        <th class="px-6 py-3 text-left font-medium text-gray-700">Email</th>
+                        <th class="px-6 py-3 text-left font-medium text-gray-700">Phone</th>
+                        <th class="px-6 py-3 text-left font-medium text-gray-700">Status</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-100">
-                    <!-- Sample Supplier Data -->
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4 text-gray-800 font-medium">NVIDIA Supplier</td>
-                        <td class="px-6 py-4 text-gray-600">John Rex</td>
-                        <td class="px-6 py-4 text-gray-600">09123456789</td>
-                        <td class="px-6 py-4 text-gray-800 font-semibold">₱ 15,000</td>
-                        <td class="px-6 py-4 text-gray-600">2025-05-14</td>
-                        <td class="px-6 py-4 text-gray-600">2025-09-13</td>
-                        <td class="px-6 py-4">
-                            <span class="px-3 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">Pending</span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex space-x-2">
-                                <button class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                </button>
-                                <button class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                    @forelse ($suppliers as $supplier)
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 font-medium text-gray-800">{{ $supplier->company_name }}</td>
+                            <td class="px-6 py-4 text-gray-600">{{ $supplier->contact_person }}</td>
+                            <td class="px-6 py-4 text-gray-600">{{ $supplier->email }}</td>
+                            <td class="px-6 py-4 text-gray-600">{{ $supplier->phone_number }}</td>
+                            <td class="px-6 py-4">
+                                @if ($supplier->status === 'active')
+                                    <span class="px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Active</span>
+                                @else
+                                    <span class="px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">Inactive</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">No suppliers found.</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -264,43 +234,57 @@
 document.addEventListener("DOMContentLoaded", function () {
     const modal = document.getElementById('addSupplierModal');
     const form = document.getElementById('supplierForm');
-    const openBtn = document.getElementById('addSupplierBtn'); 
-    const closeBtns = modal.querySelectorAll('.closeModalBtn'); 
+    const openBtn = document.getElementById('addSupplierBtn');
+    const closeBtns = modal.querySelectorAll('.closeModalBtn');
 
-    // Open modal
-    function openModal() {
-        modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-    }
+    function openModal() { modal.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+    function closeModal() { modal.classList.add('hidden'); document.body.style.overflow = 'auto'; }
 
-    // Close modal
-    function closeModal() {
-        modal.classList.add('hidden');
-        document.body.style.overflow = 'auto';
-    }
-
-    // Attach open button event
     openBtn.addEventListener('click', openModal);
-
-    // Close modal with all designated close buttons
     closeBtns.forEach(btn => btn.addEventListener('click', closeModal));
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-    // Close modal when clicking outside
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) closeModal();
-    });
-
-    // Close modal with Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closeModal();
-    });
-
-    // Form submission
+    // AJAX Submission
     form.addEventListener('submit', function(e) {
         e.preventDefault();
-        alert('Supplier added successfully!');
-        closeModal();
+        let formData = new FormData(form);
+
+        axios.post("{{ route('suppliers.store') }}", formData)
+            .then(response => {
+                showToast(response.data.message, 'success');
+                closeModal();
+                setTimeout(() => window.location.reload(), 1000);
+            })
+            .catch(error => {
+                if (error.response && error.response.data.errors) {
+                    Object.values(error.response.data.errors).forEach(errArray => {
+                        errArray.forEach(msg => showToast(msg, 'error'));
+                    });
+                } else {
+                    showToast('Something went wrong.', 'error');
+                }
+            });
     });
+
+    function showToast(message, type = 'success') {
+        let container = document.getElementById("toast-container");
+        if (!container) {
+            container = document.createElement("div");
+            container.id = "toast-container";
+            container.className = "fixed top-20 left-1/2 transform -translate-x-1/2 z-50";
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement("div");
+        toast.className = `mb-2 px-4 py-3 rounded shadow-lg text-white flex items-center justify-between ${
+            type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        }`;
+        toast.innerHTML = `<span>${message}</span><button class="ml-4 font-bold" onclick="this.parentElement.remove()">×</button>`;
+
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 1000);
+    }
 });
 </script>
 @endpush

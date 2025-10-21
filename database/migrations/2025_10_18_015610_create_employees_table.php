@@ -8,8 +8,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('employees', function (Blueprint $table) {
-            $table->bigIncrements('employee_id');
-            $table->unsignedBigInteger('branch_id'); // FK to branches
+            $table->unsignedBigInteger('employee_id')->primary();
+            $table->unsignedBigInteger('branch_id');
 
             $table->string('first_name');
             $table->string('last_name');
@@ -28,19 +28,19 @@ return new class extends Migration {
 
             // Foreign keys
             $table->foreign('branch_id')
-                  ->references('branch_id')
-                  ->on('branches')
-                  ->onDelete('cascade');
+                ->references('branch_id')
+                ->on('branches')
+                ->onDelete('cascade');
 
             $table->foreign('createdby_id')
-                  ->references('employee_id')
-                  ->on('employees')
-                  ->onDelete('set null');
+                ->references('employee_id')
+                ->on('employees')
+                ->onDelete('set null');
 
             $table->foreign('updatedby_id')
-                  ->references('employee_id')
-                  ->on('employees')
-                  ->onDelete('set null');
+                ->references('employee_id')
+                ->on('employees')
+                ->onDelete('set null');
         });
     }
 

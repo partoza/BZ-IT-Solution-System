@@ -19,7 +19,8 @@ class Employee extends Authenticatable
      * @var string
      */
     protected $primaryKey = 'employee_id';
-
+    public $incrementing = false;
+    protected $keyType = 'int';
     /**
      * Disable automatic timestamps since we have custom ones
      *
@@ -33,6 +34,7 @@ class Employee extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
+        'employee_id',
         'branch_id',
         'first_name',
         'last_name',

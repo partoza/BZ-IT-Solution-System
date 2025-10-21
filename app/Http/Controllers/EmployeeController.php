@@ -47,7 +47,7 @@ class EmployeeController extends Controller
             'role'          => 'required|in:staff,manager,admin,superadmin,cashier,technician',
             'email_address' => 'required|email|unique:employees,email_address',
             'username'      => 'required|string|unique:employees,username',
-            'password'      => 'required|string|min:8|confirmed',
+            'password'      => 'required|string|min:12|confirmed',
             'phone_number'  => 'nullable|string|max:20',
             'branch_id'     => 'required|exists:branches,branch_id',
             'avatar'        => 'nullable|image|max:2048',
@@ -58,10 +58,18 @@ class EmployeeController extends Controller
             $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
         }
 
+        // Generate unique random 5-digit employee ID
+        do {
+            $employee_id = random_int(10000, 99999);
+        } while (Employee::where('employee_id', $employee_id)->exists());
+
+        // ✅ Add the generated ID
+        $validated['employee_id'] = $employee_id;
+
         // Hash password
         $validated['password'] = bcrypt($validated['password']);
 
-        // Set created_by ID as numeric employee_id
+        // Set created_by info
         $validated['createdby_id'] = auth()->guard('employee')->user()?->employee_id;
         $validated['created_date'] = now();
 
@@ -71,9 +79,8 @@ class EmployeeController extends Controller
         // Return JSON response for AJAX
         return response()->json([
             'message' => 'Employee added successfully!',
-            'submitted_data' => $validated, // for debugging
+            'submitted_data' => $validated,
             'employee_id' => $employee->employee_id,
         ]);
     }
-
 }

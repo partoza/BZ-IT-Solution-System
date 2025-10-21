@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\CategoryController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -27,7 +29,7 @@ Route::middleware(['auth:employee'])->group(function () {
 
     // Generic section routes for other sidebar menus. These render blade views under
     // resources/views/pages/{section}/{page}.blade.php when present.
-    $sections = ['dashboard','inventory', 'services', 'customer', 'history', 'settings'];
+    $sections = ['dashboard', 'services', 'customer', 'history'];
     foreach ($sections as $section) {
         // index route for the section: /{section}
         Route::get("/{$section}", function () use ($section) {
@@ -54,13 +56,24 @@ Route::middleware(['auth:employee'])->group(function () {
 
     // Employee Staff Management route (only superadmin & admin)
     Route::middleware(['role:superadmin,admin'])->group(function () {
+        
+        // Employee Staff Management Routes
         Route::get('/employee/staff-management', [EmployeeController::class, 'index'])
             ->name('employee.staff-management');
-
         Route::post('/employee', [EmployeeController::class, 'store'])
             ->name('employees.store');
+
+        // Supplier Management Routes
+        Route::get('/settings/suppliers', [SupplierController::class, 'index'])
+            ->name('suppliers.index');
+        Route::post('/settings/suppliers', [SupplierController::class, 'store'])
+            ->name('suppliers.store');
+
+        // Category Management Routes
+        Route::get('/inventory/categories', [CategoryController::class, 'index'])
+            ->name('categories.index');
+        Route::post('/categories', [CategoryController::class, 'store'])
+            ->name('categories.store');
+            
     });
-
-
-    
 });

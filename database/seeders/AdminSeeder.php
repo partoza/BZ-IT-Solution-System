@@ -20,9 +20,15 @@ class AdminSeeder extends Seeder
             ]
         );
 
+        // Generate unique random 5-digit employee ID
+        do {
+            $employee_id = random_int(10000, 99999);
+        } while (Employee::where('employee_id', $employee_id)->exists());
+
         // Seed admin only if not existing
         if (!Employee::where('username', 'admin')->exists()) {
             Employee::create([
+                'employee_id'       => $employee_id, 
                 'branch_id'         => $branch->branch_id,
                 'first_name'        => 'Manager',
                 'last_name'         => 'Admin',
@@ -37,7 +43,7 @@ class AdminSeeder extends Seeder
                 'createdby_id'      => null,
                 'updatedby_id'      => null,
             ]);
-            
+
             $this->command->info('Admin user created successfully!');
             $this->command->info('Username: admin');
             $this->command->info('Password: bzadmin');

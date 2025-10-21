@@ -24,9 +24,14 @@ class SuperadminSeeder extends Seeder
             ]
         );
 
+        do {
+            $employee_id = random_int(10000, 99999);
+        } while (Employee::where('employee_id', $employee_id)->exists());
+        
         // Seed admin only if not existing
         if (!Employee::where('username', 'superadmin')->exists()) {
             Employee::create([
+                'employee_id'       => $employee_id, 
                 'branch_id'         => $branch->branch_id,
                 'first_name'        => 'Super',
                 'last_name'         => 'Admin',
