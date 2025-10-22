@@ -93,7 +93,7 @@ class CategoryController extends Controller
         $inactiveCategories = Category::where('status', 'Inactive')->count();
 
         // pass $categories to the view for dropdown use
-        return view('pages.inventory.categories', compact(
+        return view('pages.settings.categories', compact(
             'rows',
             'view',
             'search',
