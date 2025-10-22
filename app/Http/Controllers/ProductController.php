@@ -15,6 +15,6 @@ class ProductController extends Controller
 
     public function create()
     {
-        return view('nonmenu.inventory.addproducts');
+        return view('nonmenu.inventory.addproduct');
     }
 }

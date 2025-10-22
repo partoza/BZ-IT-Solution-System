@@ -133,8 +133,11 @@ Route::middleware(['auth:employee'])->group(function () {
             ->name('categories.store');
 
         // Add Products
-        Route::post('/products/create', [ProductController::class, 'create'])
+        Route::get('/products/create', [ProductController::class, 'create'])
             ->name('products.create');
+
+        Route::post('/products', [ProductController::class, 'store'])
+            ->name('products.store');
 
         Route::get('inventory/products', [ProductController::class, 'index'])
             ->name('inventory.products');
