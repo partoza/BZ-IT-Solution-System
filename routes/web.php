@@ -29,7 +29,7 @@ Route::middleware(['auth:employee'])->group(function () {
 
     // Generic section routes for other sidebar menus. These render blade views under
     // resources/views/pages/{section}/{page}.blade.php when present.
-    $sections = ['dashboard', 'services', 'customer', 'history'];
+    $sections = ['dashboard', 'services', 'customer', 'history', 'inventory', 'settings'];
     foreach ($sections as $section) {
         // index route for the section: /{section}
         Route::get("/{$section}", function () use ($section) {
