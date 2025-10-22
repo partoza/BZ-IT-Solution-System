@@ -7,6 +7,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\BrandController;
 
 /*
 |--------------------------------------------------------------------------
@@ -114,15 +115,18 @@ Route::middleware(['auth:employee'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Manual CRUD routes (POST/PUT/DELETE) — keep these explicit
+    | Manual CRUD routes (POST/PUT/DELETE)
     |--------------------------------------------------------------------------
     */
 
     Route::middleware(['role:superadmin,admin'])->group(function () {
 
         // Employee Staff Management
+        Route::get('/employee/staff-management', [EmployeeController::class, 'index'])
+            ->name('employees.index');
         Route::post('/employee', [EmployeeController::class, 'store'])
             ->name('employees.store');
+        
 
         // Supplier Management (store)
         Route::post('/settings/suppliers', [SupplierController::class, 'store'])
@@ -147,6 +151,12 @@ Route::middleware(['auth:employee'])->group(function () {
 
         Route::get('settings/categories', [CategoryController::class, 'index'])
             ->name('categories.index');
+        Route::get('/categories/{id}/subcategories', [CategoryController::class, 'getSubcategories']); 
+
+        Route::post('/brands', [BrandController::class, 'store'])
+            ->name('brands.store');
+
+        
     });
 
 });

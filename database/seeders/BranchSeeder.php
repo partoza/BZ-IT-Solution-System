@@ -9,12 +9,17 @@ class BranchSeeder extends Seeder
 {
     public function run()
     {
-        // Prevent duplicate seeding
-        if (! Branch::where('name', 'Main Branch')->where('location', 'Davao')->exists()) {
-            Branch::create([
-                'name'     => 'Main Branch',
-                'location' => 'Davao',
-            ]);
+        $branches = [
+            ['name' => 'Main Branch', 'location' => 'Davao'],
+            ['name' => 'Koronadal', 'location' => 'Koronadal City'],
+            ['name' => 'Gensan', 'location' => 'General Santos'],
+        ];
+
+        foreach ($branches as $b) {
+            Branch::firstOrCreate(
+                ['name' => $b['name'], 'location' => $b['location']],
+                ['name' => $b['name'], 'location' => $b['location']]
+            );
         }
     }
 }

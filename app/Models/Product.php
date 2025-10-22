@@ -28,11 +28,9 @@ class Product extends Model
         'brand_id',
         'image',
         'active_status',
-        'charge_tax',
         'base_price',
         'discounted_price',
         'warranty_period',
-        'warranty_ends_at',
         'createdby_id',
         'updatedby_id',
     ];
@@ -42,10 +40,8 @@ class Product extends Model
      */
     protected $casts = [
         'active_status' => 'boolean',
-        'charge_tax' => 'boolean',
         'base_price' => 'decimal:2',
         'discounted_price' => 'decimal:2',
-        'warranty_ends_at' => 'datetime',
     ];
 
     /**
@@ -108,6 +104,7 @@ class Product extends Model
         return $this->belongsToMany(Branch::class, 'branch_product', 'product_id', 'branch_id')
                     ->withPivot(['quantity_in_stock', 'low_stock_threshold', 'medium_stock_threshold', 'override_price'])
                     ->withTimestamps();
+                    
     }
 
     /**
@@ -153,4 +150,5 @@ class Product extends Model
     {
         return $query->where('category_id', $categoryId);
     }
+    
 }

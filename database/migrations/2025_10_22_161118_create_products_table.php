@@ -24,11 +24,9 @@ return new class extends Migration
             // General product info
             $table->string('image')->nullable();
             $table->boolean('active_status')->default(true);
-            $table->boolean('charge_tax')->default(true);
             $table->decimal('base_price', 10, 2);
             $table->decimal('discounted_price', 10, 2)->nullable();
             $table->string('warranty_period')->nullable();
-            $table->timestamp('warranty_ends_at')->nullable();
 
             // Audit fields
             $table->unsignedBigInteger('createdby_id')->nullable();

@@ -57,4 +57,10 @@ class Branch extends Model
     {
         return $this->location ? "{$this->name} - {$this->location}" : $this->name;
     }
+
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'branch_product', 'branch_id', 'product_id')
+                    ->withPivot('quantity_in_stock', 'override_price');
+    }
 }

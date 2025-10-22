@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             BranchSeeder::class,
             AdminSeeder::class,
             SuperadminSeeder::class,
+            BranchProductSeeder::class,
+            TestPurchaseOrderSeeder::class,
         ]);
     }
 }

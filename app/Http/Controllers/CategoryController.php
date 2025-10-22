@@ -145,4 +145,14 @@ class CategoryController extends Controller
             'message' => 'Category created successfully!',
         ], 200);
     }
+
+    public function getSubcategories($id)
+    {
+        $subcategories = Category::where('parent_id', $id)
+            ->where('status', 'Active')
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return response()->json($subcategories);
+    }
 }
