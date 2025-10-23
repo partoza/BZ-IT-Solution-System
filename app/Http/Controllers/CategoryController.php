@@ -71,10 +71,11 @@ class CategoryController extends Controller
 
             $inventoryValue = 0;
             if (!empty($productIds)) {
-                $inventoryValue = (float) DB::table('branch_product')
-                    ->join('products', 'products.product_id', '=', 'branch_product.product_id')
-                    ->whereIn('branch_product.product_id', $productIds)
-                    ->selectRaw('COALESCE(SUM(branch_product.quantity_in_stock * products.base_price),0) as inventory_value')
+                $inventoryValue = (float) DB::table('inventory_items')
+                    ->join('products', 'products.product_id', '=', 'inventory_items.product_id')
+                    ->whereIn('inventory_items.product_id', $productIds)
+                    ->where('inventory_items.status', 'in_stock')
+                    ->selectRaw('COALESCE(SUM(inventory_items.unit_price), 0) as inventory_value')
                     ->value('inventory_value');
             }
 

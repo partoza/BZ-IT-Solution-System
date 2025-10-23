@@ -14,13 +14,11 @@ return new class extends Migration
         Schema::create('purchase_orders', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('supplier_id');
-            $table->string('po_number')->unique(); // optional, auto-generated
+            $table->string('po_number')->unique();
             $table->enum('status', ['pending', 'received', 'cancelled'])->default('pending');
             $table->date('order_date')->default(now());
             $table->date('expected_date')->nullable();
             $table->text('notes')->nullable();
-
-            // Auditing
             $table->unsignedBigInteger('createdby_id')->nullable();
             $table->unsignedBigInteger('updatedby_id')->nullable();
             $table->timestamps();

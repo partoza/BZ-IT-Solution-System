@@ -6,10 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Brand;
 use App\Models\Category;
-use App\Models\BranchProduct;
-use Illuminate\Support\Facades\DB;
+use App\Models\InventoryItem;
 use App\Models\Branch;
-
 
 class ProductController extends Controller
 {
@@ -17,100 +15,128 @@ class ProductController extends Controller
     {
         $branchId = auth()->guard('employee')->user()?->branch_id;
         $perPage = intval($request->query('per_page', 10));
-        
-        // Filters from request
+
+        // Filters
         $search = $request->query('search');
         $status = $request->query('status');
         $category = $request->query('category');
-        $subCategory = $request->query('sub_category'); // new
+        $subCategory = $request->query('sub_category');
         $stockLevel = $request->query('stock');
 
-        // Category list for filters
-        $categories = Category::whereNull('parent_id')->orderBy('name')->get(); // only top-level
+        // Categories
+        $categories = Category::whereNull('parent_id')->orderBy('name')->get();
+        $subCategories = $category
+            ? Category::where('parent_id', $category)->orderBy('name')->get()
+            : null;
 
-        // Subcategories for the selected category
-        $subCategories = null;
-        if ($category) {
-            $subCategories = Category::where('parent_id', $category)->orderBy('name')->get();
-        }
-
-        // Base query with eager load for branch pivot
+        // Base query with relationships.
+        // Add withCount to compute branch-specific in-stock instrument count
         $query = Product::with([
-            'brand',
-            'category',
-            'subCategory', // make sure you have this relation defined
-            'branches' => function($q) use ($branchId) {
-                $q->where('branch_id', $branchId);
-            }
-        ]);
-
-        // Apply search
-        if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->where('product_name', 'like', "%{$search}%")
-                ->orWhereHas('brand', fn($q) => $q->where('name', 'like', "%{$search}%"));
-            });
-        }
-
-        // Apply status filter
-        if ($status) {
-            $query->where('active_status', $status === 'Active' ? true : false);
-        }
-
-        // Apply category filter
-        if ($category) {
-            $query->where('category_id', $category);
-        }
-
-        // Apply subcategory filter
-        if ($subCategory) {
-            $query->where('sub_category_id', $subCategory);
-        }
-
-        // Apply stock level filter using pivot
-        if ($stockLevel) {
-            $query->whereHas('branches', function ($q) use ($branchId, $stockLevel) {
-                $q->where('branch_product.branch_id', $branchId);
-
-                switch ($stockLevel) {
-                    case 'High':
-                        $q->whereRaw('branch_product.quantity_in_stock > branch_product.medium_stock_threshold');
-                        break;
-                    case 'Low':
-                        $q->whereRaw('branch_product.quantity_in_stock <= branch_product.medium_stock_threshold')
-                        ->whereRaw('branch_product.quantity_in_stock > 0');
-                        break;
-                    case 'Out':
-                        $q->where('branch_product.quantity_in_stock', 0);
-                        break;
+                'brand',
+                'category',
+                'subCategory',
+                // eager-load branch pivot restricted to current branch (if exists)
+                'branches' => function ($q) use ($branchId) {
+                    $q->where('branch_product.branch_id', $branchId);
+                },
+                // eager-load inventory items for current branch (keeps collection small)
+                'inventoryItems' => function ($q) use ($branchId) {
+                    $q->where('inventory_items.branch_id', $branchId)
+                    ->where('inventory_items.status', 'in_stock');
+                },
+            ])
+            ->withCount([
+                // this produces `branch_in_stock_count` available for filtering/having
+                'inventoryItems as branch_in_stock_count' => function ($q) use ($branchId) {
+                    $q->where('inventory_items.branch_id', $branchId)
+                    ->where('inventory_items.status', 'in_stock');
                 }
+            ]);
+
+        // Search filter
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('product_name', 'like', "%{$search}%")
+                ->orWhereHas('brand', fn($b) => $b->where('name', 'like', "%{$search}%"));
             });
         }
 
-        // Paginate results
-        $products = $query->with(['brand', 'category', 'branches' => function($q) use ($branchId) {
-                $q->where('branch_product.branch_id', $branchId);
-            }])
-            ->orderBy('product_name')
-            ->paginate($perPage)
-            ->appends($request->query());
+        // Status filter
+        if ($status) {
+            $query->where('active_status', $status === 'Active');
+        }
+
+        // Category / subcategory filter
+        if ($category) $query->where('category_id', $category);
+        if ($subCategory) $query->where('sub_category_id', $subCategory);
+
+        // Stock level filter: use HAVING on the counted column (branch_in_stock_count)
+        if ($stockLevel) {
+            switch ($stockLevel) {
+                case 'High':
+                    // more than medium threshold (choose 10, adjust as needed)
+                    $query->having('branch_in_stock_count', '>', 10);
+                    break;
+                case 'Low':
+                    // between 1 and medium threshold
+                    $query->having('branch_in_stock_count', '<=', 10)
+                        ->having('branch_in_stock_count', '>', 0);
+                    break;
+                case 'Out':
+                    $query->having('branch_in_stock_count', '=', 0);
+                    break;
+            }
+        }
+
+        // Paginate - having will be applied by DB
+        $products = $query->orderBy('product_name')->paginate($perPage)->appends($request->query());
+
+        // Compute branch-specific info per product (use branch_in_stock_count instead of counting)
+        foreach ($products as $product) {
+            $branchPivot = $product->branches->first()?->pivot;
+
+            // Use the withCount value (DB computed)
+            $product->stock_count = (int) ($product->branch_in_stock_count ?? 0);
+
+            // low threshold from pivot or default
+            $product->low_threshold = $branchPivot->low_stock_threshold ?? 10;
+
+            // Price precedence:
+            // 1) branch pivot override_price
+            // 2) newest inventory item unit_price (last stocked)
+            // 3) product base_price
+            $product->branch_price = $branchPivot->override_price
+                ?? $product->inventoryItems->sortByDesc('created_at')->first()?->unit_price
+                ?? $product->base_price;
+        }
 
         // Summary cards
         $totalProducts = Product::count();
         $activeProducts = Product::where('active_status', true)->count();
         $inactiveProducts = Product::where('active_status', false)->count();
-        $lowStock = BranchProduct::where('branch_product.branch_id', $branchId)
-            ->whereColumn('quantity_in_stock', '<=', 'low_stock_threshold')
-            ->count();
+
+        // lowStock summary: count products where branch_in_stock_count <= low threshold (we'll compute by querying DB)
+        // We'll treat low threshold as 5 by default if pivot not present — to match UI behavior we do this in PHP
+        $lowStock = Product::withCount([
+            'inventoryItems as branch_in_stock_count' => function ($q) use ($branchId) {
+                $q->where('inventory_items.branch_id', $branchId)
+                ->where('inventory_items.status', 'in_stock');
+            }
+        ])->get()->filter(function ($product) {
+            // default low threshold; adjust if you keep it in pivot consistently
+            $threshold = 5;
+            // try to grab pivot threshold if available (requires eager loading pivot -> skip here for perf)
+            return ($product->branch_in_stock_count ?? 0) <= $threshold;
+        })->count();
 
         return view('pages.inventory.products', compact(
             'products',
             'categories',
-            'subCategories', // new
+            'subCategories',
             'search',
             'status',
             'category',
-            'subCategory', // new
+            'subCategory',
             'stockLevel',
             'totalProducts',
             'activeProducts',
@@ -118,12 +144,12 @@ class ProductController extends Controller
             'lowStock'
         ));
     }
-
+    
     public function create()
     {
         $brands = Brand::orderBy('name')->get();
 
-        // Only top-level categories (no parent)
+        // Only top-level categories
         $mainCategories = Category::where('status', 'Active')
             ->whereNull('parent_id')
             ->orderBy('name')
@@ -155,21 +181,8 @@ class ProductController extends Controller
         // Create product
         $product = Product::create($validated);
 
-        // Safety check like seeder
-        if ($product && $product->product_id) {
-            $branches = Branch::all();
-            foreach ($branches as $branch) {
-                BranchProduct::firstOrCreate(
-                    ['branch_id' => $branch->branch_id, 'product_id' => $product->product_id],
-                    [
-                        'quantity_in_stock' => 0,
-                        'low_stock_threshold' => 5,
-                        'medium_stock_threshold' => 10,
-                        'override_price' => null,
-                    ]
-                );
-            }
-        }
+        // Stock will only exist when P.O / inventory_items are created
+        // No default branch stock creation needed
 
         return response()->json(['message' => 'Product created successfully!']);
     }

@@ -125,19 +125,16 @@
                             <td class="px-6 py-3 text-gray-600">{{ $product->brand->name ?? '—' }}</td>
                             <td class="px-6 py-3 text-gray-600">{{ $product->category->name ?? '—' }}</td>
                             <td class="px-6 py-3 text-gray-600">
-                                {{ $product->branches->first()?->pivot->quantity_in_stock ?? 0 }}
+                                {{ $product->stock_count }}
                             </td>
-
                             <td class="px-6 py-3">
                                 @php
-                                    $branchId = auth()->guard('employee')->user()?->branch_id;
-                                    $branchPivot = $product->branches->firstWhere('branch_id', $branchId)?->pivot;
-                                    $branchStock = $branchPivot->quantity_in_stock ?? 0;
-                                    $branchLow = $branchPivot->low_stock_threshold ?? 10;
+                                    $stock = $product->stock_count ?? 0;
+                                    $low = $product->low_threshold ?? 10;
 
-                                    $stockBadge = $branchStock == 0
+                                    $stockBadge = $stock == 0
                                         ? ['Out of Stock', 'bg-red-100 text-red-800']
-                                        : ($branchStock <= $branchLow
+                                        : ($stock <= $low
                                             ? ['Low', 'bg-yellow-100 text-yellow-800']
                                             : ['High', 'bg-green-100 text-green-800']);
                                 @endphp
@@ -146,7 +143,9 @@
                                 </span>
                             </td>
 
-                            <td class="px-6 py-3 text-gray-600">₱{{ number_format($product->base_price, 2) }}</td>
+                            <td class="px-6 py-3 text-gray-600">
+                                ₱{{ number_format($product->currentPrice(auth()->guard('employee')->user()?->branch_id), 2) }}
+                            </td>
                             <td class="px-6 py-3 text-gray-600">{{ $product->warranty_period ?? '—' }} Months</td>
 
                             <td class="px-6 py-3">

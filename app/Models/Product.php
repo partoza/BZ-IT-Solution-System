@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Auth;
+use App\Models\InventoryItem;
 
 class Product extends Model
 {
@@ -150,5 +151,26 @@ class Product extends Model
     {
         return $query->where('category_id', $categoryId);
     }
+
+    public function inventoryItems()
+    {
+        return $this->hasMany(InventoryItem::class, 'product_id', 'product_id');
+    }
     
+    public function stockCount($branchId)
+    {
+        return $this->inventoryItems()->where('branch_id', $branchId)->where('status', 'in_stock')->count();
+    }
+
+    public function currentPrice($branchId)
+    {
+        // Latest inventory item for the branch
+        $item = $this->inventoryItems()
+                    ->where('branch_id', $branchId)
+                    ->where('status', 'in_stock')
+                    ->latest('created_at')
+                    ->first();
+
+        return $item ? $item->unit_price : $this->base_price;
+    }
 }
