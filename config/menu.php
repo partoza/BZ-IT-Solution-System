@@ -78,8 +78,8 @@ return [
             ],
             [
                 'title' => 'Stock In',
-                'type' => 'controller',
-                'action' => 'App\\Http\\Controllers\\StockController@index',
+                'type' => 'view',
+                'view' => 'pages.inventory.stock-in',
                 'uri' => 'inventory/stock-in',
                 'name' => 'inventory.stock-in',
                 'roles' => ['*'],
@@ -183,6 +183,22 @@ return [
                 'roles' => ['*'],
             ],
             [
+                'title' => 'Purchase Order History',
+                'type' => 'view',
+                'view' => 'pages.history.purchase-order',
+                'uri' => 'history/purchase-order',
+                'name' => 'history.purchase-order',
+                'roles' => ['*'],
+            ],
+            [
+                'title' => 'Add Purchase Order History',
+                'type' => 'view',
+                'view' => 'pages.history.add-purchase-order',
+                'uri' => 'history/add-purchase-order',
+                'name' => 'history.add-purchase-order',
+                'roles' => ['*'],
+            ],
+            [
                 'title' => 'Audit Logs',
                 'type' => 'controller',
                 'action' => 'App\\Http\\Controllers\\AuditLogController@index',
@@ -190,6 +206,7 @@ return [
                 'name' => 'history.audit-logs',
                 'roles' => ['admin', 'superadmin'],
             ],
+            
         ],
     ],
 
