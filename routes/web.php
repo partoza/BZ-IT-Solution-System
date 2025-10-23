@@ -8,6 +8,8 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\BrandController;
+use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\POSController;
 
 /*
 |--------------------------------------------------------------------------
@@ -112,6 +114,8 @@ Route::middleware(['auth:employee'])->group(function () {
         }
     }
 
+    Route::get('pos/filter', [POSController::class,'filter'])->name('pos.filter');
+
 
     /*
     |--------------------------------------------------------------------------
@@ -156,7 +160,24 @@ Route::middleware(['auth:employee'])->group(function () {
         Route::post('/brands', [BrandController::class, 'store'])
             ->name('brands.store');
 
+        // POS
+        Route::get('dashboard/pos', [POSController::class, 'index'])
+            ->name('pos.index');
+
+
+        // Purchase Orders
+        Route::get('history/purchase-order', [PurchaseOrderController::class, 'index'])
+            ->name('purchase-order.index');
         
+        Route::get('inventory/stock-in', [PurchaseOrderController::class, 'create'])
+            ->name('stock-in.index');
+        Route::post('inventory/stock-in/store', [PurchaseOrderController::class, 'store'])
+            ->name('purchase-orders.store');
+
+        Route::get('/supplier/{id}/details', [SupplierController::class, 'details']);
+        Route::post('/purchase-orders/{po}/receive', [PurchaseOrderController::class, 'receive'])
+            ->name('purchase-orders.receive');
+        Route::get('/purchase-orders/{po}/items', [PurchaseOrderController::class, 'getItems']);
     });
 
 });

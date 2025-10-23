@@ -48,4 +48,9 @@ class Supplier extends Model
     {
         return $this->belongsTo(Employee::class, 'updatedby_id');
     }
+
+    public function purchaseOrders()
+    {
+        return $this->hasMany(PurchaseOrder::class);
+    }
 }

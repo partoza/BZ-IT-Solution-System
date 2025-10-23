@@ -55,8 +55,6 @@ return [
             ],
             [
                 'title' => 'Point of Sales',
-                'type' => 'view',
-                'view' => 'pages.dashboard.point-of-sales',
                 'uri' => 'dashboard/pos',
                 'name' => 'dashboard.pos',
                 'roles' => ['*'],
@@ -77,21 +75,11 @@ return [
                 'roles' => ['*'],
             ],
             [
-                'title' => 'Stock In',
-                'type' => 'view',
-                'view' => 'pages.inventory.stock-in',
+                'title' => 'Purchase Order',
                 'uri' => 'inventory/stock-in',
                 'name' => 'inventory.stock-in',
                 'roles' => ['*'],
             ],
-            // [
-            //     'title' => 'Categories',
-            //     'type' => 'controller',
-            //     'action' => 'App\\Http\\Controllers\\CategoryController@index',
-            //     'uri' => 'inventory/categories',
-            //     'name' => 'categories.index',
-            //     'roles' => ['admin', 'superadmin'],
-            // ],
         ],
     ],
 
@@ -188,14 +176,6 @@ return [
                 'view' => 'pages.history.purchase-order',
                 'uri' => 'history/purchase-order',
                 'name' => 'history.purchase-order',
-                'roles' => ['*'],
-            ],
-            [
-                'title' => 'Add Purchase Order History',
-                'type' => 'view',
-                'view' => 'pages.history.add-purchase-order',
-                'uri' => 'history/add-purchase-order',
-                'name' => 'history.add-purchase-order',
                 'roles' => ['*'],
             ],
             [

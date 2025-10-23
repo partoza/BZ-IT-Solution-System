@@ -18,7 +18,7 @@ return new class extends Migration
             $table->enum('status', ['pending', 'received', 'cancelled'])->default('pending');
             $table->date('order_date')->default(now());
             $table->date('expected_date')->nullable();
-            $table->text('notes')->nullable();
+            $table->date('received_date')->nullable(); // <-- new column
             $table->unsignedBigInteger('createdby_id')->nullable();
             $table->unsignedBigInteger('updatedby_id')->nullable();
             $table->timestamps();

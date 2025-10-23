@@ -13,21 +13,22 @@ class PurchaseOrder extends Model
     protected $fillable = [
         'supplier_id',
         'po_number',
-        'status',           // pending, received, cancelled
+        'status',
         'order_date',
         'expected_date',
+        'received_date',
         'notes',
         'createdby_id',
         'updatedby_id',
     ];
 
-    protected $dates = [
-        'order_date',
-        'expected_date',
-        'created_at',
-        'updated_at',
+    protected $casts = [
+        'order_date' => 'datetime',
+        'expected_date' => 'datetime',
+        'received_date' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
-
     protected static function boot()
     {
         parent::boot();

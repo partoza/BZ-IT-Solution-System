@@ -23,6 +23,7 @@ class InventoryItem extends Model
     protected $fillable = [
         'product_id',
         'branch_id',
+        'purchase_order_item_id',
         'serial_number',
         'unit_price',
         'status', // e.g., 'in_stock', 'sold', 'reserved'

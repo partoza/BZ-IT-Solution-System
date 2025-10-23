@@ -86,6 +86,23 @@ class SupplierController extends Controller
         ]);
     }
 
+    public function details($id)
+    {
+        $supplier = Supplier::find($id);
+
+        if (!$supplier) {
+            return response()->json(['error' => 'Supplier not found'], 404);
+        }
+
+        return response()->json([
+            'company_name' => $supplier->company_name,
+            'contact_person' => $supplier->contact_person,
+            'email' => $supplier->email,
+            'phone_number' => $supplier->phone_number,
+            'category' => $supplier->category
+        ]);
+    }
+
     /**
      * Remove the specified supplier from storage.
      */

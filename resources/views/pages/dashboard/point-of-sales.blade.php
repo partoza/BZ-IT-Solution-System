@@ -116,7 +116,6 @@
       <!-- Totals + Action (fixed at bottom of the panel) -->
       <div class="p-4 border-t bg-white">
         <div class="flex items-center justify-between text-sm mb-3">
-          <div class="text-gray-600">Total Items: <span class="font-semibold">1</span></div>
           <div class="text-gray-800 font-semibold">Total Amount: ₱20,800.00</div>
         </div>
 
