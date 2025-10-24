@@ -56,7 +56,7 @@ return [
             [
                 'title' => 'Point of Sales',
                 'uri' => 'dashboard/pos',
-                'name' => 'dashboard.pos',
+                'name' => 'pos.index',
                 'roles' => ['*'],
             ],
         ],

@@ -10,6 +10,9 @@ use App\Models\Supplier;
 use App\Models\Branch;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
+use App\Models\Category;
+use App\Models\Brand;
+use App\Models\InventoryItem;
 
 class PurchaseOrderController extends Controller
 {
@@ -27,19 +30,18 @@ class PurchaseOrderController extends Controller
         $suppliers = Supplier::orderBy('company_name')->get();
 
         // Base query with relationships
-        $query = PurchaseOrder::with(['supplier', 'items']);
+        $query = PurchaseOrder::with(['supplier', 'items', 'creator']); 
 
-        // Apply search filter (PO number, supplier, or inventory serial)
+        // Apply search filter (PO number, supplier, product, or creator)
         if ($search) {
             $query->where(function ($q) use ($search) {
-                // Search by PO number
                 $q->where('po_number', 'like', "%{$search}%")
-                // Search by supplier name
                 ->orWhereHas('supplier', fn($s) => $s->where('company_name', 'like', "%{$search}%"))
-                // Search by product name in PO items
                 ->orWhereHas('items.product', fn($p) => $p->where('product_name', 'like', "%{$search}%"))
-                // Search by serial in inventory items
-                ->orWhereHas('items.inventoryItems', fn($inv) => $inv->where('serial_number', 'like', "%{$search}%"));
+                ->orWhereHas('items.inventoryItems', fn($inv) => $inv->where('serial_number', 'like', "%{$search}%"))
+                ->orWhereHas('creator', function ($creator) use ($search) {
+                    $creator->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
+                });
             });
         }
 
@@ -64,12 +66,11 @@ class PurchaseOrderController extends Controller
         $pendingPOs = PurchaseOrder::where('status', 'pending')->count();
         $partiallyReceivedPOs = PurchaseOrder::where('status', 'partial')->count();
 
-        // Total value of all POs
+        // Totals
         $totalPOsValue = \DB::table('purchase_order_items')
             ->selectRaw('SUM(unit_price * quantity_ordered) as total')
             ->value('total');
 
-        // Total value received this month
         $totalReceivedThisMonth = \DB::table('purchase_orders')
             ->join('purchase_order_items', 'purchase_orders.id', '=', 'purchase_order_items.purchase_order_id')
             ->where('purchase_orders.status', 'received')
@@ -78,14 +79,12 @@ class PurchaseOrderController extends Controller
             ->selectRaw('SUM(purchase_order_items.unit_price * purchase_order_items.quantity_ordered) as total')
             ->value('total');
 
-        // Total pending value
         $pendingPOValue = \DB::table('purchase_orders')
             ->join('purchase_order_items', 'purchase_orders.id', '=', 'purchase_order_items.purchase_order_id')
             ->where('purchase_orders.status', 'pending')
             ->selectRaw('SUM(purchase_order_items.unit_price * purchase_order_items.quantity_ordered) as total')
             ->value('total');
 
-        // Total partial value
         $partialPOValue = \DB::table('purchase_orders')
             ->join('purchase_order_items', 'purchase_orders.id', '=', 'purchase_order_items.purchase_order_id')
             ->where('purchase_orders.status', 'partial')
@@ -123,20 +122,104 @@ class PurchaseOrderController extends Controller
         ));
     }
 
-    public function create()
-    {   
+
+    public function create(Request $request)
+    {
         $branchId = auth()->guard('employee')->user()?->branch_id;
 
-        // Suppliers
+        // Fetch all suppliers
         $suppliers = Supplier::orderBy('company_name')->get();
 
-        // Products available for this branch
-        $products = Product::with(['inventoryItems' => fn($q) => $q->where('branch_id', $branchId)])
-                        ->orderBy('product_name')
-                        ->get();
+        // Fetch categories & brands (for filtering or future use)
+        $categories = Category::where('status', 'active')
+            ->whereNull('parent_id')
+            ->with('children')
+            ->orderBy('name')
+            ->get();
 
-        return view('pages.inventory.stock-in', compact('suppliers', 'products', 'branchId'));
+        $brands = Brand::orderBy('name')->get();
+
+        // Base query: all inventory items in this branch that are in stock
+        $inventoryQuery = InventoryItem::with(['product.category', 'product.brand'])
+            ->where('branch_id', $branchId)
+            ->where('status', 'in_stock');
+
+        //
+        // Apply filters (category, brand, search)
+        //
+
+        // Category filter (parent and its children)
+        if ($request->filled('category_id')) {
+            $categoryId = $request->category_id;
+
+            $categoryIds = Category::where('id', $categoryId)
+                ->orWhere('parent_id', $categoryId)
+                ->pluck('id');
+
+            $inventoryQuery->whereHas('product', function ($q) use ($categoryIds) {
+                $q->whereIn('category_id', $categoryIds);
+            });
+        }
+
+        // Brand filter
+        if ($request->filled('brand_id')) {
+            $inventoryQuery->whereHas('product', function ($q) use ($request) {
+                $q->where('brand_id', $request->brand_id);
+            });
+        }
+
+        // Search filter (product name or SKU)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $inventoryQuery->whereHas('product', function ($q) use ($search) {
+                $q->where('product_name', 'like', "%{$search}%");
+            });
+        }
+
+        // Execute query
+        $inventoryItems = $inventoryQuery->get();
+
+        //
+        // Group by product_id for catalog-style display
+        //
+        $products = $inventoryItems->groupBy('product_id')->map(function ($items) {
+            $sample = $items->first();
+            $product = $sample->product;
+
+            // choose the lowest available cost price (useful for PO)
+            $lowestCost = $items->min('unit_price');
+
+            return [
+                'product_id'   => $product->product_id,
+                'product_name' => $product->product_name,
+                'description'  => $product->description ?? '',
+                'cost_price'   => (float) $lowestCost,
+                'base_price'   => (float) ($product->price ?? $lowestCost),
+                'stock_count'  => $items->count(),
+                'image_url'    => $product->image_url ?? null,
+                'sku'          => $product->sku ?? null,
+                'brand'        => $product->brand->name ?? null,
+                'brand_id'     => $product->brand_id ?? null,
+                'category'     => $product->category->name ?? null,
+                'category_id'  => $product->category_id ?? null,
+            ];
+        })->values();
+
+        // Handle AJAX filter requests (return only the product grid partial)
+        if ($request->ajax()) {
+            return view('partials.po-product-grid', ['products' => $products])->render();
+        }
+
+        // Full page load
+        return view('pages.inventory.stock-in', [
+            'suppliers'  => $suppliers,
+            'categories' => $categories,
+            'brands'     => $brands,
+            'products'   => $products,
+            'branchId'   => $branchId,
+        ]);
     }
+
 
     public function store(Request $request)
     {

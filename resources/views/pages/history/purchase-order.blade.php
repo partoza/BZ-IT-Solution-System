@@ -115,6 +115,7 @@
                         <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Supplier</th>
                         <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Order Date</th>
                         <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Received Date</th>
+                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Created By</th>
                         <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Status</th>
                         <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Actions</th>
                     </tr>
@@ -132,6 +133,7 @@
                                     Not yet received
                                 @endif
                             </td>
+                            <td class="px-6 py-3">{{ $po->creator?->full_name ?? '—' }}</td>
                             <td class="px-6 py-3">
                                 @php
                                     $statusClasses = [

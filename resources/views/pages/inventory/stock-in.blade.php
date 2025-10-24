@@ -72,14 +72,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Additional PO Details -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-6 border-t">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Expected Delivery</label>
-                            <input id="expected-delivery" name="expected_delivery" type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" required>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Product Catalog -->
@@ -90,86 +82,45 @@
                             <h1 class="text-xl font-semibold text-primary">Purchase Order Items</h1>
                             <p class="text-sm text-gray-500">Add products to your purchase order</p>
                         </div>
-
-                        <!-- Search + Filters -->
-                        <div class="flex flex-wrap items-center gap-3 justify-start flex-1">
-                            <div class="relative flex-grow sm:flex-grow-0 min-w-[200px] max-w-md">
-                                <input
-                                    type="text"
-                                    id="product-search"
-                                    placeholder="Search Product..."
-                                    class="border rounded-lg px-3 py-2 pr-10 text-sm w-full focus:outline-none focus:ring-2 focus:ring-primary"
-                                />
-                                <button type="button" class="absolute top-1/2 right-2 -translate-y-1/2 text-gray-500 hover:text-primary transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M21 21l-4.35-4.35M10 18a8 8 0 100-16 8 8 0 000 16z" />
-                                    </svg>
-                                </button>
+                        <div class="flex items-center gap-2">
+                            <div class="relative">
+                            <input id="searchInput" type="text" placeholder="Search Product..." class="border rounded-lg px-3 py-2 text-sm w-48" />
                             </div>
 
-                            <select id="category-filter" class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">All Categories</option>
-                                <option>Peripherals</option>
-                                <option>Accessories</option>
-                                <option>PC Furniture</option>
-                                <option>CCTV</option>
-                                <option>Solar</option>
+                            <select id="brandFilter" class="border rounded-lg px-3 py-2 text-sm">
+                            <option value="">All Brands</option>
+                            @foreach($brands as $brand)
+                                <option value="{{ $brand->id ?? $brand->brand_id }}">{{ $brand->name ?? $brand->brand_name }}</option>
+                            @endforeach
                             </select>
 
-                            <select id="brand-filter" class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
-                                <option value="">All Brands</option>
-                                <option>NVIDIA</option>
-                                <option>AMD</option>
-                                <option>Intel</option>
-                                <option>ASUS</option>
-                                <option>MSI</option>
-                            </select>
+                            <label class="flex items-center gap-1 text-sm">
+                            <input id="discountFilter" type="checkbox" class="accent-primary" />
+                            Discounted
+                            </label>
                         </div>
                     </div>
-
+                    
                     <!-- Product Tabs -->
                     <div class="flex flex-wrap gap-2 mb-4">
-                        <button type="button" class="category-tab px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium" data-category="">All Products</button>
-                        <button type="button" class="category-tab px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200 transition-colors" data-category="Peripherals">Peripherals</button>
-                        <button type="button" class="category-tab px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200 transition-colors" data-category="Accessories">Accessories</button>
-                        <button type="button" class="category-tab px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200 transition-colors" data-category="PC Furniture">PC Furniture</button>
-                        <button type="button" class="category-tab px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200 transition-colors" data-category="CCTV">CCTV</button>
-                        <button type="button" class="category-tab px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200 transition-colors" data-category="Solar">Solar</button>
+                        <button type="button" 
+                            class="category-tab px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium" 
+                            data-category="">
+                            All Products
+                        </button>
+
+                        @foreach($categories as $category)
+                            <button type="button" 
+                                class="category-tab px-4 py-2 rounded-lg bg-white text-gray-700 border border-gray-200 text-sm font-medium" 
+                                data-category="{{ $category->id }}">
+                                {{ $category->name }}
+                            </button>
+                        @endforeach
                     </div>
 
                     <!-- Product Grid -->
-                    <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-y-auto flex-1 pr-2">
-                        @foreach($products as $product)
-                            <div class="product-card border rounded-xl p-3 flex flex-col hover:shadow-md transition-shadow bg-white"
-                                 data-product-id="{{ $product->product_id }}"
-                                 data-product-name="{{ $product->product_name }}"
-                                 data-product-price="{{ $product->base_price }}"
-                                 data-product-cost="{{ $product->cost_price ?? ($product->base_price * 0.8) }}"
-                                 data-product-category="{{ $product->category ?? '' }}"
-                                 data-product-sku="{{ $product->sku ?? 'N/A' }}">
-                                
-                                <!-- Product Image Container -->
-                                <div class="relative mb-2 rounded-lg overflow-hidden bg-gray-100 aspect-w-16 aspect-h-12">
-                                    <img
-                                        src="{{ $product->image_url ?? 'https://via.placeholder.com/300x200/4F46E5/FFFFFF?text=No+Image' }}"
-                                        alt="{{ $product->product_name }}"
-                                        class="w-full h-32 object-cover transition-transform hover:scale-105"
-                                    />
-                                </div>
-                                <div class="font-semibold text-gray-800 text-sm mb-1 line-clamp-2">{{ $product->product_name }}</div>
-                                <button type ="button"
-                                    class="add-to-po-btn mt-auto px-3 py-2 bg-primary text-white rounded-lg text-sm flex items-center justify-center gap-2 transition-colors font-medium hover:bg-primary-dark"
-                                    data-product-id="{{ $product->product_id }}"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    Add to PO
-                                </button>
-                            </div>
-                        @endforeach
+                    <div id="productGridWrapper">
+                        @include('partials.po-product-grid', ['products' => $products])
                     </div>
                 </div>
             </div>
@@ -266,40 +217,6 @@
     </div>
 </form>
 
-<!-- PO Item Template -->
-<template id="po-item-template">
-    <div class="po-item border rounded-lg p-3 flex gap-3 items-start bg-white hover:shadow-sm transition">
-        <img src="" alt="Product" class="w-16 h-16 object-cover rounded-md shadow-sm flex-shrink-0" />
-        <div class="flex-1 min-w-0">
-            <div class="flex items-start justify-between mb-1">
-                <div class="font-semibold text-sm text-gray-800 truncate product-name"></div>
-                <button class="remove-item text-red-400 text-lg hover:text-red-600 transition flex-shrink-0 ml-2">&times;</button>
-            </div>
-            <div class="text-xs text-gray-500 mb-1">
-                SKU: <span class="font-medium product-sku"></span>
-            </div>
-            <div class="grid grid-cols-2 gap-2 mb-2">
-                <div>
-                    <label class="text-xs text-gray-500">Cost Price</label>
-                    <input type="number" class="cost-price w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-green-500" min="0" step="0.01">
-                    <div class="mt-2">
-                        <label class="text-xs text-gray-500">Selling Price</label>
-                        <input type="number" class="selling-price w-full border rounded px-2 py-1 text-sm" min="0" step="0.01" disabled>
-                    </div>
-                </div>
-                <div>
-                    <label class="text-xs text-gray-500">Quantity</label>
-                    <div class="flex items-center gap-1">
-                        <button class="decrease-qty w-6 h-6 flex items-center justify-center rounded border border-gray-300 text-gray-600 hover:bg-gray-100 transition">-</button>
-                        <input type="number" class="quantity w-12 text-center border border-gray-300 rounded px-1 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-green-500" min="1" value="1">
-                        <button class="increase-qty w-6 h-6 flex items-center justify-center rounded border border-gray-300 text-gray-600 hover:bg-gray-100 transition">+</button>
-                    </div>
-                </div>
-            </div>
-            <div class="text-green-600 font-bold text-sm product-line-total">₱0.00</div>
-        </div>
-    </div>
-</template>
 
 <!-- Modal -->
 <div id="product-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -336,6 +253,62 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+
+    async function fetchProducts() {
+        const params = new URLSearchParams({
+            category_id: currentCategory || '',
+            brand_id: brandFilter?.value || '',
+            search: searchInput?.value || '',
+            discounted: discountFilter?.checked ? 1 : 0
+        });
+
+        try {
+            const res = await fetch(`{{ route('stock-in.index') }}?${params.toString()}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const html = await res.text();
+            const wrapper = document.getElementById('productGridWrapper');
+            wrapper.innerHTML = html;
+        } catch (err) {
+            console.error('Error fetching products:', err);
+        }
+    }
+
+    // Filter state variables
+    let currentCategory = '';
+
+    // Filter DOM elements
+    const brandFilter = document.getElementById('brandFilter');
+    const searchInput = document.getElementById('searchInput');
+    const discountFilter = document.getElementById('discountFilter');
+    const categoryTabs = document.querySelectorAll('.category-tab');
+
+    // Attach listeners
+    brandFilter?.addEventListener('change', fetchProducts);
+    discountFilter?.addEventListener('change', fetchProducts);
+    searchInput?.addEventListener('input', debounce(fetchProducts, 300)); // debounce for search
+    categoryTabs?.forEach(btn => {
+        btn.addEventListener('click', () => {
+            currentCategory = btn.dataset.category;
+            // visually highlight active tab
+            categoryTabs.forEach(b => b.classList.remove('bg-primary', 'text-white'));
+            btn.classList.add('bg-primary', 'text-white');
+            currentCategory = btn.dataset.category || '';
+            fetchProducts();
+        });
+    });
+
+    // Debounce helper
+    function debounce(fn, delay) {
+        let timer;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn(...args), delay);
+        };
+    }
+
     // configure axios csrf header
     if (window.axios) {
         axios.defaults.headers.common['X-CSRF-TOKEN'] = '{{ csrf_token() }}';
@@ -627,24 +600,28 @@ document.addEventListener('DOMContentLoaded', function() {
              .replace(/'/g, "&#039;");
     }
 
-    // ---------------------------
-    // Add product click: open modal
-    // ---------------------------
-    document.addEventListener('click', e => {
+    // Delegate clicks to dynamically loaded "Add to PO" buttons
+    document.addEventListener('click', function (e) {
         const btn = e.target.closest('.add-to-po-btn');
         if (!btn) return;
 
-        const card = btn.closest('.product-card');
+        // Extract product data
         currentProduct = {
-            id: card.dataset.productId,
-            name: card.dataset.productName,
-            costPrice: parseFloat(card.dataset.productCost) || parseFloat(card.dataset.productPrice) || 0,
-            branch_id: document.getElementById('branch_id').value || null
+            id: btn.dataset.productId,
+            name: btn.dataset.productName,
+            costPrice: parseFloat(btn.dataset.productCost) || 0,
+            basePrice: parseFloat(btn.dataset.productBase) || 0,
+            stock: parseInt(btn.dataset.productStock) || 0,
+            image: btn.dataset.productImage || '',
+            sku: btn.dataset.productSku || ''
         };
 
-        modalProductName.textContent = currentProduct.name;
+        // Populate modal
+        modalProductName.textContent = currentProduct.name || 'Unnamed Product';
         modalQuantity.value = 1;
-        modalCostPrice.value = currentProduct.costPrice.toFixed(2);
+        modalCostPrice.value = currentProduct.costPrice;
+
+        // Show modal
         modal.classList.remove('hidden');
     });
 
@@ -713,7 +690,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const branchId = document.getElementById('branch_id').value;
-        const expectedDelivery = document.getElementById('expected-delivery').value || null;
         const shipping = parseFloat(shippingCostInput.value) || 0;
 
         // Build items payload: unit_price from cost, and optionally set selling_price & markup
@@ -753,7 +729,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const payload = {
             supplier_id: supplierId,
             branch_id: branchId,
-            expected_delivery: expectedDelivery,
             shipping: shipping,
             status: document.getElementById('po_status').value || 'pending',
             apply_markup: applyMarkup ? 1 : 0,

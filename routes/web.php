@@ -114,8 +114,6 @@ Route::middleware(['auth:employee'])->group(function () {
         }
     }
 
-    Route::get('pos/filter', [POSController::class,'filter'])->name('pos.filter');
-
 
     /*
     |--------------------------------------------------------------------------
@@ -178,6 +176,8 @@ Route::middleware(['auth:employee'])->group(function () {
         Route::post('/purchase-orders/{po}/receive', [PurchaseOrderController::class, 'receive'])
             ->name('purchase-orders.receive');
         Route::get('/purchase-orders/{po}/items', [PurchaseOrderController::class, 'getItems']);
+
+        Route::get('/pos/inventory', [App\Http\Controllers\POSController::class, 'getInventory'])->name('pos.inventory');
     });
 
 });

@@ -19,13 +19,10 @@ return new class extends Migration
             $table->string('serial_number')->unique()->nullable();
             $table->decimal('unit_price', 10, 2);
             $table->enum('status', ['in_stock', 'sold', 'returned'])->default('in_stock');
-
             // Audit columns
             $table->unsignedBigInteger('createdby_id')->nullable();
             $table->unsignedBigInteger('updatedby_id')->nullable();
-
             $table->timestamps();
-
             // Foreign keys
             $table->foreign('branch_id')->references('branch_id')->on('branches')->onDelete('cascade');
             $table->foreign('product_id')->references('product_id')->on('products')->onDelete('cascade');
