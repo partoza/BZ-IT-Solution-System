@@ -179,6 +179,15 @@ return [
                 'roles' => ['*'],
             ],
             [
+                'title' => 'Checkout Page',
+                'type' => 'view',
+                'view' => 'pages.history.checkout',
+                'uri' => 'history/checkout',
+                'name' => 'history.checkout',
+                'roles' => ['*'],
+            ],
+
+            [
                 'title' => 'Audit Logs',
                 'type' => 'controller',
                 'action' => 'App\\Http\\Controllers\\AuditLogController@index',
