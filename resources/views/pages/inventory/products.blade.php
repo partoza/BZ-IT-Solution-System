@@ -10,8 +10,8 @@
         <!-- Total Products Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
             <div class="flex items-center gap-3 mb-2">
-                <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                    <div class="w-6 h-6 bg-primary flex items-center justify-center"
+                <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <div class="w-8 h-8 bg-primary flex items-center justify-center"
                         style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                             class="size-4 text-white">
@@ -55,8 +55,8 @@
         <!-- Active Products Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
             <div class="flex items-center gap-3 mb-2">
-                <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                    <div class="w-6 h-6 bg-green-500 flex items-center justify-center"
+                <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <div class="w-8 h-8 bg-primary flex items-center justify-center"
                         style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                             class="bi bi-bag-check-fill size-4 text-white" viewBox="0 0 16 16">
@@ -86,11 +86,11 @@
         <!-- Inactive Products Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
             <div class="flex items-center gap-3 mb-2">
-                <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
-                    <div class="w-6 h-6 bg-red-500 flex items-center justify-center"
+                <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <div class="w-8 h-8 bg-primary flex items-center justify-center"
                         style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
-                        <svg width="16" height="16" fill="currentColor"
-                            class="bi bi-bag-x-fill size-4 text-white" viewBox="0 0 16 16">
+                        <svg width="16" height="16" fill="currentColor" class="bi bi-bag-x-fill size-4 text-white"
+                            viewBox="0 0 16 16">
                             <path fill-rule="evenodd"
                                 d="M10.5 3.5a2.5 2.5 0 0 0-5 0V4h5zm1 0V4H15v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4h3.5v-.5a3.5 3.5 0 1 1 7 0M6.854 8.146a.5.5 0 1 0-.708.708L7.293 10l-1.147 1.146a.5.5 0 0 0 .708.708L8 10.707l1.146 1.147a.5.5 0 0 0 .708-.708L8.707 10l1.147-1.146a.5.5 0 0 0-.708-.708L8 9.293z" />
                         </svg>
@@ -117,8 +117,8 @@
         <!-- Low Stock Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
             <div class="flex items-center gap-3 mb-2">
-                <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center">
-                    <div class="w-6 h-6 bg-yellow-500 flex items-center justify-center"
+                <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <div class="w-8 h-8 bg-primary flex items-center justify-center"
                         style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                             class="size-4 text-white">
@@ -128,28 +128,81 @@
                         </svg>
                     </div>
                 </div>
-                <h2 class="text-base font-medium text-gray-700">Low Stock</h2>
+                <h2 class="text-base font-medium text-gray-700">Low/Out of Stock</h2>
             </div>
             <div class="ps-11">
                 <h3 class="text-2xl font-semibold text-gray-900">{{ $lowStock }}</h3>
                 <p class="text-xs text-gray-500 mt-1">Need Restock</p>
                 <div class="flex items-center gap-2 mt-2">
-                    <div class="flex items-center <?= $lowStock > 0 ? 'text-orange-600' : 'text-green-600' ?> text-xs">
-                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <?php if ($lowStock > 0): ?>
-                            <!-- Warning icon for low stock -->
-                            <path fill-rule="evenodd"
-                                d="M8.257 3.099c.765-1.36 2.721-1.36 3.486 0l6.518 11.593c.75 1.335-.213 2.983-1.743 2.983H3.482c-1.53 0-2.493-1.648-1.743-2.983L8.257 3.1zM10 6.5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 6.5zm0 7.75a.75.75 0 100 1.5.75.75 0 000-1.5z"
-                                clip-rule="evenodd" />
+                    <div class="relative group">
+                        <div
+                            class="flex items-center {{ $lowStock > 0 ? 'text-orange-600' : 'text-green-600' }} text-xs cursor-default">
+                            <svg class="size-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                @if($lowStock > 0)
+                                    <!-- Warning icon for low stock -->
+                                    <path fill-rule="evenodd"
+                                        d="M8.257 3.099c.765-1.36 2.721-1.36 3.486 0l6.518 11.593c.75 1.335-.213 2.983-1.743 2.983H3.482c-1.53 0-2.493-1.648-1.743-2.983L8.257 3.1zM10 6.5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 6.5zm0 7.75a.75.75 0 100 1.5.75.75 0 000-1.5z"
+                                        clip-rule="evenodd" />
+                                @else
+                                    <!-- Checkmark icon for all in stock -->
+                                    <path
+                                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                                @endif
+                            </svg>
+                            <span>{{ $lowStock > 0 ? 'Attention Needed' : 'All Products in Stock' }}</span>
+                        </div>
 
-                            <?php else: ?>
-                            <!-- Checkmark icon for all in stock -->
-                            <path fill-rule="evenodd"
-                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.236 4.53L6.53 9.22a.75.75 0 00-1.06 1.06l2.5 2.5a.75.75 0 001.134-.088l4-5.5z"
-                                clip-rule="evenodd" />
-                            <?php endif; ?>
-                        </svg>
-                        <span><?= $lowStock > 0 ? 'Attention Needed' : 'All Products in Stock' ?></span>
+                        @if($lowStock > 0)
+                            @php
+                                // Determine source for tooltip items:
+                                // Prefer explicit $lowStockProducts passed from controller.
+                                // Fallback to current $products collection (handles paginator).
+                                $tooltipProducts = collect();
+                                if (!empty($lowStockProducts) && count($lowStockProducts) > 0) {
+                                    $tooltipProducts = collect($lowStockProducts);
+                                } else {
+                                    $src = $products ?? collect();
+                                    if (is_object($src) && method_exists($src, 'getCollection')) {
+                                        $src = $src->getCollection();
+                                    }
+                                    $src = collect($src);
+                                    $tooltipProducts = $src->filter(function ($p) {
+                                        $stock = $p->stock_count ?? $p->stock ?? $p->quantity ?? 0;
+                                        $low = $p->low_threshold ?? 10;
+                                        return $stock <= $low; // include zero (out) and low
+                                    })->values();
+                                }
+
+                                // Sort by stock ascending so the least-stocked items appear first (0,1,2...)
+                                $tooltipProducts = $tooltipProducts->sortBy(function ($p) {
+                                    return (int) ($p->stock_count ?? $p->stock ?? $p->quantity ?? 0);
+                                })->values();
+
+                                // Small card list: take the first 3 lowest-stock products for quick view
+                                $cardLowProducts = $tooltipProducts->slice(0, 3)->values();
+                            @endphp
+
+                            <!-- Tooltip: list of products that need restock (positioned below icon) -->
+                            <div
+                                class="absolute z-20 top-full mt-2 left-1/2 transform -translate-x-1/2 hidden group-hover:block group-focus:block w-64 bg-white border border-gray-200 rounded shadow-sm text-sm text-gray-700 p-3">
+                                <div class="font-medium mb-1 text-red-600">Products needing restock</div>
+                                <ul class="list-disc ml-4 max-h-44 overflow-auto">
+                                    @forelse($tooltipProducts as $p)
+                                        @php
+                                            $name = $p->product_name ?? $p->name ?? $p->title ?? 'Unnamed Product';
+                                            $stock = $p->stock_count ?? $p->stock ?? $p->quantity ?? 0;
+                                        @endphp
+                                        @if($stock == 0)
+                                            <li class="truncate">{{ $name }} — Out of Stock</li>
+                                        @else
+                                            <li class="truncate">{{ $name }} — {{ $stock }} left</li>
+                                        @endif
+                                    @empty
+                                        <li>No product details available.</li>
+                                    @endforelse
+                                </ul>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -166,7 +219,7 @@
                 <!-- Filters and Actions Container -->
                 <div class="flex flex-col xl:flex-row gap-4 w-full xl:w-auto">
                     <!-- Search and Filters -->
-                    <form method="GET" class="flex flex-col md:flex-row gap-3 flex-1">
+                    <form method="GET" class="flex flex-col md:flex-row gap-3 flex-1 global-focus">
                         <!-- Search Input -->
                         <div class="relative flex-1 md:max-w-60">
                             <input type="text" name="search" value="{{ $search }}" placeholder="Search Product..."
@@ -199,16 +252,16 @@
                             </select>
 
                             <!-- <select id="subCategorySelect" name="sub_category"
-                                                                                                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm flex-1 min-w-32" {{ $subCategories ? '' : 'disabled' }}>
-                                                                                                            <option value="">All Subcategories</option>
-                                                                                                            @if($subCategories)
-                                                                                                                @foreach($subCategories as $sub)
-                                                                                                                    <option value="{{ $sub->id }}" {{ $subCategory == $sub->id ? 'selected' : '' }}>
-                                                                                                                        {{ $sub->name }}
-                                                                                                                    </option>
-                                                                                                                @endforeach
-                                                                                                            @endif
-                                                                                                        </select> -->
+                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm flex-1 min-w-32" {{ $subCategories ? '' : 'disabled' }}>
+                                    <option value="">All Subcategories</option>
+                                    @if($subCategories)
+                                        @foreach($subCategories as $sub)
+                                            <option value="{{ $sub->id }}" {{ $subCategory == $sub->id ? 'selected' : '' }}>
+                                                {{ $sub->name }}
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select> -->
 
                             <select name="stock"
                                 class="px-3 py-2 border border-gray-300 rounded-lg text-sm flex-1 min-w-32">
@@ -217,18 +270,20 @@
                                 <option value="Low" {{ $stockLevel === 'Low' ? 'selected' : '' }}>Low</option>
                                 <option value="Out" {{ $stockLevel === 'Out' ? 'selected' : '' }}>Out of Stock</option>
                             </select>
+                            <!-- Action Buttons (submit inside the form) -->
+                            <div class="flex gap-3">
+                                <button type="submit"
+                                    class="px-5 py-2 bg-primary text-white rounded-lg hover:bg-emerald-700 text-sm font-medium">
+                                    Filter
+                                </button>
+                            </div>
                         </div>
                     </form>
 
-                    <!-- Action Buttons -->
+                    <!-- Add Product Button (separate link) -->
                     <div class="flex gap-3">
-                        <button type="submit"
-                            class="px-5 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium">
-                            Filter
-                        </button>
-
                         <a href="{{ route('products.create') }}"
-                            class="px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium flex items-center justify-center">
+                            class="px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium flex items-center justify-center">
                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
                                 </path>
@@ -242,7 +297,7 @@
 
 
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <table class="min-w-full divide-y divide-gray-200 text-sms">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Product</th>
@@ -290,7 +345,7 @@
                                 @php
                                     $isActive = $product->active_status; // boolean
                                     $statusText = $isActive ? 'Active' : 'Inactive';
-                                    $statusClass = $isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600';
+                                    $statusClass = $isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-600';
                                 @endphp
 
                                 <span class="px-2.5 py-0.5 text-xs font-medium rounded-full {{ $statusClass }}">
@@ -300,8 +355,45 @@
 
                             <td class="px-6 py-3">
                                 <div class="flex space-x-2">
-                                    <a href="#" class="text-blue-600 hover:text-blue-900">✏️</a>
-                                    <a href="#" class="text-red-600 hover:text-red-900">🗑️</a>
+                                    <!-- View Button -->
+                                    <div class="relative group">
+                                        <button
+                                            class="text-gray-600 hover:text-primary/90 transition-colors duration-200 p-1 rounded">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                                fill="currentColor">
+                                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                                <path fill-rule="evenodd"
+                                                    d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
+                                        <div
+                                            class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-primary rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-10">
+                                            View Product
+                                            <div
+                                                class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-primary">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Edit Button -->
+                                    <div class="relative group">
+                                        <button
+                                            class="text-gray-600 hover:text-primary/90 transition-colors duration-200 p-1 rounded">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                                fill="currentColor">
+                                                <path
+                                                    d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                            </svg>
+                                        </button>
+                                        <div
+                                            class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-primary rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-10">
+                                            Edit Product
+                                            <div
+                                                class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-primary">
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
                         </tr>

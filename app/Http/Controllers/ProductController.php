@@ -115,18 +115,28 @@ class ProductController extends Controller
         $activeProducts = Product::where('active_status', true)->count();
         $inactiveProducts = Product::where('active_status', false)->count();
 
-        // lowStock summary: count products where branch_in_stock_count <= low threshold (we'll compute by querying DB)
-        // We'll treat low threshold as 5 by default if pivot not present — to match UI behavior we do this in PHP
-        $lowStock = Product::withCount([
+        // lowStock summary: count products where branch stock <= branch pivot low_stock_threshold (default 10)
+        // We'll load branch pivot when available and use its low_stock_threshold; otherwise default to 10
+        $productsForLowStock = Product::with([
+            'branches' => function ($q) use ($branchId) {
+                $q->where('branch_product.branch_id', $branchId);
+            }
+        ])->withCount([
             'inventoryItems as branch_in_stock_count' => function ($q) use ($branchId) {
                 $q->where('inventory_items.branch_id', $branchId)
-                ->where('inventory_items.status', 'in_stock');
+                  ->where('inventory_items.status', 'in_stock');
             }
-        ])->get()->filter(function ($product) {
-            // default low threshold; adjust if you keep it in pivot consistently
-            $threshold = 5;
-            // try to grab pivot threshold if available (requires eager loading pivot -> skip here for perf)
-            return ($product->branch_in_stock_count ?? 0) <= $threshold;
+        ])->get();
+
+        $lowStock = $productsForLowStock->filter(function ($product) {
+            $stock = (int) ($product->branch_in_stock_count ?? 0);
+            $threshold = 10; // default low threshold to match UI and per-product logic
+
+            if ($product->relationLoaded('branches') && $product->branches->first() && $product->branches->first()->pivot) {
+                $threshold = $product->branches->first()->pivot->low_stock_threshold ?? $threshold;
+            }
+
+            return $stock <= $threshold;
         })->count();
 
         return view('pages.inventory.products', compact(
