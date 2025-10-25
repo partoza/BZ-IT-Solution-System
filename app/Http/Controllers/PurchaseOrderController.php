@@ -139,16 +139,12 @@ class PurchaseOrderController extends Controller
 
         $brands = Brand::orderBy('name')->get();
 
-        // Base query: all inventory items in this branch that are in stock
-        $inventoryQuery = InventoryItem::with(['product.category', 'product.brand'])
-            ->where('branch_id', $branchId)
-            ->where('status', 'in_stock');
+        // Base query: all products
+        $productsQuery = Product::with(['category', 'brand', 'inventoryItems' => function ($q) use ($branchId) {
+            $q->where('branch_id', $branchId)->where('status', 'in_stock');
+        }]);
 
-        //
-        // Apply filters (category, brand, search)
-        //
-
-        // Category filter (parent and its children)
+        // Category filter
         if ($request->filled('category_id')) {
             $categoryId = $request->category_id;
 
@@ -156,46 +152,33 @@ class PurchaseOrderController extends Controller
                 ->orWhere('parent_id', $categoryId)
                 ->pluck('id');
 
-            $inventoryQuery->whereHas('product', function ($q) use ($categoryIds) {
-                $q->whereIn('category_id', $categoryIds);
-            });
+            $productsQuery->whereIn('category_id', $categoryIds);
         }
 
         // Brand filter
         if ($request->filled('brand_id')) {
-            $inventoryQuery->whereHas('product', function ($q) use ($request) {
-                $q->where('brand_id', $request->brand_id);
-            });
+            $productsQuery->where('brand_id', $request->brand_id);
         }
 
         // Search filter (product name or SKU)
         if ($request->filled('search')) {
             $search = $request->search;
-            $inventoryQuery->whereHas('product', function ($q) use ($search) {
-                $q->where('product_name', 'like', "%{$search}%");
+            $productsQuery->where(function ($q) use ($search) {
+                $q->where('product_name', 'like', "%{$search}%")
+                ->orWhere('sku', 'like', "%{$search}%");
             });
         }
 
-        // Execute query
-        $inventoryItems = $inventoryQuery->get();
-
-        //
-        // Group by product_id for catalog-style display
-        //
-        $products = $inventoryItems->groupBy('product_id')->map(function ($items) {
-            $sample = $items->first();
-            $product = $sample->product;
-
-            // choose the lowest available cost price (useful for PO)
-            $lowestCost = $items->min('unit_price');
+        $products = $productsQuery->get()->map(function ($product) {
+            $inventory = $product->inventoryItems;
 
             return [
                 'product_id'   => $product->product_id,
                 'product_name' => $product->product_name,
                 'description'  => $product->description ?? '',
-                'cost_price'   => (float) $lowestCost,
-                'base_price'   => (float) ($product->price ?? $lowestCost),
-                'stock_count'  => $items->count(),
+                'cost_price'   => $inventory->min('unit_price') ?? 0,
+                'base_price'   => (float) ($product->price ?? $inventory->min('unit_price') ?? 0),
+                'stock_count'  => $inventory->count(),
                 'image_url'    => $product->image_url ?? null,
                 'sku'          => $product->sku ?? null,
                 'brand'        => $product->brand->name ?? null,
@@ -203,9 +186,9 @@ class PurchaseOrderController extends Controller
                 'category'     => $product->category->name ?? null,
                 'category_id'  => $product->category_id ?? null,
             ];
-        })->values();
+        });
 
-        // Handle AJAX filter requests (return only the product grid partial)
+        // Handle AJAX requests
         if ($request->ajax()) {
             return view('partials.po-product-grid', ['products' => $products])->render();
         }
@@ -219,6 +202,7 @@ class PurchaseOrderController extends Controller
             'branchId'   => $branchId,
         ]);
     }
+
 
 
     public function store(Request $request)
