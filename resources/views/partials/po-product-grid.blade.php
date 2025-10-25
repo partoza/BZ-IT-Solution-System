@@ -1,7 +1,7 @@
 {{-- resources/views/partials/po-product-grid.blade.php --}}
 @php use Illuminate\Support\Str; @endphp
 
-<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-y-auto h-[410px] pr-2">
+<div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 overflow-y-auto h-[410px] pr-2">
     @forelse($products as $product)
         @php
             // Normalize image URL:
@@ -22,7 +22,7 @@
         @endphp
 
         <div
-            class="border rounded-xl p-3 flex flex-col bg-white hover:shadow-md transition product-card"
+            class="border rounded-xl p-3 flex flex-col bg-white hover:shadow-md transition product-card h-[210px]"
             data-product-id="{{ $product['product_id'] }}"
         >
             <img
