@@ -1,107 +1,245 @@
 @extends('layout.sidebarmenu')
 
 @section('pages-content')
+    @php
+        $activeProductPercentage = $totalProducts > 0 ? round(($activeProducts / $totalProducts) * 100) : 0;
+        $inactiveProductPercentage = $totalProducts > 0 ? round(($inactiveProducts / $totalProducts) * 100) : 0;
+    @endphp
     <!-- Stats Section -->
     <div class="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 gap-5 mb-8">
         <!-- Total Products Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
-            <h2 class="text-base font-medium text-gray-700 mb-1">Total Products</h2>
-            <h3 class="text-2xl font-semibold text-gray-900">{{ $totalProducts }}</h3>
-            <p class="text-xs text-gray-500 mt-1">Real Time Total</p>
-        </div>
-
-        <!-- No. Category Card -->
-        <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
-            <h2 class="text-base font-medium text-gray-700 mb-1">Active Products</h2>
-            <h3 class="text-2xl font-semibold text-gray-900">{{ $activeProducts }}</h3>
-            <p class="text-xs text-green-600 mt-1">↑ Active</p>
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                    <div class="w-6 h-6 bg-primary flex items-center justify-center"
+                        style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                            class="size-4 text-white">
+                            <path fill-rule="evenodd"
+                                d="M1.5 9.832v1.793c0 1.036.84 1.875 1.875 1.875h17.25c1.035 0 1.875-.84 1.875-1.875V9.832a3 3 0 0 0-.722-1.952l-3.285-3.832A3 3 0 0 0 16.215 3h-8.43a3 3 0 0 0-2.278 1.048L2.222 7.88A3 3 0 0 0 1.5 9.832ZM7.785 4.5a1.5 1.5 0 0 0-1.139.524L3.881 8.25h3.165a3 3 0 0 1 2.496 1.336l.164.246a1.5 1.5 0 0 0 1.248.668h2.092a1.5 1.5 0 0 0 1.248-.668l.164-.246a3 3 0 0 1 2.496-1.336h3.165l-2.765-3.226a1.5 1.5 0 0 0-1.139-.524h-8.43Z"
+                                clip-rule="evenodd" />
+                            <path
+                                d="M2.813 15c-.725 0-1.313.588-1.313 1.313V18a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-1.688c0-.724-.588-1.312-1.313-1.312h-4.233a3 3 0 0 0-2.496 1.336l-.164.246a1.5 1.5 0 0 1-1.248.668h-2.092a1.5 1.5 0 0 1-1.248-.668l-.164-.246A3 3 0 0 0 7.046 15H2.812Z" />
+                        </svg>
+                    </div>
+                </div>
+                <h2 class="text-base font-medium text-gray-700">Total Products</h2>
+            </div>
+            <div class="ps-11">
+                <h3 class="text-2xl font-semibold text-gray-900">{{ $totalProducts }}</h3>
+                <p class="text-xs text-gray-500 mt-1">Real Time Total</p>
+                <div class="flex items-center gap-2 mt-2">
+                    @php
+                        $activeProductPercentage = $totalProducts > 0 ? round(($activeProducts / $totalProducts) * 100) : 0;
+                    @endphp
+                    <div class="flex items-center text-green-600 text-xs">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <span>{{ $activeProductPercentage }}% Active</span>
+                    </div>
+                    <div class="flex items-center text-red-600 text-xs">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <span>{{ 100 - $activeProductPercentage }}% Inactive</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Active Products Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
-            <h2 class="text-base font-medium text-gray-700 mb-1">Inactive Products</h2>
-            <h3 class="text-2xl font-semibold text-gray-900">{{ $inactiveProducts }}</h3>
-            <p class="text-xs text-red-600 mt-1">↓ Inactive</p>
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                    <div class="w-6 h-6 bg-green-500 flex items-center justify-center"
+                        style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-bag-check-fill size-4 text-white" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd"
+                                d="M10.5 3.5a2.5 2.5 0 0 0-5 0V4h5zm1 0V4H15v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4h3.5v-.5a3.5 3.5 0 1 1 7 0m-.646 5.354a.5.5 0 0 0-.708-.708L7.5 10.793 6.354 9.646a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0z" />
+                        </svg>
+                    </div>
+                </div>
+                <h2 class="text-base font-medium text-gray-700">Active Products</h2>
+            </div>
+            <div class="ps-11">
+                <h3 class="text-2xl font-semibold text-gray-900">{{ $activeProducts }}</h3>
+                <p class="text-xs text-gray-500 mt-1">Currently Active</p>
+                <div class="flex items-center gap-2 mt-2">
+                    <div class="flex items-center text-green-600 text-xs">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <span>{{ $activeProductPercentage }}% of Total</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inactive Products Card -->
+        <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
+                    <div class="w-6 h-6 bg-red-500 flex items-center justify-center"
+                        style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
+                        <svg width="16" height="16" fill="currentColor"
+                            class="bi bi-bag-x-fill size-4 text-white" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd"
+                                d="M10.5 3.5a2.5 2.5 0 0 0-5 0V4h5zm1 0V4H15v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4h3.5v-.5a3.5 3.5 0 1 1 7 0M6.854 8.146a.5.5 0 1 0-.708.708L7.293 10l-1.147 1.146a.5.5 0 0 0 .708.708L8 10.707l1.146 1.147a.5.5 0 0 0 .708-.708L8.707 10l1.147-1.146a.5.5 0 0 0-.708-.708L8 9.293z" />
+                        </svg>
+                    </div>
+                </div>
+                <h2 class="text-base font-medium text-gray-700">Inactive Products</h2>
+            </div>
+            <div class="ps-11">
+                <h3 class="text-2xl font-semibold text-gray-900">{{ $inactiveProducts }}</h3>
+                <p class="text-xs text-gray-500 mt-1">Currently Inactive</p>
+                <div class="flex items-center gap-2 mt-2">
+                    <div class="flex items-center text-red-600 text-xs">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <span>{{ $inactiveProductPercentage }}% of Total</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Low Stock Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
-            <h2 class="text-base font-medium text-gray-700 mb-1">Low Stock</h2>
-            <h3 class="text-2xl font-semibold text-gray-900">{{ $lowStock }}</h3>
-            <p class="text-xs text-yellow-600 mt-1">⚠️ Need Restock</p>
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center">
+                    <div class="w-6 h-6 bg-yellow-500 flex items-center justify-center"
+                        style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                            class="size-4 text-white">
+                            <path fill-rule="evenodd"
+                                d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                </div>
+                <h2 class="text-base font-medium text-gray-700">Low Stock</h2>
+            </div>
+            <div class="ps-11">
+                <h3 class="text-2xl font-semibold text-gray-900">{{ $lowStock }}</h3>
+                <p class="text-xs text-gray-500 mt-1">Need Restock</p>
+                <div class="flex items-center gap-2 mt-2">
+                    <div class="flex items-center <?= $lowStock > 0 ? 'text-orange-600' : 'text-green-600' ?> text-xs">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <?php if ($lowStock > 0): ?>
+                            <!-- Warning icon for low stock -->
+                            <path fill-rule="evenodd"
+                                d="M8.257 3.099c.765-1.36 2.721-1.36 3.486 0l6.518 11.593c.75 1.335-.213 2.983-1.743 2.983H3.482c-1.53 0-2.493-1.648-1.743-2.983L8.257 3.1zM10 6.5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 6.5zm0 7.75a.75.75 0 100 1.5.75.75 0 000-1.5z"
+                                clip-rule="evenodd" />
+
+                            <?php else: ?>
+                            <!-- Checkmark icon for all in stock -->
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.236 4.53L6.53 9.22a.75.75 0 00-1.06 1.06l2.5 2.5a.75.75 0 001.134-.088l4-5.5z"
+                                clip-rule="evenodd" />
+                            <?php endif; ?>
+                        </svg>
+                        <span><?= $lowStock > 0 ? 'Attention Needed' : 'All Products in Stock' ?></span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
     <!-- Products Table -->
     <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
         <!-- Products List Header -->
         <div class="bg-white shadow-sm p-5 mb-2">
-            <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3">
-                <h2 class="text-lg font-semibold text-gray-800">Products</h2>
+            <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+                <!-- Title -->
+                <h2 class="text-lg font-semibold text-gray-800 mb-4 xl:mb-0">Products</h2>
 
-                <div class="flex flex-col xl:flex-row gap-3 w-full xl:w-auto">
-                    <!-- Search Input -->
-                <form method="GET" class="flex flex-wrap gap-3">
-                    <div class="relative flex-1 xl:w-72">
-                        <input type="text" name="search" value="{{ $search }}" placeholder="Search Product..."
-                        class="w-60 px-3 py-2 border border-gray-300 rounded-lg text-sm" />
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                            </svg>
+                <!-- Filters and Actions Container -->
+                <div class="flex flex-col xl:flex-row gap-4 w-full xl:w-auto">
+                    <!-- Search and Filters -->
+                    <form method="GET" class="flex flex-col md:flex-row gap-3 flex-1">
+                        <!-- Search Input -->
+                        <div class="relative flex-1 md:max-w-60">
+                            <input type="text" name="search" value="{{ $search }}" placeholder="Search Product..."
+                                class="w-full px-3 py-2 pl-10 border border-gray-300 rounded-lg text-sm" />
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
                         </div>
+
+                        <!-- Filter Dropdowns -->
+                        <div class="flex flex-wrap gap-3">
+                            <select name="status"
+                                class="px-3 py-2 border border-gray-300 rounded-lg text-sm flex-1 min-w-32">
+                                <option value="">All Status</option>
+                                <option value="Active" {{ $status === 'Active' ? 'selected' : '' }}>Active</option>
+                                <option value="Inactive" {{ $status === 'Inactive' ? 'selected' : '' }}>Inactive</option>
+                            </select>
+
+                            <select id="mainCategorySelect" name="category"
+                                class="px-3 py-2 border border-gray-300 rounded-lg text-sm flex-2 min-w-32">
+                                <option value="">All Categories</option>
+                                @foreach ($categories as $cat)
+                                    <option value="{{ $cat->id }}" {{ $category == $cat->id ? 'selected' : '' }}>
+                                        {{ $cat->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            <!-- <select id="subCategorySelect" name="sub_category"
+                                                                                                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm flex-1 min-w-32" {{ $subCategories ? '' : 'disabled' }}>
+                                                                                                            <option value="">All Subcategories</option>
+                                                                                                            @if($subCategories)
+                                                                                                                @foreach($subCategories as $sub)
+                                                                                                                    <option value="{{ $sub->id }}" {{ $subCategory == $sub->id ? 'selected' : '' }}>
+                                                                                                                        {{ $sub->name }}
+                                                                                                                    </option>
+                                                                                                                @endforeach
+                                                                                                            @endif
+                                                                                                        </select> -->
+
+                            <select name="stock"
+                                class="px-3 py-2 border border-gray-300 rounded-lg text-sm flex-1 min-w-32">
+                                <option value="">All Stocks</option>
+                                <option value="High" {{ $stockLevel === 'High' ? 'selected' : '' }}>High</option>
+                                <option value="Low" {{ $stockLevel === 'Low' ? 'selected' : '' }}>Low</option>
+                                <option value="Out" {{ $stockLevel === 'Out' ? 'selected' : '' }}>Out of Stock</option>
+                            </select>
+                        </div>
+                    </form>
+
+                    <!-- Action Buttons -->
+                    <div class="flex gap-3">
+                        <button type="submit"
+                            class="px-5 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium">
+                            Filter
+                        </button>
+
+                        <a href="{{ route('products.create') }}"
+                            class="px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium flex items-center justify-center">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
+                                </path>
+                            </svg>
+                            Add Product
+                        </a>
                     </div>
-
-                    <select name="status" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                        <option value="">All Status</option>
-                        <option value="Active" {{ $status === 'Active' ? 'selected' : '' }}>Active</option>
-                        <option value="Inactive" {{ $status === 'Inactive' ? 'selected' : '' }}>Inactive</option>
-                    </select>
-
-                    <select id="mainCategorySelect" name="category" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                        <option value="">All Categories</option>
-                        @foreach ($categories as $cat)
-                            <option value="{{ $cat->id }}" {{ $category == $cat->id ? 'selected' : '' }}>
-                                {{ $cat->name }}
-                            </option>
-                        @endforeach
-                    </select>
-
-                    <select id="subCategorySelect" name="sub_category" class="px-3 py-2 border border-gray-300 rounded-lg text-sm" {{ $subCategories ? '' : 'disabled' }}>
-                        <option value="">All Subcategories</option>
-                        @if($subCategories)
-                            @foreach($subCategories as $sub)
-                                <option value="{{ $sub->id }}" {{ $subCategory == $sub->id ? 'selected' : '' }}>
-                                    {{ $sub->name }}
-                                </option>
-                            @endforeach
-                        @endif
-                    </select>
-                    
-                    <select name="stock" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                        <option value="">All Stocks</option>
-                        <option value="High" {{ $stockLevel === 'High' ? 'selected' : '' }}>High</option>
-                        <option value="Low" {{ $stockLevel === 'Low' ? 'selected' : '' }}>Low</option>
-                        <option value="Out" {{ $stockLevel === 'Out' ? 'selected' : '' }}>Out of Stock</option>
-                    </select>
-
-                    <button type="submit"
-                        class="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium">
-                        Filter
-                    </button>
-
-                    <a href="{{ route('products.create') }}"
-                        class="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center justify-center">
-                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                        Add Product
-                    </a>
-                </form>
                 </div>
             </div>
         </div>
+
 
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 text-sm">
@@ -181,45 +319,46 @@
             {{ $products->links() }}
         </div>
     </div>
+    </div>
 
     @push('scripts')
         <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const mainCategorySelect = document.getElementById('mainCategorySelect');
-            const subCategorySelect = document.getElementById('subCategorySelect');
+            document.addEventListener('DOMContentLoaded', function () {
+                const mainCategorySelect = document.getElementById('mainCategorySelect');
+                const subCategorySelect = document.getElementById('subCategorySelect');
 
-            mainCategorySelect.addEventListener('change', function () {
-                const mainCategoryId = this.value;
+                mainCategorySelect.addEventListener('change', function () {
+                    const mainCategoryId = this.value;
 
-                // Reset subcategory dropdown
-                subCategorySelect.innerHTML = '<option value="">All Subcategories</option>';
+                    // Reset subcategory dropdown
+                    subCategorySelect.innerHTML = '<option value="">All Subcategories</option>';
 
-                if (!mainCategoryId) {
-                    subCategorySelect.disabled = true;
-                    return;
-                }
-
-                axios.get(`/categories/${mainCategoryId}/subcategories`)
-                    .then(response => {
-                        const subcategories = response.data;
-
-                        if (subcategories.length > 0) {
-                            subcategories.forEach(sub => {
-                                const option = new Option(sub.name, sub.id);
-                                subCategorySelect.add(option);
-                            });
-                            subCategorySelect.disabled = false;
-                        } else {
-                            subCategorySelect.disabled = true;
-                            // optional: showToast('No subcategories found', 'error');
-                        }
-                    })
-                    .catch(() => {
+                    if (!mainCategoryId) {
                         subCategorySelect.disabled = true;
-                        // optional: showToast('Error loading subcategories', 'error');
-                    });
+                        return;
+                    }
+
+                    axios.get(`/categories/${mainCategoryId}/subcategories`)
+                        .then(response => {
+                            const subcategories = response.data;
+
+                            if (subcategories.length > 0) {
+                                subcategories.forEach(sub => {
+                                    const option = new Option(sub.name, sub.id);
+                                    subCategorySelect.add(option);
+                                });
+                                subCategorySelect.disabled = false;
+                            } else {
+                                subCategorySelect.disabled = true;
+                                // optional: showToast('No subcategories found', 'error');
+                            }
+                        })
+                        .catch(() => {
+                            subCategorySelect.disabled = true;
+                            // optional: showToast('Error loading subcategories', 'error');
+                        });
+                });
             });
-        });
         </script>
 
     @endpush

@@ -201,7 +201,7 @@
             </svg>
             <div class="w-full js-anim-welcome">
                 <!-- Main Content Section -->
-                <div class="max-w-7xl mx-auto py-10 md:py-5 px-4 md:px-8 lg:px-12">
+                <div class="max-w-7xl mx-auto py-10 md:py-5 px-4 md:px-8 lg:buttonpx-12">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-16 justify-center">
                         <!-- Company Info & Badges -->
                         <div class="col-span-1 text-center md:text-left ani-fade" style="--ani-delay:720ms">
