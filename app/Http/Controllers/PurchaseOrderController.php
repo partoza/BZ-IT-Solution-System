@@ -165,8 +165,18 @@ class PurchaseOrderController extends Controller
             $search = $request->search;
             $productsQuery->where(function ($q) use ($search) {
                 $q->where('product_name', 'like', "%{$search}%")
-                ->orWhere('sku', 'like', "%{$search}%");
+                  ->orWhere('sku', 'like', "%{$search}%")
+                  // also allow searching by brand or category names
+                  ->orWhereHas('brand', fn($b) => $b->where('name', 'like', "%{$search}%"))
+                  ->orWhereHas('category', fn($c) => $c->where('name', 'like', "%{$search}%"));
             });
+        }
+
+        // Discount filter: when 'discounted' param is truthy (e.g., 1), only include products
+        // that have a discounted_price set and greater than zero.
+        if ($request->filled('discounted') && $request->boolean('discounted')) {
+            $productsQuery->whereNotNull('discounted_price')
+                          ->where('discounted_price', '>', 0);
         }
 
         $products = $productsQuery->get()->map(function ($product) {

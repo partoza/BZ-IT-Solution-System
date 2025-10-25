@@ -2,9 +2,9 @@
 
 @section('pages-content')
     <div class="overflow-hidden">
-        <div class="flex items-center justify-between mb-4 bg-white rounded-xl shadow-sm px-6 py-3">
+        <div class="flex items-center justify-between bg-white rounded-xl shadow-sm px-6 py-3">
             <div>
-                <h2 class="text-xl font-bold text-gray-800 whitespace-nowrap">Add New Product</h2>
+                <h2 class="text-xl font-bold text-primary whitespace-nowrap">Add New Product</h2>
                 <p class="text-sm text-gray-600 mt-1">Please fill up all the required fields to add new product.</p>
             </div>
             <div class="flex items-center gap-3">
@@ -32,7 +32,7 @@
         <form id="productForm" novalidate enctype="multipart/form-data" method="POST" action="#" class="global-focus">
             @csrf
             <div class="mt-4">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
                     <div class="lg:col-span-2 bg-white py-4 px-6 rounded-lg shadow-sm">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Product Information</h3>
                         <div class="mb-3">
@@ -108,7 +108,7 @@
                         </div>
                     </div>
 
-                    <div class="flex flex-col space-y-4">
+                    <div class="flex flex-col space-y-3">
                         <!--Pricing Panel-->
                         <!-- <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                                                                         <h3 class="font-semibold text-gray-800 mb-3">Pricing</h3>
@@ -129,7 +129,7 @@
                                                                     </div> -->
 
                         <!-- Classification Panel -->
-                        <div class="bg-white rounded-lg shadow-sm p-6 shadow-sm">
+                        <div class="bg-white rounded-lg shadow-sm p-6 py-4 addEventListener">
                             <h3 class="text-lg font-semibold text-gray-800">Classification</h3>
                             <div class="space-y-3">
                                 <div>
@@ -204,7 +204,7 @@
                                 </div>
                             </div>
 
-                            <div id="warrantyPanel" class="space-y-3 mb-4">
+                            <div id="warrantyPanel" class="space-y-3">
                                 <label class="block text-sm text-gray-600">Warranty</label>
                                 <select name="warranty_period"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white">
@@ -296,7 +296,6 @@
                         checkField(basePrice);
                         checkField(brandSelect);
                         checkField(mainCategory);
-                        checkField(subCategory);
 
                         const missingImage = !(imageInput && imageInput.files && imageInput.files[0]);
 
@@ -331,10 +330,7 @@
                                 else mainCategoryError.classList.add('hidden');
                             }
 
-                            if (subCategory && subCategoryError) {
-                                if (!subCategory.value) subCategoryError.classList.remove('hidden');
-                                else subCategoryError.classList.add('hidden');
-                            }
+                            // Subcategory is optional now; do not show a required inline error on the client.
 
                             // Show/hide image-specific helper
                             if (missingImage && productImageError) productImageError.classList.remove('hidden');
@@ -372,7 +368,8 @@
                                 if (error.response && error.response.data.errors) {
                                     const errors = error.response.data.errors;
                                     const keys = Object.keys(errors || {});
-                                    const requiredKeys = ['product_name', 'base_price', 'sub_category_id', 'brand_id', 'category_id'];
+                                    // sub_category_id is intentionally NOT considered required on the client
+                                    const requiredKeys = ['product_name', 'base_price', 'brand_id', 'category_id'];
                                     const hasRequiredMissing = keys.some(k => requiredKeys.includes(k));
 
                                     // If server says required fields missing, show consolidated toast and show inline errors where possible
@@ -574,7 +571,7 @@
                             const basePriceError = document.getElementById('basePriceError');
                             const brandError = document.getElementById('brandError');
                             const mainCategoryError = document.getElementById('mainCategoryError');
-                            const subCategoryError = document.getElementById('subCategoryError');
+                            // const subCategoryError = document.getElementById('subCategoryError');
                             if (productNameError) productNameError.classList.add('hidden');
                             if (basePriceError) basePriceError.classList.add('hidden');
                             if (brandError) brandError.classList.add('hidden');
