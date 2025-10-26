@@ -10,6 +10,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\POSController;
+use App\Http\Controllers\CustomerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -161,7 +162,9 @@ Route::middleware(['auth:employee'])->group(function () {
         // POS
         Route::get('dashboard/pos', [POSController::class, 'index'])
             ->name('pos.index');
-
+        Route::post('/pos/checkout', [PosController::class, 'checkout'])->name('pos.checkout');
+        Route::post('/pos/validate-serials', [POSController::class, 'validateSerials'])
+            ->name('pos.validate-serials');
 
         // Purchase Orders
         Route::get('history/purchase-order', [PurchaseOrderController::class, 'index'])
@@ -178,6 +181,12 @@ Route::middleware(['auth:employee'])->group(function () {
         Route::get('/purchase-orders/{po}/items', [PurchaseOrderController::class, 'getItems']);
 
         Route::get('/pos/inventory', [App\Http\Controllers\POSController::class, 'getInventory'])->name('pos.inventory');
+
+        //customer
+        Route::get('/customers/search', [CustomerController::class, 'search'])->name('customers.search');
+        Route::post('/customers/store/ajax', [CustomerController::class, 'storeAjax'])->name('customers.store.ajax');
+
+
     });
 
 });

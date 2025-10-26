@@ -160,16 +160,23 @@ class PurchaseOrderController extends Controller
             $productsQuery->where('brand_id', $request->brand_id);
         }
 
-        // Search filter (product name or SKU)
+        // Search filter
         if ($request->filled('search')) {
             $search = $request->search;
             $productsQuery->where(function ($q) use ($search) {
                 $q->where('product_name', 'like', "%{$search}%")
-                  ->orWhere('product_name', 'like', "%{$search}%")
+                  ->orWhere('sku', 'like', "%{$search}%")
                   // also allow searching by brand or category names
                   ->orWhereHas('brand', fn($b) => $b->where('name', 'like', "%{$search}%"))
                   ->orWhereHas('category', fn($c) => $c->where('name', 'like', "%{$search}%"));
             });
+        }
+
+        // Discount filter: when 'discounted' param is truthy (e.g., 1), only include products
+        // that have a discounted_price set and greater than zero.
+        if ($request->filled('discounted') && $request->boolean('discounted')) {
+            $productsQuery->whereNotNull('discounted_price')
+                          ->where('discounted_price', '>', 0);
         }
 
         // Discount filter: when 'discounted' param is truthy (e.g., 1), only include products
@@ -341,24 +348,28 @@ class PurchaseOrderController extends Controller
 
         $query = $po->items()->with('product');
 
-        if($includeInventory) {
+        if ($includeInventory) {
             $query->with('inventoryItems');
         }
 
-        $items = $query->get()->map(function($item) use ($includeInventory) {
+        $items = $query->get()->map(function ($item) use ($includeInventory) {
+            $product = $item->product;
+
             $data = [
                 'id' => $item->id,
                 'product_id' => $item->product_id,
-                'product_name' => $item->product->product_name,
+                'product_name' => $product->product_name ?? 'Unnamed Product',
                 'quantity_ordered' => $item->quantity_ordered,
-                'unit_price' => $item->unit_price,
+                'unit_price' => (float) $item->unit_price,
+                // important: product-level boolean that the frontend will use
+                'track_serials' => (bool) ($product->track_serials ?? false),
             ];
 
-            if($includeInventory) {
-                $data['inventory_items'] = $item->inventoryItems->map(function($inv) {
+            if ($includeInventory) {
+                $data['inventory_items'] = $item->inventoryItems->map(function ($inv) {
                     return [
                         'id' => $inv->id,
-                        'serial_number' => $inv->serial_number ?? null
+                        'serial_number' => $inv->serial_number ?? null,
                     ];
                 })->toArray();
             }

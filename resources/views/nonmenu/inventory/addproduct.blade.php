@@ -214,6 +214,13 @@
                                     <option value="12">12 Months</option>
                                 </select>
                             </div>
+
+                            <div class="flex items-center gap-2">
+                                <input type="hidden" name="track_serials" value="0">
+                                <input type="checkbox" name="track_serials" id="trackSerials" value="1" checked>
+                                <label for="trackSerials" class="text-gray-700">Track serials for this product</label>
+                            </div>
+
                         </div>
                         <div class="mt-4">
                             <button type="submit"
@@ -279,7 +286,6 @@
                         const basePrice = productForm.querySelector('input[name="base_price"]');
                         const brandSelect = productForm.querySelector('select[name="brand_id"]');
                         const mainCategory = productForm.querySelector('select[name="category_id"]');
-                        const subCategory = productForm.querySelector('select[name="sub_category_id"]');
                         const imageInput = productForm.querySelector('#productImageInput');
                         const productImageError = document.getElementById('productImageError');
 
@@ -310,7 +316,6 @@
                             const basePriceError = document.getElementById('basePriceError');
                             const brandError = document.getElementById('brandError');
                             const mainCategoryError = document.getElementById('mainCategoryError');
-                            const subCategoryError = document.getElementById('subCategoryError');
 
                             if (productName && productNameError) {
                                 if (!productName.value || !productName.value.toString().trim()) productNameError.classList.remove('hidden');
@@ -382,13 +387,11 @@
                                         const basePriceError = document.getElementById('basePriceError');
                                         const brandError = document.getElementById('brandError');
                                         const mainCategoryError = document.getElementById('mainCategoryError');
-                                        const subCategoryError = document.getElementById('subCategoryError');
 
                                         if (errors.product_name && productNameError) productNameError.classList.remove('hidden');
                                         if (errors.base_price && basePriceError) basePriceError.classList.remove('hidden');
                                         if (errors.brand_id && brandError) brandError.classList.remove('hidden');
                                         if (errors.category_id && mainCategoryError) mainCategoryError.classList.remove('hidden');
-                                        if (errors.sub_category_id && subCategoryError) subCategoryError.classList.remove('hidden');
                                     } else {
                                         Object.values(errors).forEach(errArray => {
                                             errArray.forEach(msg => showToast(msg, 'error'));
@@ -517,7 +520,6 @@
                             if (basePriceError) basePriceError.classList.add('hidden');
                             if (brandError) brandError.classList.add('hidden');
                             if (mainCategoryError) mainCategoryError.classList.add('hidden');
-                            if (subCategoryError) subCategoryError.classList.add('hidden');
                         };
                         reader.readAsDataURL(this.files[0]);
                     }

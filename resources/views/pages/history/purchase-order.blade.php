@@ -234,6 +234,7 @@ document.addEventListener('DOMContentLoaded', function(){
     document.querySelectorAll('.receive-btn').forEach(btn => {
         btn.addEventListener('click', e => {
             currentPoId = btn.dataset.poId;
+
             axios.get(`/purchase-orders/${currentPoId}/items`)
                 .then(res => {
                     const items = res.data.items;
@@ -245,6 +246,7 @@ document.addEventListener('DOMContentLoaded', function(){
                         div.dataset.productId = item.product_id;
                         div.dataset.poItemId = item.id;
 
+                        // Base markup input
                         div.innerHTML = `
                             <div class="flex justify-between items-center mb-2">
                                 <span class="font-semibold">${item.product_name}</span>
@@ -254,33 +256,26 @@ document.addEventListener('DOMContentLoaded', function(){
                                 <label class="block mb-1 font-medium">Markup %:</label>
                                 <input type="number" min="0" value="20" class="border rounded px-2 py-1 w-24 markup-input">
                             </div>
-                            <div>
-                                <label class="inline-flex items-center">
-                                    <input type="checkbox" class="track-serial-checkbox mr-2"> Track individual serials
-                                </label>
-                                <div class="serial-inputs mt-2 hidden"></div>
-                            </div>
                         `;
 
-                        const checkbox = div.querySelector('.track-serial-checkbox');
-                        const serialInputsContainer = div.querySelector('.serial-inputs');
+                        // Serial inputs container
+                        const serialInputsContainer = document.createElement('div');
+                        serialInputsContainer.className = 'serial-inputs mt-2';
 
-                        checkbox.addEventListener('change', e => {
-                            serialInputsContainer.innerHTML = '';
-                            if (checkbox.checked) {
-                                for (let i = 0; i < item.quantity_ordered; i++) {
-                                    const input = document.createElement('input');
-                                    input.type = 'text';
-                                    input.placeholder = 'Serial #' + (i + 1);
-                                    input.className = 'border rounded px-2 py-1 w-48 mb-1 block';
-                                    serialInputsContainer.appendChild(input);
-                                }
-                                serialInputsContainer.classList.remove('hidden');
-                            } else {
-                                serialInputsContainer.classList.add('hidden');
+                        // Automatically render serial inputs if track_serials is true
+                        if (item.track_serials) {
+                            for (let i = 0; i < item.quantity_ordered; i++) {
+                                const input = document.createElement('input');
+                                input.type = 'text';
+                                input.placeholder = 'Serial #' + (i + 1);
+                                input.className = 'border rounded px-2 py-1 w-48 mb-1 block';
+                                serialInputsContainer.appendChild(input);
                             }
-                        });
+                        } else {
+                            serialInputsContainer.classList.add('hidden');
+                        }
 
+                        div.appendChild(serialInputsContainer);
                         receiveProductsContainer.appendChild(div);
                     });
 
@@ -307,21 +302,18 @@ document.addEventListener('DOMContentLoaded', function(){
             const productId = div.dataset.productId;
             const poItemId = div.dataset.poItemId;
             const qty = parseInt(div.querySelector('span:last-child').textContent.split(' ')[0]);
-            const trackSerial = div.querySelector('.track-serial-checkbox').checked;
             const markup = parseFloat(div.querySelector('.markup-input').value) || 20;
-            const serials = [];
 
-            if(trackSerial){
-                div.querySelectorAll('.serial-inputs input').forEach(inp => {
-                    if(inp.value.trim()) serials.push(inp.value.trim());
-                });
-            }
+            // Collect serials if inputs exist
+            const serials = [];
+            div.querySelectorAll('.serial-inputs input').forEach(inp => {
+                if(inp.value.trim()) serials.push(inp.value.trim());
+            });
 
             itemsPayload.push({
                 po_item_id: poItemId,
                 product_id: productId,
                 quantity: qty,
-                track_serial: trackSerial,
                 serials: serials,
                 markup: markup
             });

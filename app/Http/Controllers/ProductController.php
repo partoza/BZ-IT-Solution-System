@@ -181,6 +181,7 @@ class ProductController extends Controller
             'active_status' => 'boolean',
             'image' => 'nullable|image|max:2048',
             'warranty_period' => 'nullable|string',
+            'track_serials' => 'boolean', // ✅ add this
         ]);
 
         // Handle image upload
@@ -190,9 +191,6 @@ class ProductController extends Controller
 
         // Create product
         $product = Product::create($validated);
-
-        // Stock will only exist when P.O / inventory_items are created
-        // No default branch stock creation needed
 
         return response()->json(['message' => 'Product created successfully!']);
     }

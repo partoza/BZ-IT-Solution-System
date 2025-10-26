@@ -15,6 +15,7 @@ return new class extends Migration
             $table->bigIncrements('product_id');
             $table->string('product_name');
             $table->text('description')->nullable();
+            $table->boolean('track_serials')->default(false);
 
             // Relationships
             $table->unsignedBigInteger('category_id')->nullable();
