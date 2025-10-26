@@ -229,8 +229,8 @@
     <!-- Modal -->
     <div id="brandModal"
         class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 backdrop-blur-sm">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md mx-4 border border-gray-100">
-            <div class="flex items-center justify-between mb-6">
+        <div class="bg-white p-5 rounded-2xl shadow-2xl w-full max-w-md mx-4 border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-bold text-gray-800">Add New Brand</h2>
                 <button id="closeBrandModal" class="text-gray-400 hover:text-red-600 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,7 +240,9 @@
                 </button>
             </div>
 
-            <div class="space-y-4">
+            <hr class="mb-2">
+
+            <div class="space-y-4 mt-4">
                 <div class="global-focus">
                     <label for="brandName" class="block text-sm font-medium text-gray-700 mb-2">Brand Name</label>
                     <input type="text" id="brandName" placeholder="Enter brand name"
@@ -402,68 +404,7 @@
                 // ------------------------------
                 // Toast Notification
                 // ------------------------------
-                window.showToast = function (message, type = 'success') {
-                    let container = document.getElementById("toast-container");
-                    if (!container) {
-                        container = document.createElement("div");
-                        container.id = "toast-container";
-                        container.className = "fixed top-4 right-4 z-50 flex flex-col gap-2";
-                        document.body.appendChild(container);
-                    }
-
-                    const toast = document.createElement("div");
-                    toast.className = `px-4 py-3 rounded-xl shadow-lg text-white flex items-center justify-between transform transition-all duration-300 ease-in-out relative overflow-hidden ${type === 'success'
-                        ? 'bg-green-500 border-l-4 border-green-600'
-                        : 'bg-red-500 border-l-4 border-red-600'
-                        }`;
-
-                    const icon = type === 'success'
-                        ? `<svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>`
-                        : `<svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>`;
-
-                    toast.innerHTML = `
-                <div class="flex items-center">
-                    ${icon}
-                    <span class="font-medium">${message}</span>
-                </div>
-                <button class="ml-4 opacity-70 hover:opacity-100 transition-opacity" onclick="this.parentElement.remove()">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-                <div class="absolute bottom-0 left-0 right-0 h-1 bg-black/10">
-                    <div class="h-full ${type === 'success' ? 'bg-green-600' : 'bg-red-600'} progress-bar"></div>
-                </div>
-            `;
-
-                    // Add slide-in animation
-                    toast.style.transform = 'translateX(100%)';
-                    toast.style.opacity = '0';
-
-                    container.appendChild(toast);
-
-                    // Trigger animation
-                    requestAnimationFrame(() => {
-                        toast.style.transform = 'translateX(0)';
-                        toast.style.opacity = '1';
-                    });
-
-                    // Progress bar animation
-                    const progressBar = toast.querySelector('.progress-bar');
-                    progressBar.style.width = '100%';
-                    progressBar.style.transition = 'width 3s linear';
-
-                    setTimeout(() => {
-                        progressBar.style.width = '0%';
-                    }, 10);
-
-                    // Auto remove after delay
-                    setTimeout(() => {
-                        toast.style.transform = 'translateX(100%)';
-                        toast.style.opacity = '0';
-                        setTimeout(() => toast.remove(), 300);
-                    }, 3000);
-                };
+                // Use the global `showToast(message, type)` provided by resources/js/utils/toast.js
 
                 // ------------------------------
                 // Brand Modal Handling

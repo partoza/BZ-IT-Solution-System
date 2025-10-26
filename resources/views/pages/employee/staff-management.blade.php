@@ -481,33 +481,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
-    function showToast(message, type = 'success') {
-        // Create toast container if not exists
-        let toastContainer = document.getElementById("toast-container");
-        if (!toastContainer) {
-            toastContainer = document.createElement("div");
-            toastContainer.id = "toast-container";
-            toastContainer.className = "fixed top-20 left-1/2 transform -translate-x-1/2 z-50";
-            document.body.appendChild(toastContainer);
-        }
-
-        // Create toast element
-        const toast = document.createElement("div");
-        toast.className = `mb-2 px-4 py-3 rounded shadow-lg text-white flex items-center justify-between ${
-            type === 'success' ? 'bg-green-500' : 'bg-red-500'
-        }`;
-        toast.innerHTML = `
-            <span>${message}</span>
-            <button class="ml-4 font-bold" onclick="this.parentElement.remove()">×</button>
-        `;
-
-        toastContainer.appendChild(toast);
-
-        // Auto remove after 1.5 seconds
-        setTimeout(() => {
-            toast.remove();
-        }, 1000);
-    }
+    // Use the global `showToast(message, type)` provided by resources/js/utils/toast.js
 
     const togglePassword = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('password');

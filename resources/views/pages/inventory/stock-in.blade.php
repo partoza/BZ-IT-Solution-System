@@ -13,8 +13,7 @@
         <input type="hidden" name="items_json" id="items_json" value="">
 
         <div class="flex overflow-hidden flex-col gap-6">
-            <!-- Toast Container -->
-            <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2 max-w-sm"></div>
+            <!-- toast container is provided globally in layout -->
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 h-auto lg:h-[calc(100vh-8rem)]">
                 <!-- 🟩 LEFT COLUMN: Supplier Info + Product Catalog -->
@@ -228,7 +227,7 @@
     <div id="product-modal"
         class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 backdrop-blur-sm">
         <div class="bg-white p-5 rounded-2xl shadow-2xl w-full max-w-md mx-2 border border-gray-100">
-            <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-semibold text-gray-800" id="modal-product-name">Product Name</h2>
                 <button id="modal-close" class="text-gray-400 hover:text-red-600 transition-colors" type="button">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,18 +240,18 @@
             <hr class="mb-2">
 
 
-            <div class="space-y-4">
+            <div class="space-y-4 mt-4">
                 <div class="global-focus">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
                     <input type="number" id="modal-quantity" value="1" min="1"
-                        class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50"
+                        class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50"
                         placeholder="Enter Quantity">
                 </div>
 
                 <div class="global-focus">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Cost Price</label>
                     <input type="number" id="modal-cost-price" value="0" min="0" step="0.01"
-                        class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50"
+                        class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50"
                         placeholder="Enter Cost">
                 </div>
 
@@ -274,7 +273,7 @@
     <div id="create-confirm-modal"
         class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 backdrop-blur-sm">
         <div class="bg-white p-5 rounded-2xl shadow-2xl w-full max-w-md mx-4 border border-gray-100">
-            <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold">Create Purchase Order</h3>
                 <button id="confirm-close" class="text-gray-400 hover:text-red-600 transition-colors"
                     type="button">
@@ -287,12 +286,12 @@
 
             <hr class="mb-2">
 
-            <p class="text-sm mt-7 mb-5 font-medium ">Are you sure you want to create this purchase order? <br> <span class="text-xs font-regular">This will submit the
+            <p class="text-md mt-4 mb-5 font-medium">Are you sure you want to create this purchase order? <br> <span class="text-xs font-regular">This will submit the
                 current items to the selected supplier. </span></p>
 
             <div class="flex gap-3 pt-2">
                 <button id="confirm-cancel" type="button"
-                    class="flex-1 px-2 py-2 border border-gray-300 text-gray-700 hover:bg-gray-300 hover:text-black rounded-xl font-medium transition-colors duration-200">
+                    class="flex-1 px-3 py-2 border border-gray-300 text-gray-700 hover:bg-gray-300 hover:text-black rounded-xl font-medium transition-colors duration-200">
                     Cancel
                 </button>
                 <button id="confirm-create" type="button"
@@ -404,26 +403,7 @@
                 // ---------------------------
                 // Helpers
                 // ---------------------------
-                function showToast(message, type = 'info') {
-                    const toastContainer = document.getElementById('toast-container');
-                    const toast = document.createElement('div');
-                    const typeStyles = {
-                        success: 'bg-green-500 text-white',
-                        error: 'bg-red-500 text-white',
-                        warning: 'bg-yellow-500 text-white',
-                        info: 'bg-blue-500 text-white'
-                    };
-                    toast.className = `rounded-lg p-4 shadow-lg transform transition-all duration-300 ${typeStyles[type]}`;
-                    toast.innerHTML = `
-                                                                            <div class="flex items-center justify-between">
-                                                                                <span class="text-sm font-medium">${message}</span>
-                                                                                <button class="ml-4 text-white hover:text-gray-200">&times;</button>
-                                                                            </div>
-                                                                        `;
-                    toastContainer.appendChild(toast);
-                    setTimeout(() => { toast.remove(); }, 4000);
-                    toast.querySelector('button').addEventListener('click', () => toast.remove());
-                }
+                // Global showToast is provided by resources/js/utils/toast.js and attached to window.
 
                 function fmt(v) { return '₱' + Number(v || 0).toFixed(2); }
 
@@ -748,7 +728,7 @@
 
                     modal.classList.add('hidden');
                     updatePODisplay();
-                    showToast(`${currentProduct.name} added to PO`, 'success');
+                    showToast(`${currentProduct.name} added to order`, 'success');
                 });
 
                 shippingCostInput.addEventListener('input', updatePOTotals);
@@ -759,7 +739,7 @@
                 createPOButton.addEventListener('click', function (ev) {
                     ev.preventDefault();
                     if (poItems.length === 0) {
-                        showToast('Add items to PO first', 'error');
+                        showToast('Add items to purchase order first', 'error');
                         return;
                     }
                     // show confirmation modal
@@ -848,7 +828,7 @@
                                     else window.location.reload();
                                 }, 900);
                             } else {
-                                showToast(data.message || 'Failed to create PO', 'error');
+                                showToast(data.message || 'Failed to create order', 'error');
                             }
                         })
                         .catch(error => {
@@ -859,7 +839,7 @@
                             } else if (error.response && error.response.data && error.response.data.message) {
                                 showToast(error.response.data.message, 'error');
                             } else {
-                                showToast('Something went wrong creating PO', 'error');
+                                showToast('Something went wrong creating order', 'error');
                             }
                         });
                 }

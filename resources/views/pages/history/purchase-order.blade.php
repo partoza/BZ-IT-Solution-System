@@ -216,31 +216,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-    // Dropdown toggle
-    function showToast(message, type = 'success') {
-        const colors = {
-            success: 'bg-green-500',
-            error: 'bg-red-500',
-            info: 'bg-blue-500',
-            warning: 'bg-yellow-500'
-        };
-
-        const toast = document.createElement('div');
-        toast.textContent = message;
-        toast.className = `fixed top-5 right-5 text-white px-4 py-2 rounded shadow-lg ${colors[type] || colors.info}`;
-        toast.style.zIndex = 9999;
-        toast.style.opacity = 0;
-        toast.style.transition = 'opacity 0.3s';
-
-        document.body.appendChild(toast);
-
-        requestAnimationFrame(() => toast.style.opacity = 1);
-
-        setTimeout(() => {
-            toast.style.opacity = 0;
-            toast.addEventListener('transitionend', () => toast.remove());
-        }, 3000);
-    }
+    // Use the global `showToast(message, type)` provided by resources/js/utils/toast.js
 
     document.querySelectorAll('[id^="options-menu-"]').forEach(btn => {
         btn.addEventListener('click', e => {

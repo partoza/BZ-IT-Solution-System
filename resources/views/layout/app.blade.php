@@ -10,6 +10,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
   <!-- Vite Assets -->
+  <!-- Small fallback: queue toast calls made before the JS bundle loads -->
+  <script>
+    (function(){
+      if (typeof window === 'undefined') return;
+      window.__toastQueue = window.__toastQueue || [];
+      if (!window.showToast) {
+        window.showToast = function(message, type, options){
+          window.__toastQueue.push({ message: message, type: type, options: options });
+        };
+      }
+    })();
+  </script>
   @vite(['resources/css/app.css', 'resources/js/app.js'])
 
   <!-- Favicon / Touch Icon -->
@@ -22,6 +34,8 @@
 
   <!-- Toastr -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+  <!-- jQuery is required by the toastr build used here -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
   {{-- Extra head content (optional) --}}
@@ -29,6 +43,9 @@
 </head>
 
 <body class="@yield('body-class', 'font-poppins bg-[#F5F5F5] text-gray-800')">
+  {{-- Toast container (partial) --}}
+  @include('partials.toast')
+
   {{-- Primary content yield for all pages --}}
   @yield('content')
 
