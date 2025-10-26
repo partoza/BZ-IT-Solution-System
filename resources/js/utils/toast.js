@@ -7,6 +7,13 @@ const defaultOptions = {
   timeOut: 4000,
 };
 
+// Track the currently visible toast (singleton) so we can ensure only one is
+// shown at a time. Clearing timers and removing any existing toast before
+// rendering a new one prevents duplicates and overlapping timers.
+let currentToastEl = null;
+let currentToastTimer = null;
+let currentProgressTimeout = null;
+let currentToastType = null;
 export function showToast(message, type = 'info', options = {}) {
   // Use our modern DOM toast UI by default. If callers specifically want the
   // legacy toastr build they can pass { useToastr: true } in options.
@@ -37,11 +44,58 @@ export function showToast(message, type = 'info', options = {}) {
     container.setAttribute('aria-atomic', 'true');
     document.body.appendChild(container);
   }
+  // If there's an existing toast of the same type, refresh it in-place by
+  // updating the message and restarting its timer/progress. Otherwise remove
+  // the existing toast so we only ever show one visible toast at a time.
+  if (currentToastEl) {
+    if (currentToastType === t) {
+      // refresh existing toast message and restart timers
+      const existingMsg = currentToastEl.querySelector('.toast-message');
+      const existingProgress = currentToastEl.querySelector('.toast-progress-inner');
+      if (existingMsg) existingMsg.textContent = message;
+      // reset progress bar to full width then animate to zero
+      if (existingProgress) {
+        try { clearTimeout(currentProgressTimeout); } catch (e) { /* ignore */ }
+        const timeout = (options && options.timeOut) || defaultOptions.timeOut;
+        // To avoid the "grow" animation when resetting we temporarily
+        // disable transitions, set the width to full, force a reflow, then
+        // enable a width transition and shrink to 0%.
+        try {
+          existingProgress.style.transition = 'none';
+          existingProgress.style.width = '100%';
+          // force reflow
+          // eslint-disable-next-line no-unused-expressions
+          existingProgress.offsetWidth;
+          // enable width transition for the shrink animation
+          existingProgress.style.transition = `width ${Math.max(300, timeout)}ms linear`;
+        } catch (e) { /* ignore */ }
+        currentProgressTimeout = setTimeout(() => { existingProgress.style.width = '0%'; }, 50);
+      }
+      // clear old timer and set a fresh one
+      try { clearTimeout(currentToastTimer); } catch (e) { /* ignore */ }
+      const timeoutRefresh = (options && options.timeOut) || defaultOptions.timeOut;
+      currentToastTimer = setTimeout(() => {
+        removeToast(currentToastEl);
+      }, timeoutRefresh);
+      return; // nothing more to do - we've refreshed the existing toast
+    }
+
+    // different type -> remove previous toast
+    try { clearTimeout(currentToastTimer); } catch (e) { /* ignore */ }
+    try { clearTimeout(currentProgressTimeout); } catch (e) { /* ignore */ }
+    removeToast(currentToastEl);
+    currentToastEl = null;
+    currentToastTimer = null;
+    currentProgressTimeout = null;
+    currentToastType = null;
+  }
 
   const toast = document.createElement('div');
   // make toast relative so we can absolutely position the close button at
-  // the top-right corner; use flex-col for two-row layout.
-  toast.className = 'relative bg-white border border-gray-100 shadow-sm rounded-lg pl-0 pr-2 py-2 flex flex-col transform transition-all duration-300 ease-out';
+  toast.className = 'relative bg-white border border-gray-100 shadow-lg rounded-lg pl-0 pr-2 py-2 flex flex-col transform transition-all duration-300 ease-out opacity-0 translate-y-2';
+  // ensure the toast accepts pointer events (in case a parent container uses
+  // pointer-events utilities)
+  toast.style.pointerEvents = 'auto';
   toast.setAttribute('role', 'status');
   toast.setAttribute('tabindex', '0');
 
@@ -70,7 +124,8 @@ export function showToast(message, type = 'info', options = {}) {
   // positioned close button
   body.className = 'flex-1 min-w-0 pr-8';
   const msg = document.createElement('div');
-  msg.className = 'text-sm text-gray-800';
+  // marker class so we can find and update the message when refreshing
+  msg.className = 'text-sm text-gray-800 toast-message';
   msg.textContent = message;
   body.appendChild(msg);
 
@@ -93,7 +148,8 @@ export function showToast(message, type = 'info', options = {}) {
   const progress = document.createElement('div');
   progress.className = 'h-1 w-full rounded-b-md overflow-hidden bg-gray-100';
   const progressInner = document.createElement('div');
-  progressInner.className = `${meta.bar} h-1 w-full transition-all ease-linear`;
+  // marker class to find it later when refreshing an existing toast
+  progressInner.className = `${meta.bar} h-1 w-full transition-all ease-linear toast-progress-inner`;
   progress.appendChild(progressInner);
   progressWrap.appendChild(progress);
 
@@ -114,17 +170,30 @@ export function showToast(message, type = 'info', options = {}) {
   // allow slightly longer transition to make progress smooth
   progressInner.style.transitionDuration = `${Math.max(300, timeout)}ms`;
   // trigger shrink after a tick
-  setTimeout(() => { progressInner.style.width = '0%'; }, 50);
+  currentProgressTimeout = setTimeout(() => { progressInner.style.width = '0%'; }, 50);
 
-  const timer = setTimeout(() => {
+  // Use module-level timer refs so subsequent toasts can clear older timers.
+  currentToastTimer = setTimeout(() => {
     removeToast(toast);
+    // clear refs when removed
+    if (currentToastEl === toast) currentToastEl = null;
+    currentToastTimer = null;
+    currentProgressTimeout = null;
   }, timeout);
 
   // Close handler
   closeBtn.addEventListener('click', () => {
-    clearTimeout(timer);
+    try { clearTimeout(currentToastTimer); } catch (e) { /* ignore */ }
+    try { clearTimeout(currentProgressTimeout); } catch (e) { /* ignore */ }
     removeToast(toast);
+    if (currentToastEl === toast) currentToastEl = null;
+    currentToastTimer = null;
+    currentProgressTimeout = null;
   });
+
+  // Track current toast so next showToast call can clear it first
+  currentToastEl = toast;
+  currentToastType = t;
 }
 
 function removeToast(el) {
@@ -132,6 +201,15 @@ function removeToast(el) {
   el.classList.add('opacity-0', 'translate-y-2');
   // allow animation to finish
   setTimeout(() => el.remove(), 300);
+  // if the removed element was the tracked current toast, clear refs
+  if (currentToastEl === el) {
+    currentToastEl = null;
+    try { clearTimeout(currentToastTimer); } catch (e) { /* ignore */ }
+    try { clearTimeout(currentProgressTimeout); } catch (e) { /* ignore */ }
+    currentToastTimer = null;
+    currentProgressTimeout = null;
+    currentToastType = null;
+  }
 }
 
 function getIconSvg(type, colorClass) {

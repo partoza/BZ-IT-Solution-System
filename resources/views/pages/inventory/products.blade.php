@@ -9,7 +9,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 gap-3 mb-3">
         <!-- Total Products Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
-            <div class="flex items-center gap-3 mb-2">
+            <div class="flex items-center gap-3 mb-1">
                 <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
                     <div class="w-8 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-center"
                         style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
@@ -54,7 +54,7 @@
 
         <!-- Active Products Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
-            <div class="flex items-center gap-3 mb-2">
+            <div class="flex items-center gap-3 mb-1">
                 <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
                     <div class="w-8 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-center"
                         style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
@@ -85,7 +85,7 @@
 
         <!-- Inactive Products Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
-            <div class="flex items-center gap-3 mb-2">
+            <div class="flex items-center gap-3 mb-1">
                 <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
                     <div class="w-8 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-center"
                         style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
@@ -116,7 +116,7 @@
 
         <!-- Low Stock Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
-            <div class="flex items-center gap-3 mb-2">
+            <div class="flex items-center gap-3 mb-1">
                 <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
                     <div class="w-8 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-center"
                         style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
@@ -134,9 +134,9 @@
                 <h3 class="text-2xl font-semibold text-gray-900">{{ $lowStock }}</h3>
                 <p class="text-xs text-gray-500 mt-1">Need Restock</p>
                 <div class="flex items-center gap-2 mt-2">
-                    <div class="relative group">
+                    <div class="relative inline-block group">
                         <div
-                            class="flex items-center {{ $lowStock > 0 ? 'text-orange-600' : 'text-green-600' }} text-xs cursor-default">
+                            class="flex items-center {{ $lowStock > 0 ? 'text-orange-600 bg-orange-600/10' : 'text-green-600 bg-primary/10' }} text-xs cursor-pointer px-2 py-1 rounded-lg">
                             <svg class="size-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 @if($lowStock > 0)
                                     <!-- Warning icon for low stock -->
@@ -184,23 +184,27 @@
 
                             <!-- Tooltip: list of products that need restock (positioned below icon) -->
                             <div
-                                class="absolute z-20 top-full mt-2 left-1/2 transform -translate-x-1/2 hidden group-hover:block group-focus:block w-64 bg-white border border-gray-200 rounded shadow-sm text-sm text-gray-700 p-3">
-                                <div class="font-medium mb-1 text-red-600">Products needing restock</div>
-                                <ul class="list-disc ml-4 max-h-44 overflow-auto">
+                                class="z-50 pointer-events-none opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-150 absolute top-full mt-3 left-1/2 transform -translate-x-1/2 w-60 bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-sm text-gray-700">
+                                <div class="font-medium text-red-600 mb-2">Products Needing Restock</div>
+                                <div class="space-y-2 max-h-44 overflow-auto">
                                     @forelse($tooltipProducts as $p)
                                         @php
                                             $name = $p->product_name ?? $p->name ?? $p->title ?? 'Unnamed Product';
                                             $stock = $p->stock_count ?? $p->stock ?? $p->quantity ?? 0;
                                         @endphp
-                                        @if($stock == 0)
-                                            <li class="truncate">{{ $name }} — Out of Stock</li>
-                                        @else
-                                            <li class="truncate">{{ $name }} — {{ $stock }} left</li>
-                                        @endif
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2 min-w-0">
+                                                <span class="w-2 h-2 rounded-full {{ $stock == 0 ? 'bg-red-400' : 'bg-yellow-400' }} inline-block"></span>
+                                                <span class="text-xs text-gray-600 truncate">{{ $name }}</span>
+                                            </div>
+                                            <span class="font-semibold text-gray-800 text-xs">
+                                                {{ $stock == 0 ? 'Out of Stock' : $stock . ' left' }}
+                                            </span>
+                                        </div>
                                     @empty
-                                        <li>No product details available.</li>
+                                        <div class="text-xs text-gray-600">No product details available.</div>
                                     @endforelse
-                                </ul>
+                                </div>
                             </div>
                         @endif
                     </div>

@@ -18,6 +18,9 @@ class PurchaseOrderController extends Controller
 {
     public function index(Request $request)
     {
+        $startOfWeek = \Carbon\Carbon::now()->startOfWeek();
+        $endOfWeek = \Carbon\Carbon::now()->endOfWeek();
+
         $branchId = auth()->guard('employee')->user()?->branch_id;
         $perPage = intval($request->query('per_page', 10));
 
@@ -30,18 +33,18 @@ class PurchaseOrderController extends Controller
         $suppliers = Supplier::orderBy('company_name')->get();
 
         // Base query with relationships
-        $query = PurchaseOrder::with(['supplier', 'items', 'creator']); 
+        $query = PurchaseOrder::with(['supplier', 'items', 'creator']);
 
         // Apply search filter (PO number, supplier, product, or creator)
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('po_number', 'like', "%{$search}%")
-                ->orWhereHas('supplier', fn($s) => $s->where('company_name', 'like', "%{$search}%"))
-                ->orWhereHas('items.product', fn($p) => $p->where('product_name', 'like', "%{$search}%"))
-                ->orWhereHas('items.inventoryItems', fn($inv) => $inv->where('serial_number', 'like', "%{$search}%"))
-                ->orWhereHas('creator', function ($creator) use ($search) {
-                    $creator->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
-                });
+                    ->orWhereHas('supplier', fn($s) => $s->where('company_name', 'like', "%{$search}%"))
+                    ->orWhereHas('items.product', fn($p) => $p->where('product_name', 'like', "%{$search}%"))
+                    ->orWhereHas('items.inventoryItems', fn($inv) => $inv->where('serial_number', 'like', "%{$search}%"))
+                    ->orWhereHas('creator', function ($creator) use ($search) {
+                        $creator->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
+                    });
             });
         }
 
@@ -57,18 +60,41 @@ class PurchaseOrderController extends Controller
 
         // Pagination & ordering
         $purchase_orders = $query->orderBy('order_date', 'desc')
-                                ->paginate($perPage)
-                                ->appends($request->query());
+            ->paginate($perPage)
+            ->appends($request->query());
 
         // Summary calculations
         $totalPOs = PurchaseOrder::count();
         $receivedPOs = PurchaseOrder::where('status', 'received')->count();
         $pendingPOs = PurchaseOrder::where('status', 'pending')->count();
         $partiallyReceivedPOs = PurchaseOrder::where('status', 'partial')->count();
+        $totalOrdersLast30Days = PurchaseOrder::where('status', 'received')
+            ->where('received_date', '>=', now()->subDays(30))
+            ->count();
+
+        //Weekly Activities
+        $pendingThisWeek = PurchaseOrder::where('status', 'pending')
+            ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            ->count();
+
+        $completedThisWeek = PurchaseOrder::where('status', 'received')
+            ->whereBetween('received_date', [$startOfWeek, $endOfWeek])
+            ->count();
+
+        $voidThisWeek = PurchaseOrder::where('status', 'void0')
+            ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            ->count();
 
         // Totals
         $totalPOsValue = \DB::table('purchase_order_items')
             ->selectRaw('SUM(unit_price * quantity_ordered) as total')
+            ->value('total');
+
+        $totalReceivedThisWeek = \DB::table('purchase_orders')
+            ->join('purchase_order_items', 'purchase_orders.id', '=', 'purchase_order_items.purchase_order_id')
+            ->where('purchase_orders.status', 'received')
+            ->whereBetween('purchase_orders.received_date', [$startOfWeek, $endOfWeek])
+            ->selectRaw('COALESCE(SUM(purchase_order_items.unit_price * purchase_order_items.quantity_ordered), 0) as total')
             ->value('total');
 
         $totalReceivedThisMonth = \DB::table('purchase_orders')
@@ -103,6 +129,10 @@ class PurchaseOrderController extends Controller
             ->sortByDesc('total_value')
             ->first();
 
+        // Supplier summary counts
+        $totalSuppliers = Supplier::count();
+     //   $totalActiveSuppliers = Supplier::where('status', 'active')->count();
+
         return view('pages.history.purchase-order', compact(
             'purchase_orders',
             'suppliers',
@@ -114,11 +144,18 @@ class PurchaseOrderController extends Controller
             'receivedPOs',
             'pendingPOs',
             'partiallyReceivedPOs',
+            'totalOrdersLast30Days',
             'totalPOsValue',
             'totalReceivedThisMonth',
             'pendingPOValue',
             'partialPOValue',
-            'topSupplier'
+            'topSupplier',
+            'pendingThisWeek',
+            'completedThisWeek',
+            'voidThisWeek',
+            'totalReceivedThisWeek',
+            'totalSuppliers',
+           // 'totalActiveSuppliers',
         ));
     }
 
@@ -140,9 +177,13 @@ class PurchaseOrderController extends Controller
         $brands = Brand::orderBy('name')->get();
 
         // Base query: all products
-        $productsQuery = Product::with(['category', 'brand', 'inventoryItems' => function ($q) use ($branchId) {
-            $q->where('branch_id', $branchId)->where('status', 'in_stock');
-        }]);
+        $productsQuery = Product::with([
+            'category',
+            'brand',
+            'inventoryItems' => function ($q) use ($branchId) {
+                $q->where('branch_id', $branchId)->where('status', 'in_stock');
+            }
+        ]);
 
         // Category filter
         if ($request->filled('category_id')) {
@@ -165,10 +206,10 @@ class PurchaseOrderController extends Controller
             $search = $request->search;
             $productsQuery->where(function ($q) use ($search) {
                 $q->where('product_name', 'like', "%{$search}%")
-                  ->orWhere('sku', 'like', "%{$search}%")
-                  // also allow searching by brand or category names
-                  ->orWhereHas('brand', fn($b) => $b->where('name', 'like', "%{$search}%"))
-                  ->orWhereHas('category', fn($c) => $c->where('name', 'like', "%{$search}%"));
+                    ->orWhere('product_name', 'like', "%{$search}%")
+                    // also allow searching by brand or category names
+                    ->orWhereHas('brand', fn($b) => $b->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('category', fn($c) => $c->where('name', 'like', "%{$search}%"));
             });
         }
 
@@ -176,32 +217,32 @@ class PurchaseOrderController extends Controller
         // that have a discounted_price set and greater than zero.
         if ($request->filled('discounted') && $request->boolean('discounted')) {
             $productsQuery->whereNotNull('discounted_price')
-                          ->where('discounted_price', '>', 0);
+                ->where('discounted_price', '>', 0);
         }
 
         // Discount filter: when 'discounted' param is truthy (e.g., 1), only include products
         // that have a discounted_price set and greater than zero.
         if ($request->filled('discounted') && $request->boolean('discounted')) {
             $productsQuery->whereNotNull('discounted_price')
-                          ->where('discounted_price', '>', 0);
+                ->where('discounted_price', '>', 0);
         }
 
         $products = $productsQuery->get()->map(function ($product) {
             $inventory = $product->inventoryItems;
 
             return [
-                'product_id'   => $product->product_id,
+                'product_id' => $product->product_id,
                 'product_name' => $product->product_name,
-                'description'  => $product->description ?? '',
-                'cost_price'   => $inventory->min('unit_price') ?? 0,
-                'base_price'   => (float) ($product->price ?? $inventory->min('unit_price') ?? 0),
-                'stock_count'  => $inventory->count(),
-                'image_url'    => $product->image_url ?? null,
-                'sku'          => $product->sku ?? null,
-                'brand'        => $product->brand->name ?? null,
-                'brand_id'     => $product->brand_id ?? null,
-                'category'     => $product->category->name ?? null,
-                'category_id'  => $product->category_id ?? null,
+                'description' => $product->description ?? '',
+                'cost_price' => $inventory->min('unit_price') ?? 0,
+                'base_price' => (float) ($product->price ?? $inventory->min('unit_price') ?? 0),
+                'stock_count' => $inventory->count(),
+                'image_url' => $product->image_url ?? null,
+                'sku' => $product->sku ?? null,
+                'brand' => $product->brand->name ?? null,
+                'brand_id' => $product->brand_id ?? null,
+                'category' => $product->category->name ?? null,
+                'category_id' => $product->category_id ?? null,
             ];
         });
 
@@ -212,11 +253,11 @@ class PurchaseOrderController extends Controller
 
         // Full page load
         return view('pages.inventory.stock-in', [
-            'suppliers'  => $suppliers,
+            'suppliers' => $suppliers,
             'categories' => $categories,
-            'brands'     => $brands,
-            'products'   => $products,
-            'branchId'   => $branchId,
+            'brands' => $brands,
+            'products' => $products,
+            'branchId' => $branchId,
         ]);
     }
 
@@ -226,10 +267,10 @@ class PurchaseOrderController extends Controller
     {
         $request->validate([
             'supplier_id' => 'required|exists:suppliers,id',
-            'branch_id'   => 'required|exists:branches,branch_id',
-            'products'    => 'required|array|min:1',
+            'branch_id' => 'required|exists:branches,branch_id',
+            'products' => 'required|array|min:1',
             'products.*.product_id' => 'required|exists:products,product_id',
-            'products.*.quantity'   => 'required|integer|min:1',
+            'products.*.quantity' => 'required|integer|min:1',
             'products.*.unit_price' => 'required|numeric|min:0',
         ]);
 
@@ -244,35 +285,35 @@ class PurchaseOrderController extends Controller
 
             // Create PO record (default pending)
             $po = PurchaseOrder::create([
-                'po_number'   => $poNumber,
+                'po_number' => $poNumber,
                 'supplier_id' => $supplier->id,
-                'status'      => 'pending', // default
-                'createdby_id'=> auth()->guard('employee')->user()?->employee_id ?? null,
+                'status' => 'pending', // default
+                'createdby_id' => auth()->guard('employee')->user()?->employee_id ?? null,
             ]);
 
             // Create PO items only
             foreach ($request->products as $item) {
                 PurchaseOrderItem::create([
                     'purchase_order_id' => $po->id,
-                    'product_id'        => $item['product_id'],
-                    'branch_id'         => $branch->branch_id,
-                    'quantity_ordered'  => $item['quantity'],
-                    'unit_price'        => $item['unit_price'],
+                    'product_id' => $item['product_id'],
+                    'branch_id' => $branch->branch_id,
+                    'quantity_ordered' => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
                 ]);
             }
 
             DB::commit();
 
             return response()->json([
-                'status'  => 'success',
+                'status' => 'success',
                 'message' => "Purchase Order $poNumber created successfully!",
-                'po_id'   => $po->id,
+                'po_id' => $po->id,
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
-                'status'  => 'error',
+                'status' => 'error',
                 'message' => $e->getMessage(),
             ], 500);
         }
@@ -295,7 +336,8 @@ class PurchaseOrderController extends Controller
         foreach ($data['items'] as $itemData) {
             $poItemId = $itemData['po_item_id'];
             $poItem = PurchaseOrderItem::find($poItemId);
-            if(!$poItem) continue;
+            if (!$poItem)
+                continue;
 
             $qty = $itemData['quantity'];
             $serials = $itemData['serials'] ?? [];
@@ -306,8 +348,8 @@ class PurchaseOrderController extends Controller
             $unitPriceWithMarkup = $poItem->unit_price * (1 + ($markupPercent / 100));
 
             // Create inventory items
-            if(count($serials) > 0){
-                foreach($serials as $serial){
+            if (count($serials) > 0) {
+                foreach ($serials as $serial) {
                     \App\Models\InventoryItem::create([
                         'product_id' => $poItem->product_id,
                         'branch_id' => $branchId,
@@ -318,7 +360,7 @@ class PurchaseOrderController extends Controller
                     ]);
                 }
             } else {
-                for($i=0; $i<$qty; $i++){
+                for ($i = 0; $i < $qty; $i++) {
                     \App\Models\InventoryItem::create([
                         'product_id' => $poItem->product_id,
                         'branch_id' => $branchId,
@@ -340,7 +382,7 @@ class PurchaseOrderController extends Controller
             'message' => 'Purchase Order successfully received'
         ]);
     }
-    
+
     public function getItems(PurchaseOrder $po)
     {
         // Check if request wants inventory items
