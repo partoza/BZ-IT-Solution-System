@@ -45,14 +45,21 @@
                     <div class="flex-1">
                         <div class="font-semibold text-lg text-gray-800">{{ $product['name'] }}</div>
                         <div class="text-sm text-gray-600 mt-1">Qty: {{ $product['quantity'] }}</div>
-                        <div class="text-blue-600 font-bold text-md mt-1 product-price">₱0.00</div>
+                        <div class="text-blue-600 font-bold text-md mt-1 product-price"
+                            data-price="{{ $product['price'] }}"
+                            data-quantity="{{ $product['quantity'] }}">
+                            ₱{{ $product['track_serial'] ? '0.00' : number_format($product['price'] * $product['quantity'], 2) }}
+                        </div>
 
                         <!-- Input Serial Button -->
-                        <button type="button"
-                            class="mt-2 text-sm px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition serial-btn"
-                            data-product-id="{{ $product['product_id'] }}">
-                            Input Serial
-                        </button>
+                        @if($product['track_serial'])
+                            <button type="button"
+                                class="mt-2 text-sm px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition serial-btn"
+                                data-product-id="{{ $product['product_id'] }}"
+                                data-quantity="{{ $product['quantity'] }}">
+                                Input Serial
+                            </button>
+                        @endif
                     </div>
                 </div>
             @empty
@@ -73,7 +80,7 @@
             <!-- Customer Details -->
             <div class="mb-6">
                 <h3 class="text-lg font-semibold text-gray-800 mb-3">Customer Details</h3>
-                <div class="flex gap-3 relative"> <!-- 👈 Add relative here -->
+                <div class="flex gap-3 relative"> 
                     <div class="flex-1 relative">
                         <input type="text" id="customerSearch" placeholder="Search customer..."
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg"
@@ -313,13 +320,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Open serial modal dynamically
     function openSerialModal(btn) {
         const productId = btn.dataset.productId;
-        const productQty = parseInt(btn.closest('div').querySelector('div.text-sm').textContent.replace('Qty: ', ''));
+        const productQty = parseInt(btn.dataset.quantity) || 1; // from data-attribute
         currentProductQty = productQty;
 
         serialProductId.value = productId;
         serialContainer.innerHTML = '';
 
-        // Prefill if button has existing serials
         const existingSerials = btn.dataset.serials ? JSON.parse(btn.dataset.serials) : [];
 
         for (let i = 0; i < productQty; i++) {
@@ -604,6 +610,18 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   })();
+
+  document.querySelectorAll('.product-price').forEach(priceNode => {
+        const container = priceNode.closest('div');
+        const btn = container.querySelector('.serial-btn');
+
+        // If no serial tracking, calculate subtotal immediately
+        if (!btn) {
+            const price = parseFloat(priceNode.dataset.price) || 0;
+            const qty = parseInt(priceNode.dataset.quantity) || 1;
+            priceNode.textContent = '₱' + (price * qty).toFixed(2);
+        }
+    });
 
 });
 </script>

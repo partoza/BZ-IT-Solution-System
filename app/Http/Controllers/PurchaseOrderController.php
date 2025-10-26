@@ -160,7 +160,7 @@ class PurchaseOrderController extends Controller
             $productsQuery->where('brand_id', $request->brand_id);
         }
 
-        // Search filter (product name or SKU)
+        // Search filter
         if ($request->filled('search')) {
             $search = $request->search;
             $productsQuery->where(function ($q) use ($search) {
@@ -170,6 +170,13 @@ class PurchaseOrderController extends Controller
                   ->orWhereHas('brand', fn($b) => $b->where('name', 'like', "%{$search}%"))
                   ->orWhereHas('category', fn($c) => $c->where('name', 'like', "%{$search}%"));
             });
+        }
+
+        // Discount filter: when 'discounted' param is truthy (e.g., 1), only include products
+        // that have a discounted_price set and greater than zero.
+        if ($request->filled('discounted') && $request->boolean('discounted')) {
+            $productsQuery->whereNotNull('discounted_price')
+                          ->where('discounted_price', '>', 0);
         }
 
         // Discount filter: when 'discounted' param is truthy (e.g., 1), only include products
