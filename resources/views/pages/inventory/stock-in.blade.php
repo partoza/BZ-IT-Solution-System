@@ -866,8 +866,7 @@
                                 poItems = [];
                                 updatePODisplay();
                                 setTimeout(() => {
-                                    if (data.redirect) window.location.href = data.redirect;
-                                    else window.location.reload();
+                                    window.location.href = '/history/purchase-order'; 
                                 }, 900);
                             } else {
                                 showToast(data.message || 'Failed to create order', 'error');

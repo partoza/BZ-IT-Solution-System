@@ -171,7 +171,7 @@ Route::middleware(['auth:employee'])->group(function () {
             ->name('pos.sales.index');
 
         // Purchase Orders
-        Route::get('history/purchase-order', [PurchaseOrderController::class, 'index'])
+        Route::get('/history/purchase-order', [PurchaseOrderController::class, 'index'])
             ->name('purchase-order.index');
         
         Route::get('inventory/stock-in', [PurchaseOrderController::class, 'create'])
