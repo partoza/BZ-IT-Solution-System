@@ -41,6 +41,10 @@
                                         </option>
                                     @endforeach
                                 </select>
+
+                                <div id="supplier-error" class="hidden text-sm text-red-600 mt-1" role="alert">
+                                    Please select supplier first
+                                </div>
                             </div>
 
                             <!-- Info Boxes (row 2) -->
@@ -275,8 +279,7 @@
         <div class="bg-white p-5 rounded-2xl shadow-2xl w-full max-w-md mx-4 border border-gray-100">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold">Create Purchase Order</h3>
-                <button id="confirm-close" class="text-gray-400 hover:text-red-600 transition-colors"
-                    type="button">
+                <button id="confirm-close" class="text-gray-400 hover:text-red-600 transition-colors" type="button">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
                         </path>
@@ -286,8 +289,9 @@
 
             <hr class="mb-2">
 
-            <p class="text-md mt-4 mb-5 font-medium">Are you sure you want to create this purchase order? <br> <span class="text-xs font-regular">This will submit the
-                current items to the selected supplier. </span></p>
+            <p class="text-md mt-4 mb-5 font-medium">Are you sure you want to create this purchase order? <br> <span
+                    class="text-xs font-regular">This will submit the
+                    current items to the selected supplier. </span></p>
 
             <div class="flex gap-3 pt-2">
                 <button id="confirm-cancel" type="button"
@@ -305,6 +309,36 @@
 
     @push('scripts')
         <script>
+            const supplierSelect = document.getElementById('supplier-select');
+            const supplierInfoBoxes = document.querySelectorAll('.supplier-info [data-field]');
+            const supplierErrorEl = document.getElementById('supplier-error');
+
+            supplierSelect.addEventListener('change', function () {
+                // hide inline error once user picks a supplier
+                if (this.value) supplierErrorEl.classList.add('hidden');
+                const supplierId = this.value;
+                if (!supplierId) {
+                    supplierInfoBoxes.forEach(box => { box.innerHTML = '<span class="text-gray-500">Select a supplier</span>'; });
+                    return;
+                }
+                supplierInfoBoxes.forEach(box => { box.innerHTML = '<span class="text-gray-500">Loading...</span>'; });
+                fetch(`/supplier/${supplierId}/details`)
+                    .then(response => { if (!response.ok) throw new Error('Supplier not found'); return response.json(); })
+                    .then(data => {
+                        supplierInfoBoxes.forEach(box => {
+                            const field = box.getAttribute('data-field');
+                            box.textContent = data[field] || 'N/A';
+                            box.classList.remove('text-gray-500');
+                        });
+                        //showToast(`Supplier ${data.company_name} selected`, 'success');
+                    })
+                    .catch(() => {
+                        supplierInfoBoxes.forEach(box => { box.innerHTML = '<span class="text-red-500">Error loading</span>'; });
+                        showToast('Error loading supplier details', 'error');
+                    });
+            });
+
+
             document.addEventListener('DOMContentLoaded', function () {
 
                 async function fetchProducts() {
@@ -447,17 +481,17 @@
                     poItemsContainer.innerHTML = '';
 
                     if (poItems.length === 0) {
-                        poItemsContainer.innerHTML = `
-                                                                                <div class="text-center py-8 text-gray-500">
-                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-12 text-gray-300 mx-auto mb-2" style="width:48px; height:48px;">
-                                                                  <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
-                                                                  <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
-                                                                </svg>
+                    poItemsContainer.innerHTML = `
+                            <div class="text-center py-8 text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-12 text-gray-300 mx-auto mb-2" style="width:48px; height:48px;">
+                <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
+                <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
+            </svg>
 
-                                                                                    <p class="font-medium">Purchase Order is Empty</p>
-                                                                                    <p class="text-xs">Add products from the catalog</p>
-                                                                                </div>
-                                                                            `;
+                                <p class="font-medium">Purchase Order is Empty</p>
+                                <p class="text-xs">Add products from the catalog</p>
+                            </div>
+                        `;
                         updatePOTotals();
                         return;
                     }
@@ -469,58 +503,58 @@
                         // Bulk (non-serial) row: qty + cost editable (no markup)
                         if (!item.serials) {
                             div.innerHTML = `
-                                                           <div class="flex justify-between items-center">
-                          <span class="font-medium text-md">${escapeHtml(item.name)}</span>
-                          <button class="remove-item" data-index="${itemIndex}" aria-label="Remove item">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                                 class="w-5 h-5 text-black hover:text-red-600 transition-colors duration-150">
-                              <path fill-rule="evenodd"
-                                    d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                          </button>
-                        </div>
+                                                                           <div class="flex justify-between items-center">
+                                          <span class="font-medium text-md">${escapeHtml(item.name)}</span>
+                                          <button class="remove-item" data-index="${itemIndex}" aria-label="Remove item">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                                 class="w-5 h-5 text-black hover:text-red-600 transition-colors duration-150">
+                                              <path fill-rule="evenodd"
+                                                    d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                          </button>
+                                        </div>
 
-                        <!-- Image + Inputs Column -->
-                        <div class="flex items-start gap-6">
-                          <!-- Product Image -->
-                          <div class="flex-shrink-0">
-                            <img src="${item.image || '/placeholder-image.jpg'}"
-                                 alt="${escapeHtml(item.name)}"
-                                 class="w-[110px] h-[110px] object-cover rounded-lg border">
-                          </div>
+                                        <!-- Image + Inputs Column -->
+                                        <div class="flex items-start gap-6">
+                                          <!-- Product Image -->
+                                          <div class="flex-shrink-0">
+                                            <img src="${item.image || '/placeholder-image.jpg'}"
+                                                 alt="${escapeHtml(item.name)}"
+                                                 class="w-[110px] h-[110px] object-cover rounded-lg border">
+                                          </div>
 
-                          <!-- Quantity and Cost stacked vertically -->
-                          <div class="flex flex-col flex-1 justify-between gap-1">
-                            <!-- Quantity -->
-                            <div class="flex flex-col">
-                              <label class="text-xs text-gray-500">Quantity</label>
-                              <input type="number"
-                                     class="po-qty w-full border rounded px-2 py-1 text-sm h-9"
-                                     min="1"s
-                                     placeholder="Enter Quantity"
-                                     value="${item.quantity}">
-                            </div>
+                                          <!-- Quantity and Cost stacked vertically -->
+                                          <div class="flex flex-col flex-1 justify-between gap-1">
+                                            <!-- Quantity -->
+                                            <div class="flex flex-col">
+                                              <label class="text-xs text-gray-500">Quantity</label>
+                                              <input type="number"
+                                                     class="po-qty w-full border rounded px-2 py-1 text-sm h-9"
+                                                     min="1"s
+                                                     placeholder="Enter Quantity"
+                                                     value="${item.quantity}">
+                                            </div>
 
-                            <!-- Cost -->
-                            <div class="flex flex-col">
-                              <label class="text-xs text-gray-500">Cost</label>
-                              <input type="number"
-                                     class="po-cost w-full border rounded px-2 py-1 text-sm h-9"
-                                     min="0"
-                                     step="0.01"
-                                     placeholder="Enter Cost"
-                                     value="${item.costPrice}">
-                            </div>
-                          </div>
-                        </div>
+                                            <!-- Cost -->
+                                            <div class="flex flex-col">
+                                              <label class="text-xs text-gray-500">Cost</label>
+                                              <input type="number"
+                                                     class="po-cost w-full border rounded px-2 py-1 text-sm h-9"
+                                                     min="0"
+                                                     step="0.01"
+                                                     placeholder="Enter Cost"
+                                                     value="${item.costPrice}">
+                                            </div>
+                                          </div>
+                                        </div>
 
-                        <!-- Total Cost -->
-                        <div class="mt-3 pt-3 border-t text-sm">
-                          Cost Total: ₱<span class="line-total">${(item.costPrice * item.quantity).toFixed(2)}</span>
-                        </div>
+                                        <!-- Total Cost -->
+                                        <div class="mt-3 pt-3 border-t text-sm">
+                                          Cost Total: ₱<span class="line-total">${(item.costPrice * item.quantity).toFixed(2)}</span>
+                                        </div>
 
-                                                        `;
+                                                                        `;
 
                             const qtyInput = div.querySelector('.po-qty');
                             const costInput = div.querySelector('.po-cost');
@@ -547,9 +581,9 @@
                         } else {
                             // Serial-tracked: each row shows serial input + unit cost. No per-serial markup input.
                             div.innerHTML = `<div class="flex justify-between items-center">
-                                                                                        <span class="font-semibold">${escapeHtml(item.name)}</span>
-                                                                                        <button class="remove-item text-black font-bold hover:text-red-600" data-index="${itemIndex}" aria-label="Remove item">&times;</button>
-                                                                                    </div>`;
+                                                                                                        <span class="font-semibold">${escapeHtml(item.name)}</span>
+                                                                                                        <button class="remove-item text-black font-bold hover:text-red-600" data-index="${itemIndex}" aria-label="Remove item">&times;</button>
+                                                                                                    </div>`;
 
                             const serialContainer = document.createElement('div');
                             serialContainer.className = 'flex flex-col gap-2 mt-2';
@@ -742,6 +776,14 @@
                         showToast('Add items to purchase order first', 'error');
                         return;
                     }
+
+                    const selectedSupplier = supplierSelect.value;
+                    if (!selectedSupplier) {
+                        showToast('Please select supplier', 'error');
+                        supplierErrorEl.classList.remove('hidden');
+                        supplierSelect.focus();
+                        return;
+                 }
                     // show confirmation modal
                     confirmModal.classList.remove('hidden');
                 });
