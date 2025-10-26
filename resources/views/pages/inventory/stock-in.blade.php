@@ -16,11 +16,11 @@
             <!-- Toast Container -->
             <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2 max-w-sm"></div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 h-auto lg:h-[calc(100vh-8rem)]">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 h-auto lg:h-[calc(100vh-8rem)]">
                 <!-- 🟩 LEFT COLUMN: Supplier Info + Product Catalog -->
                 <div class="lg:col-span-2 flex flex-col min-h-0">
                     <!-- Supplier Information -->
-                    <div class="bg-white rounded-xl shadow-sm p-6 py-4 mb-2 border border-gray-100">
+                    <div class="bg-white rounded-xl shadow-sm p-6 py-4 mb-3 border border-gray-100">
                         <div class="flex items-center justify-between mb-4 border-b pb-3">
                             <h2 class="text-lg font-semibold">Supplier Information</h2>
                         </div>
@@ -138,14 +138,14 @@
                         <div class="bg-gradient-to-r from-emerald-600 to-emerald-500 rounded-lg shadow-sm p-4 text-white">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <div class="text-sm">Purchase Order</div>
+                                    <div class="text-sm text-white font-medium">Purchase Order</div>
                                     <div class="text-xs" id="current-date">{{ now()->format('l, m/d/Y') }}</div>
                                 </div>
                                 @php
                                     $branch = auth()->guard('employee')->user()?->branch;
                                 @endphp
 
-                                <div class="text-sm font-semibold">
+                                <div class="text-sm font-medium">
                                     {{ $branch?->name ?? 'Unknown Branch' }}
                                 </div>
                             </div>
@@ -212,7 +212,7 @@
 
                         <div class="grid grid-cols-1 gap-3">
                             <button id="create-po" type="submit"
-                                class="py-3 bg-primary text-white rounded-lg font-medium flex items-center justify-center gap-2 hover:from-green-700 hover:to-green-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                class="py-3 bg-primary hover:bg-emerald-700 text-white rounded-lg font-medium flex items-center justify-center gap-2 hover:from-green-700 hover:to-green-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled>
                                 Purchase Order
                             </button>
@@ -225,41 +225,83 @@
 
 
     <!-- Modal -->
-    <div id="product-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
-            <h2 class="text-lg font-semibold mb-4" id="modal-product-name">Product Name</h2>
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
-                <input type="number" id="modal-quantity" value="1" min="1" class="w-full border rounded px-3 py-2">
+    <div id="product-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 backdrop-blur-sm">
+        <div class="bg-white p-5 rounded-2xl shadow-2xl w-full max-w-md mx-2 border border-gray-100">
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="text-xl font-semibold text-gray-800" id="modal-product-name">Product Name</h2>
+                <button id="modal-close" class="text-gray-400 hover:text-red-600 transition-colors" type="button">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
             </div>
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Cost Price</label>
-                <input type="number" id="modal-cost-price" value="0" min="0" step="0.01"
-                    class="w-full border rounded px-3 py-2">
-            </div>
-            <div class="flex justify-end gap-3">
-                <button id="modal-cancel" type="button"
-                    class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Cancel</button>
-                <button id="modal-add" type="button"
-                    class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Add to PO</button>
+
+            <hr class="mb-2">
+
+
+            <div class="space-y-4">
+                <div class="global-focus">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                    <input type="number" id="modal-quantity" value="1" min="1"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50"
+                        placeholder="Enter Quantity">
+                </div>
+
+                <div class="global-focus">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Cost Price</label>
+                    <input type="number" id="modal-cost-price" value="0" min="0" step="0.01"
+                        class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50"
+                        placeholder="Enter Cost">
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button id="modal-cancel" type="button"
+                        class="flex-1 px-3 py-2 border border-gray-300 text-gray-700 hover:bg-gray-300 hover:text-black rounded-xl font-medium transition-colors duration-200">
+                        Cancel
+                    </button>
+                    <button id="modal-add" type="button"
+                        class="flex-1 px-3 py-2 bg-primary hover:bg-emerald-700 text-white rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-200">
+                        Add to Order
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Create PO Confirmation Modal -->
     <div id="create-confirm-modal"
-        class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
-            <h3 class="text-lg font-semibold mb-3">Create Purchase Order</h3>
-            <p class="text-sm text-gray-600 mb-4">Are you sure you want to create this Purchase Order?</p>
+        class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 backdrop-blur-sm">
+        <div class="bg-white p-5 rounded-2xl shadow-2xl w-full max-w-md mx-4 border border-gray-100">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-lg font-semibold">Create Purchase Order</h3>
+                <button id="confirm-close" class="text-gray-400 hover:text-red-600 transition-colors"
+                    type="button">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
 
-            <div class="flex justify-end gap-2">
+            <hr class="mb-2">
+
+            <p class="text-sm mt-7 mb-5 font-medium ">Are you sure you want to create this purchase order? <br> <span class="text-xs font-regular">This will submit the
+                current items to the selected supplier. </span></p>
+
+            <div class="flex gap-3 pt-2">
                 <button id="confirm-cancel" type="button"
-                    class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Cancel</button>
+                    class="flex-1 px-2 py-2 border border-gray-300 text-gray-700 hover:bg-gray-300 hover:text-black rounded-xl font-medium transition-colors duration-200">
+                    Cancel
+                </button>
                 <button id="confirm-create" type="button"
-                    class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Confirm</button>
+                    class="flex-1 px-3 py-2 bg-primary hover:bg-emerald-700 text-white rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-200">
+                    Confirm
+                </button>
             </div>
         </div>
+    </div>
     </div>
 
     @push('scripts')
@@ -348,6 +390,7 @@
                 const modalQuantity = document.getElementById('modal-quantity');
                 const modalCostPrice = document.getElementById('modal-cost-price');
                 const modalCancel = document.getElementById('modal-cancel');
+                const modalClose = document.getElementById('modal-close');
                 const modalAdd = document.getElementById('modal-add');
 
                 // Confirmation modal elements (created above)
@@ -372,11 +415,11 @@
                     };
                     toast.className = `rounded-lg p-4 shadow-lg transform transition-all duration-300 ${typeStyles[type]}`;
                     toast.innerHTML = `
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm font-medium">${message}</span>
-                                <button class="ml-4 text-white hover:text-gray-200">&times;</button>
-                            </div>
-                        `;
+                                                                            <div class="flex items-center justify-between">
+                                                                                <span class="text-sm font-medium">${message}</span>
+                                                                                <button class="ml-4 text-white hover:text-gray-200">&times;</button>
+                                                                            </div>
+                                                                        `;
                     toastContainer.appendChild(toast);
                     setTimeout(() => { toast.remove(); }, 4000);
                     toast.querySelector('button').addEventListener('click', () => toast.remove());
@@ -425,66 +468,79 @@
 
                     if (poItems.length === 0) {
                         poItemsContainer.innerHTML = `
-                                <div class="text-center py-8 text-gray-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-12 text-gray-300 mx-auto mb-2" style="width:48px; height:48px;">
-                  <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
-                  <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
-                </svg>
+                                                                                <div class="text-center py-8 text-gray-500">
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-12 text-gray-300 mx-auto mb-2" style="width:48px; height:48px;">
+                                                                  <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
+                                                                  <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
+                                                                </svg>
 
-                                    <p class="font-medium">Purchase Order is Empty</p>
-                                    <p class="text-xs">Add products from the catalog</p>
-                                </div>
-                            `;
+                                                                                    <p class="font-medium">Purchase Order is Empty</p>
+                                                                                    <p class="text-xs">Add products from the catalog</p>
+                                                                                </div>
+                                                                            `;
                         updatePOTotals();
                         return;
                     }
 
                     poItems.forEach((item, itemIndex) => {
                         const div = document.createElement('div');
-                        div.className = 'po-item border rounded-lg p-3 flex flex-col gap-2 bg-white';
+                        div.className = 'po-item border rounded-lg p-3 px-5 flex flex-col gap-2 bg-white global-focus';
 
                         // Bulk (non-serial) row: qty + cost editable (no markup)
                         if (!item.serials) {
                             div.innerHTML = `
-                                   <div class="flex justify-between items-center mb-3">
-                                    <span class="font-semibold text-lg">${escapeHtml(item.name)}</span>
-                                    <button class="remove-item text-black font-bold text-xl hover:text-red-600" data-index="${itemIndex}" aria-label="Remove item"></button>
-                                </div>
-                                
-                                <div class="flex gap-4 items-center">
-                                    <!-- Image Section -->
-                                    <div class="flex-shrink-0">
-                                    <img src="${item.image || '/placeholder-image.jpg'}" 
-                                        alt="${escapeHtml(item.name)}" 
-                                        class="w-20 h-20 object-cover rounded-lg border">
-                                    </div>
-                                    
-                                    <!-- Qty and Cost Controls - Vertical Layout (aligned to image) -->
-                                    <div class="flex flex-col justify-between flex-grow h-20">
-                                    <div class="flex flex-col">
-                                        <label class="text-xs text-gray-500 mb-1">Quantity</label>
-                                        <input type="number" 
-                                            class="po-qty w-full border rounded px-2 py-1 text-sm h-9" 
-                                            min="1" 
-                                            value="${item.quantity}">
-                                    </div>
-                                    
-                                    <div class="flex flex-col">
-                                        <label class="text-xs text-gray-500 mb-1">Cost</label>
-                                        <input type="number" 
-                                            class="po-cost w-full border rounded px-2 py-1 text-sm h-9" 
-                                            min="0" 
-                                            step="0.01" 
-                                            value="${item.costPrice}">
-                                    </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Total Cost -->
-                                <div class="font-medium mt-3 pt-3 border-t">
-                                    Cost Total: ₱<span class="line-total">${(item.costPrice * item.quantity).toFixed(2)}</span>
-                                </div>
-                                `;
+                                                           <div class="flex justify-between items-center">
+                          <span class="font-medium text-md">${escapeHtml(item.name)}</span>
+                          <button class="remove-item" data-index="${itemIndex}" aria-label="Remove item">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                 class="w-5 h-5 text-black hover:text-red-600 transition-colors duration-150">
+                              <path fill-rule="evenodd"
+                                    d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                          </button>
+                        </div>
+
+                        <!-- Image + Inputs Column -->
+                        <div class="flex items-start gap-6">
+                          <!-- Product Image -->
+                          <div class="flex-shrink-0">
+                            <img src="${item.image || '/placeholder-image.jpg'}"
+                                 alt="${escapeHtml(item.name)}"
+                                 class="w-[110px] h-[110px] object-cover rounded-lg border">
+                          </div>
+
+                          <!-- Quantity and Cost stacked vertically -->
+                          <div class="flex flex-col flex-1 justify-between gap-1">
+                            <!-- Quantity -->
+                            <div class="flex flex-col">
+                              <label class="text-xs text-gray-500">Quantity</label>
+                              <input type="number"
+                                     class="po-qty w-full border rounded px-2 py-1 text-sm h-9"
+                                     min="1"s
+                                     placeholder="Enter Quantity"
+                                     value="${item.quantity}">
+                            </div>
+
+                            <!-- Cost -->
+                            <div class="flex flex-col">
+                              <label class="text-xs text-gray-500">Cost</label>
+                              <input type="number"
+                                     class="po-cost w-full border rounded px-2 py-1 text-sm h-9"
+                                     min="0"
+                                     step="0.01"
+                                     placeholder="Enter Cost"
+                                     value="${item.costPrice}">
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Total Cost -->
+                        <div class="mt-3 pt-3 border-t text-sm">
+                          Cost Total: ₱<span class="line-total">${(item.costPrice * item.quantity).toFixed(2)}</span>
+                        </div>
+
+                                                        `;
 
                             const qtyInput = div.querySelector('.po-qty');
                             const costInput = div.querySelector('.po-cost');
@@ -511,9 +567,9 @@
                         } else {
                             // Serial-tracked: each row shows serial input + unit cost. No per-serial markup input.
                             div.innerHTML = `<div class="flex justify-between items-center">
-                                        <span class="font-semibold">${escapeHtml(item.name)}</span>
-                                        <button class="remove-item text-black font-bold hover:text-red-600" data-index="${itemIndex}" aria-label="Remove item">&times;</button>
-                                    </div>`;
+                                                                                        <span class="font-semibold">${escapeHtml(item.name)}</span>
+                                                                                        <button class="remove-item text-black font-bold hover:text-red-600" data-index="${itemIndex}" aria-label="Remove item">&times;</button>
+                                                                                    </div>`;
 
                             const serialContainer = document.createElement('div');
                             serialContainer.className = 'flex flex-col gap-2 mt-2';
@@ -662,6 +718,8 @@
                 });
 
                 modalCancel.addEventListener('click', () => modal.classList.add('hidden'));
+                modalClose.addEventListener('click', () => modal.classList.add('hidden'));
+
 
                 // ---------------------------
                 // Add to PO from modal (no markup handling here)
@@ -808,12 +866,17 @@
 
                 const confirmCreateBtn = document.getElementById('confirm-create');
                 const confirmCancelBtn = document.getElementById('confirm-cancel');
+                const confirmCloseConfirmation = document.getElementById('confirm-close');
                 // Wire confirm modal buttons
                 confirmCreateBtn.addEventListener('click', () => {
                     sendCreatePO(false, 0); // always false since no markup
                 });
 
                 confirmCancelBtn.addEventListener('click', () => {
+                    confirmModal.classList.add('hidden');
+                });
+
+                confirmCloseConfirmation.addEventListener('click', () => {
                     confirmModal.classList.add('hidden');
                 });
 
