@@ -34,6 +34,7 @@ class Product extends Model
         'warranty_period',
         'createdby_id',
         'updatedby_id',
+        'track_serials', // ✅ add this
     ];
 
     /**
@@ -41,6 +42,7 @@ class Product extends Model
      */
     protected $casts = [
         'active_status' => 'boolean',
+        'track_serials' => 'boolean', // ✅ add this
         'base_price' => 'decimal:2',
         'discounted_price' => 'decimal:2',
     ];

@@ -11,15 +11,13 @@ class Customer extends Model
 {
     use HasFactory;
 
-    protected $table = 'customers'; // create this table via migration (example below)
+    protected $table = 'customers';
 
     protected $fillable = [
-        'company_name',
-        'contact_person',
+        'name',
         'email',
-        'phone_number',
+        'phone',
         'address',
-        'notes',
         'createdby_id',
         'updatedby_id',
     ];

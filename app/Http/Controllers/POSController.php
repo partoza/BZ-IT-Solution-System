@@ -3,9 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+
 use App\Models\InventoryItem;
 use App\Models\Category;
 use App\Models\Brand;
+use App\Models\Customer;
 
 class POSController extends Controller
 {
@@ -57,7 +62,7 @@ class POSController extends Controller
             });
         }
 
-        // Search by product_name or SKU (if you have sku on products)
+        // Search by product_name
         if ($request->filled('search')) {
             $search = $request->search;
             $inventoryQuery->whereHas('product', function ($q) use ($search) {
@@ -86,8 +91,8 @@ class POSController extends Controller
                     'product_id'  => $product->product_id,
                     'name'        => $product->product_name,
                     'description' => $product->description ?? '',
-                    'price'       => (float) $displayPrice,           // unit_price from inventory_items
-                    'stock_count' => $items->count(),                 // number of inventory units available
+                    'price'       => (float) $displayPrice,          
+                    'stock_count' => $items->count(),                 
                     'image'       => $product->image ?? null,
                     'brand'       => $product->brand->name ?? null,
                     'brand_id'    => $product->brand_id ?? null,
@@ -98,7 +103,7 @@ class POSController extends Controller
             // preserve collection indexing for blade loops (optional)
             ->values();
 
-        // AJAX live filtering: return only the product grid partial
+        // AJAX live filtering:
         if ($request->ajax()) {
             return view('partials.product-grid', ['products' => $products])->render();
         }
@@ -110,4 +115,135 @@ class POSController extends Controller
             'products'   => $products,
         ]);
     }
+
+    public function checkout(Request $request)
+    {
+        try {
+            // For form-based submission
+            $rawCart = $request->input('cartData');
+            $cartItems = $rawCart ? json_decode($rawCart, true) : $request->input('cart', []);
+
+            $productIds = collect($cartItems)->pluck('id')->toArray();
+
+            if (empty($productIds)) {
+                Log::warning('No products in cart.');
+                return redirect()->back()->with('error', 'No products in cart.');
+            }
+
+            $branchId = auth()->user()->branch_id;
+            Log::info('Branch ID: ' . $branchId);
+
+            $inventoryItems = InventoryItem::with(['product.brand', 'product.category'])
+                ->where('branch_id', $branchId)
+                ->where('status', 'in_stock')
+                ->whereIn('product_id', $productIds)
+                ->get();
+
+            Log::info('Inventory count: ' . $inventoryItems->count());
+
+            $products = $inventoryItems
+                ->groupBy('product_id')
+                ->map(function ($items) use ($cartItems) {
+                    $inventorySample = $items->first();
+                    $product = $inventorySample->product;
+
+                    $displayPrice = $items->min('unit_price');
+                    $cartItem = collect($cartItems)->firstWhere('id', $product->product_id);
+                    $quantity = $cartItem['qty'] ?? 1;
+
+                    return [
+                        'product_id'  => $product->product_id,
+                        'name'        => $product->product_name,
+                        'description' => $product->description ?? '',
+                        'price'       => (float) $displayPrice,
+                        'quantity'    => $quantity,
+                        'subtotal'    => $displayPrice * $quantity,
+                        'stock_count' => $items->count(),
+                        'image'       => $product->image ?? null,
+                        'brand'       => $product->brand->name ?? null,
+                        'category'    => $product->category->name ?? null,
+                    ];
+                })
+                ->values();
+
+            Log::info('Mapped products:', $products->toArray());
+
+            
+            return view('nonmenu.pos.checkout', [
+                'cartProducts' => $products,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Checkout error: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            return redirect()->back()->with('error', 'Checkout failed. ' . $e->getMessage());
+        }
+    }
+
+    public function validateSerials(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,product_id',
+            'serials' => 'required|array',
+            'serials.*' => 'required|string',
+        ]);
+
+        $productId = $request->product_id;
+        $serials = $request->serials;
+        $branchId = auth()->guard('employee')->user()?->branch_id;
+
+        \Log::info('ValidateSerials called', [
+            'branch_id' => $branchId,
+            'product_id' => $productId,
+            'serials_received' => $serials
+        ]);
+
+        $invalid = [];
+        $alreadySold = [];
+
+        foreach ($serials as $serial) {
+            $serialTrimmed = trim($serial);
+
+            \Log::info('Checking serial', ['serial' => $serialTrimmed]);
+
+            $item = InventoryItem::where('branch_id', $branchId)
+                ->where('product_id', $productId)
+                ->where('serial_number', $serialTrimmed)
+                ->first();
+
+            if (!$item) {
+                $invalid[] = $serialTrimmed;
+                \Log::warning('Serial invalid', ['serial' => $serialTrimmed]);
+            } elseif ($item->status !== 'in_stock') {
+                $alreadySold[] = $serialTrimmed;
+                \Log::warning('Serial already sold', ['serial' => $serialTrimmed, 'status' => $item->status]);
+            } else {
+                \Log::info('Serial valid', ['serial' => $serialTrimmed]);
+            }
+        }
+
+        if ($invalid || $alreadySold) {
+            $msg = '';
+            if ($invalid) $msg .= 'Invalid serials: ' . implode(', ', $invalid) . '. ';
+            if ($alreadySold) $msg .= 'Already sold: ' . implode(', ', $alreadySold);
+
+            \Log::error('Serial validation failed', ['message' => $msg]);
+            return response()->json(['success' => false, 'message' => $msg]);
+        }
+
+        // All serials valid, calculate total price
+        $totalPrice = InventoryItem::where('branch_id', $branchId)
+            ->where('product_id', $productId)
+            ->whereIn('serial_number', array_map('trim', $serials))
+            ->sum('unit_price');
+
+        \Log::info('Serials validated successfully', ['totalPrice' => $totalPrice]);
+
+        return response()->json([
+            'success' => true,
+            'updatedPrice' => $totalPrice
+        ]);
+    }
+
+
 }

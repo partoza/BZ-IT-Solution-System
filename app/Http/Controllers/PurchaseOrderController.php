@@ -331,24 +331,28 @@ class PurchaseOrderController extends Controller
 
         $query = $po->items()->with('product');
 
-        if($includeInventory) {
+        if ($includeInventory) {
             $query->with('inventoryItems');
         }
 
-        $items = $query->get()->map(function($item) use ($includeInventory) {
+        $items = $query->get()->map(function ($item) use ($includeInventory) {
+            $product = $item->product;
+
             $data = [
                 'id' => $item->id,
                 'product_id' => $item->product_id,
-                'product_name' => $item->product->product_name,
+                'product_name' => $product->product_name ?? 'Unnamed Product',
                 'quantity_ordered' => $item->quantity_ordered,
-                'unit_price' => $item->unit_price,
+                'unit_price' => (float) $item->unit_price,
+                // important: product-level boolean that the frontend will use
+                'track_serials' => (bool) ($product->track_serials ?? false),
             ];
 
-            if($includeInventory) {
-                $data['inventory_items'] = $item->inventoryItems->map(function($inv) {
+            if ($includeInventory) {
+                $data['inventory_items'] = $item->inventoryItems->map(function ($inv) {
                     return [
                         'id' => $inv->id,
-                        'serial_number' => $inv->serial_number ?? null
+                        'serial_number' => $inv->serial_number ?? null,
                     ];
                 })->toArray();
             }

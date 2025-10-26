@@ -2,13 +2,13 @@
 <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 overflow-y-auto h-[600px] pr-2">
     @forelse($products as $product)
         <div
-            class="border rounded-xl p-3 flex flex-col bg-white hover:shadow-md transition product-card h-[390px]"
+            class="border rounded-xl p-3 flex flex-col bg-white hover:shadow-md transition product-card h-[240px]"
             data-product-id="{{ $product['product_id'] }}"
         >
             <img 
                 src="{{ $product['image'] ? asset('storage/'.$product['image']) : asset('assets/img/default-product.png') }}" 
                 alt="{{ $product['name'] }}"
-                class="mb-2 rounded-lg object-cover h-20 w-full h-[190px]"
+                class="mb-2 rounded-lg object-cover h-20 w-full h-[120px]"
             />
 
             {{-- Name --}}
@@ -16,20 +16,10 @@
                 {{ $product['name'] }}
             </div>
 
-            {{-- Price with raw value in data-price --}}
-            <div class="product-price text-primary font-bold text-base mb-1" data-price="{{ $product['price'] }}">
-                ₱{{ number_format($product['price'], 2) }}
-            </div>
-
             {{-- Stock --}}
             <div class="product-stock text-xs text-gray-500 mb-2" data-stock="{{ $product['stock_count'] }}">
                 Stock: {{ $product['stock_count'] }}
             </div>
-
-            {{-- Optional small meta --}}
-            @if(!empty($product['brand']))
-                <div class="text-xs text-gray-400 mb-2">{{ $product['brand'] }}</div>
-            @endif
 
             {{-- Add to Cart: include complete dataset so JS can read immediately --}}
             <button
