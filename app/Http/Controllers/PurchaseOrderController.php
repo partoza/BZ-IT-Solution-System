@@ -165,7 +165,7 @@ class PurchaseOrderController extends Controller
             $search = $request->search;
             $productsQuery->where(function ($q) use ($search) {
                 $q->where('product_name', 'like', "%{$search}%")
-                  ->orWhere('sku', 'like', "%{$search}%")
+                  ->orWhere('product_name', 'like', "%{$search}%")
                   // also allow searching by brand or category names
                   ->orWhereHas('brand', fn($b) => $b->where('name', 'like', "%{$search}%"))
                   ->orWhereHas('category', fn($c) => $c->where('name', 'like', "%{$search}%"));

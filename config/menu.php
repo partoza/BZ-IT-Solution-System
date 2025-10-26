@@ -83,55 +83,55 @@ return [
         ],
     ],
 
-    'services' => [
-        'key' => 'services',
-        'title' => 'Services',
-        'icon' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5"><path fill-rule="evenodd" d="M12 6.75a5.25 5.25 0 0 1 6.775-5.025.75.75 0 0 1 .313 1.248l-3.32 3.319c.063.475.276.934.641 1.299.365.365.824.578 1.3.64l3.318-3.319a.75.75 0 0 1 1.248.313 5.25 5.25 0 0 1-5.472 6.756c-1.018-.086-1.87.1-2.309.634L7.344 21.3A3.298 3.298 0 1 1 2.7 16.657l8.684-7.151c.533-.44.72-1.291.634-2.309A5.342 5.342 0 0 1 12 6.75ZM4.117 19.125a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75h-.008a.75.75 0 0 1-.75-.75v-.008Z" clip-rule="evenodd"/></svg>',
-        'roles' => ['staff', 'manager', 'admin', 'superadmin'],
-        'subitems' => [
-            [
-                'title' => 'Service Ticket',
-                'type' => 'view',
-                'view' => 'pages.services.service-ticket',
-                'uri' => 'services/service-ticket',
-                'name' => 'services.service-ticket',
-                'roles' => ['*'],
-            ],
-            [
-                'title' => 'Ticket Tracking',
-                'type' => 'view',
-                'view' => 'pages.services.ticket-tracking',
-                'uri' => 'services/ticket-tracking',
-                'name' => 'services.ticket-tracking',
-                'roles' => ['*'],
-            ],
-        ],
-    ],
+    // 'services' => [
+    //     'key' => 'services',
+    //     'title' => 'Services',
+    //     'icon' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5"><path fill-rule="evenodd" d="M12 6.75a5.25 5.25 0 0 1 6.775-5.025.75.75 0 0 1 .313 1.248l-3.32 3.319c.063.475.276.934.641 1.299.365.365.824.578 1.3.64l3.318-3.319a.75.75 0 0 1 1.248.313 5.25 5.25 0 0 1-5.472 6.756c-1.018-.086-1.87.1-2.309.634L7.344 21.3A3.298 3.298 0 1 1 2.7 16.657l8.684-7.151c.533-.44.72-1.291.634-2.309A5.342 5.342 0 0 1 12 6.75ZM4.117 19.125a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75h-.008a.75.75 0 0 1-.75-.75v-.008Z" clip-rule="evenodd"/></svg>',
+    //     'roles' => ['staff', 'manager', 'admin', 'superadmin'],
+    //     'subitems' => [
+    //         [
+    //             'title' => 'Service Ticket',
+    //             'type' => 'view',
+    //             'view' => 'pages.services.service-ticket',
+    //             'uri' => 'services/service-ticket',
+    //             'name' => 'services.service-ticket',
+    //             'roles' => ['*'],
+    //         ],
+    //         [
+    //             'title' => 'Ticket Tracking',
+    //             'type' => 'view',
+    //             'view' => 'pages.services.ticket-tracking',
+    //             'uri' => 'services/ticket-tracking',
+    //             'name' => 'services.ticket-tracking',
+    //             'roles' => ['*'],
+    //         ],
+    //     ],
+    // ],
 
-    'customer' => [
-        'key' => 'customer',
-        'title' => 'Customer',
-        'icon' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5"><path fill-rule="evenodd" d="M8.25 6.75a3.75 3.75 0 1 1 7.5 0 3.75 3.75 0 0 1-7.5 0ZM15.75 9.75a3 3 0 1 1 6 0 3 3 0 0 1-6 0ZM2.25 9.75a3 3 0 1 1 6 0 3 3 0 0 1-6 0ZM6.31 15.117A6.745 6.745 0 0 1 12 12a6.745 6.745 0 0 1 6.709 7.498.75.75 0 0 1-.372.568A12.696 12.696 0 0 1 12 21.75c-2.305 0-4.47-.612-6.337-1.684a.75.75 0 0 1-.372-.568 6.787 6.787 0 0 1 1.019-4.38Z"/></svg>',
-        'roles' => ['staff', 'manager', 'admin', 'superadmin'],
-        'subitems' => [
-            [
-                'title' => 'Customer Management',
-                'type' => 'controller',
-                'action' => 'App\\Http\\Controllers\\CustomerController@index',
-                'uri' => 'customers/customer-management',
-                'name' => 'customers.customer-management',
-                'roles' => ['*'],
-            ],
-            [
-                'title' => 'After Sales',
-                'type' => 'view',
-                'view' => 'pages.customer.after-sales',
-                'uri' => 'customers/after-sales',
-                'name' => 'customers.after-sales',
-                'roles' => ['*'],
-            ],
-        ],
-    ],
+    // 'customer' => [
+    //     'key' => 'customer',
+    //     'title' => 'Customer',
+    //     'icon' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5"><path fill-rule="evenodd" d="M8.25 6.75a3.75 3.75 0 1 1 7.5 0 3.75 3.75 0 0 1-7.5 0ZM15.75 9.75a3 3 0 1 1 6 0 3 3 0 0 1-6 0ZM2.25 9.75a3 3 0 1 1 6 0 3 3 0 0 1-6 0ZM6.31 15.117A6.745 6.745 0 0 1 12 12a6.745 6.745 0 0 1 6.709 7.498.75.75 0 0 1-.372.568A12.696 12.696 0 0 1 12 21.75c-2.305 0-4.47-.612-6.337-1.684a.75.75 0 0 1-.372-.568 6.787 6.787 0 0 1 1.019-4.38Z"/></svg>',
+    //     'roles' => ['staff', 'manager', 'admin', 'superadmin'],
+    //     'subitems' => [
+    //         [
+    //             'title' => 'Customer Management',
+    //             'type' => 'controller',
+    //             'action' => 'App\\Http\\Controllers\\CustomerController@index',
+    //             'uri' => 'customers/customer-management',
+    //             'name' => 'customers.customer-management',
+    //             'roles' => ['*'],
+    //         ],
+    //         [
+    //             'title' => 'After Sales',
+    //             'type' => 'view',
+    //             'view' => 'pages.customer.after-sales',
+    //             'uri' => 'customers/after-sales',
+    //             'name' => 'customers.after-sales',
+    //             'roles' => ['*'],
+    //         ],
+    //     ],
+    // ],
 
     'employee' => [
         'key' => 'employee',
@@ -162,14 +162,14 @@ return [
                 'name' => 'history.transaction-history',
                 'roles' => ['*'],
             ],
-            [
-                'title' => 'Resolution History',
-                'type' => 'view',
-                'view' => 'pages.history.resolution-history',
-                'uri' => 'history/resolution-history',
-                'name' => 'history.resolution-history',
-                'roles' => ['*'],
-            ],
+            // [
+            //     'title' => 'Resolution History',
+            //     'type' => 'view',
+            //     'view' => 'pages.history.resolution-history',
+            //     'uri' => 'history/resolution-history',
+            //     'name' => 'history.resolution-history',
+            //     'roles' => ['*'],
+            // ],
             [
                 'title' => 'Purchase Order History',
                 'type' => 'view',
