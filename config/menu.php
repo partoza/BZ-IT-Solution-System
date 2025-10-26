@@ -155,21 +155,11 @@ return [
         'roles' => ['staff', 'manager', 'admin', 'superadmin'],
         'subitems' => [
             [
-                'title' => 'Transaction History',
-                'type' => 'view',
-                'view' => 'pages.history.transaction-history',
-                'uri' => 'history/transaction-history',
-                'name' => 'history.transaction-history',
+                'title' => 'Sales History',
+                'uri' => '/pos/sales',
+                'name' => 'pos.sales.index',
                 'roles' => ['*'],
             ],
-            // [
-            //     'title' => 'Resolution History',
-            //     'type' => 'view',
-            //     'view' => 'pages.history.resolution-history',
-            //     'uri' => 'history/resolution-history',
-            //     'name' => 'history.resolution-history',
-            //     'roles' => ['*'],
-            // ],
             [
                 'title' => 'Purchase Order History',
                 'uri' => 'history/purchase-order',
