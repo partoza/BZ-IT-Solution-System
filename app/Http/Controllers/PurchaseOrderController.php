@@ -160,12 +160,11 @@ class PurchaseOrderController extends Controller
             $productsQuery->where('brand_id', $request->brand_id);
         }
 
-        // Search filter (product name or SKU)
+        // Search filter
         if ($request->filled('search')) {
             $search = $request->search;
             $productsQuery->where(function ($q) use ($search) {
-                $q->where('product_name', 'like', "%{$search}%")
-                ->orWhere('sku', 'like', "%{$search}%");
+                $q->where('product_name', 'like', "%{$search}%");
             });
         }
 

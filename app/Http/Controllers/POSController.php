@@ -152,16 +152,17 @@ class POSController extends Controller
                     $quantity = $cartItem['qty'] ?? 1;
 
                     return [
-                        'product_id'  => $product->product_id,
-                        'name'        => $product->product_name,
-                        'description' => $product->description ?? '',
-                        'price'       => (float) $displayPrice,
-                        'quantity'    => $quantity,
-                        'subtotal'    => $displayPrice * $quantity,
-                        'stock_count' => $items->count(),
-                        'image'       => $product->image ?? null,
-                        'brand'       => $product->brand->name ?? null,
-                        'category'    => $product->category->name ?? null,
+                        'product_id'   => $product->product_id,
+                        'name'         => $product->product_name,
+                        'description'  => $product->description ?? '',
+                        'price'        => (float) $displayPrice,
+                        'quantity'     => $quantity,
+                        'subtotal'     => $displayPrice * $quantity,
+                        'stock_count'  => $items->count(),
+                        'image'        => $product->image ?? null,
+                        'brand'        => $product->brand->name ?? null,
+                        'category'     => $product->category->name ?? null,
+                        'track_serial' => $product->track_serials ?? false,
                     ];
                 })
                 ->values();
