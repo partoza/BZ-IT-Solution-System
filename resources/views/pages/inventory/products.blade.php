@@ -6,12 +6,12 @@
         $inactiveProductPercentage = $totalProducts > 0 ? round(($inactiveProducts / $totalProducts) * 100) : 0;
     @endphp
     <!-- Stats Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 gap-5 mb-8">
+    <div class="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 gap-3 mb-3">
         <!-- Total Products Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
             <div class="flex items-center gap-3 mb-2">
                 <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                    <div class="w-8 h-8 bg-primary flex items-center justify-center"
+                    <div class="w-8 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-center"
                         style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                             class="size-4 text-white">
@@ -25,7 +25,7 @@
                 </div>
                 <h2 class="text-base font-medium text-gray-700">Total Products</h2>
             </div>
-            <div class="ps-11">
+            <div class="ps-14">
                 <h3 class="text-2xl font-semibold text-gray-900">{{ $totalProducts }}</h3>
                 <p class="text-xs text-gray-500 mt-1">Real Time Total</p>
                 <div class="flex items-center gap-2 mt-2">
@@ -56,7 +56,7 @@
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
             <div class="flex items-center gap-3 mb-2">
                 <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                    <div class="w-8 h-8 bg-primary flex items-center justify-center"
+                    <div class="w-8 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-center"
                         style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                             class="bi bi-bag-check-fill size-4 text-white" viewBox="0 0 16 16">
@@ -67,7 +67,7 @@
                 </div>
                 <h2 class="text-base font-medium text-gray-700">Active Products</h2>
             </div>
-            <div class="ps-11">
+            <div class="ps-14">
                 <h3 class="text-2xl font-semibold text-gray-900">{{ $activeProducts }}</h3>
                 <p class="text-xs text-gray-500 mt-1">Currently Active</p>
                 <div class="flex items-center gap-2 mt-2">
@@ -87,7 +87,7 @@
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
             <div class="flex items-center gap-3 mb-2">
                 <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                    <div class="w-8 h-8 bg-primary flex items-center justify-center"
+                    <div class="w-8 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-center"
                         style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
                         <svg width="16" height="16" fill="currentColor" class="bi bi-bag-x-fill size-4 text-white"
                             viewBox="0 0 16 16">
@@ -98,7 +98,7 @@
                 </div>
                 <h2 class="text-base font-medium text-gray-700">Inactive Products</h2>
             </div>
-            <div class="ps-11">
+            <div class="ps-14">
                 <h3 class="text-2xl font-semibold text-gray-900">{{ $inactiveProducts }}</h3>
                 <p class="text-xs text-gray-500 mt-1">Currently Inactive</p>
                 <div class="flex items-center gap-2 mt-2">
@@ -118,7 +118,7 @@
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
             <div class="flex items-center gap-3 mb-2">
                 <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                    <div class="w-8 h-8 bg-primary flex items-center justify-center"
+                    <div class="w-8 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-center"
                         style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                             class="size-4 text-white">
@@ -130,7 +130,7 @@
                 </div>
                 <h2 class="text-base font-medium text-gray-700">Low/Out of Stock</h2>
             </div>
-            <div class="ps-11">
+            <div class="ps-14">
                 <h3 class="text-2xl font-semibold text-gray-900">{{ $lowStock }}</h3>
                 <p class="text-xs text-gray-500 mt-1">Need Restock</p>
                 <div class="flex items-center gap-2 mt-2">
@@ -214,7 +214,7 @@
         <div class="bg-white shadow-sm p-5 mb-2">
             <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
                 <!-- Title -->
-                <h2 class="text-lg font-semibold text-gray-800 mb-4 xl:mb-0">Products</h2>
+                <h2 class="text-xl font-semibold text-primary mb-4 xl:mb-0">Products</h2>
 
                 <!-- Filters and Actions Container -->
                 <div class="flex flex-col xl:flex-row gap-4 w-full xl:w-auto">

@@ -2,9 +2,9 @@
 
 @section('pages-content')
     <div class="overflow-hidden">
-        <div class="flex items-center justify-between mb-4 bg-white rounded-xl shadow-sm px-6 py-3">
+        <div class="flex items-center justify-between bg-white rounded-xl shadow-sm px-6 py-3">
             <div>
-                <h2 class="text-xl font-bold text-gray-800 whitespace-nowrap">Add New Product</h2>
+                <h2 class="text-xl font-bold text-primary whitespace-nowrap">Add New Product</h2>
                 <p class="text-sm text-gray-600 mt-1">Please fill up all the required fields to add new product.</p>
             </div>
             <div class="flex items-center gap-3">
@@ -32,7 +32,7 @@
         <form id="productForm" novalidate enctype="multipart/form-data" method="POST" action="#" class="global-focus">
             @csrf
             <div class="mt-4">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
                     <div class="lg:col-span-2 bg-white py-4 px-6 rounded-lg shadow-sm">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Product Information</h3>
                         <div class="mb-3">
@@ -108,7 +108,7 @@
                         </div>
                     </div>
 
-                    <div class="flex flex-col space-y-4">
+                    <div class="flex flex-col space-y-3">
                         <!--Pricing Panel-->
                         <!-- <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                                                                         <h3 class="font-semibold text-gray-800 mb-3">Pricing</h3>
@@ -129,7 +129,7 @@
                                                                     </div> -->
 
                         <!-- Classification Panel -->
-                        <div class="bg-white rounded-lg shadow-sm p-6 shadow-sm">
+                        <div class="bg-white rounded-lg shadow-sm p-6 py-4 addEventListener">
                             <h3 class="text-lg font-semibold text-gray-800">Classification</h3>
                             <div class="space-y-3">
                                 <div>
@@ -204,7 +204,7 @@
                                 </div>
                             </div>
 
-                            <div id="warrantyPanel" class="space-y-3 mb-4">
+                            <div id="warrantyPanel" class="space-y-3">
                                 <label class="block text-sm text-gray-600">Warranty</label>
                                 <select name="warranty_period"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white">
@@ -236,8 +236,8 @@
     <!-- Modal -->
     <div id="brandModal"
         class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 backdrop-blur-sm">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md mx-4 border border-gray-100">
-            <div class="flex items-center justify-between mb-6">
+        <div class="bg-white p-5 rounded-2xl shadow-2xl w-full max-w-md mx-4 border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-bold text-gray-800">Add New Brand</h2>
                 <button id="closeBrandModal" class="text-gray-400 hover:text-red-600 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -247,7 +247,9 @@
                 </button>
             </div>
 
-            <div class="space-y-4">
+            <hr class="mb-2">
+
+            <div class="space-y-4 mt-4">
                 <div class="global-focus">
                     <label for="brandName" class="block text-sm font-medium text-gray-700 mb-2">Brand Name</label>
                     <input type="text" id="brandName" placeholder="Enter brand name"
@@ -335,6 +337,8 @@
                                 else mainCategoryError.classList.add('hidden');
                             }
 
+                            // Subcategory is optional now; do not show a required inline error on the client.
+
                             // Show/hide image-specific helper
                             if (missingImage && productImageError) productImageError.classList.remove('hidden');
                             else if (productImageError) productImageError.classList.add('hidden');
@@ -371,7 +375,8 @@
                                 if (error.response && error.response.data.errors) {
                                     const errors = error.response.data.errors;
                                     const keys = Object.keys(errors || {});
-                                    const requiredKeys = ['product_name', 'base_price', 'sub_category_id', 'brand_id', 'category_id'];
+                                    // sub_category_id is intentionally NOT considered required on the client
+                                    const requiredKeys = ['product_name', 'base_price', 'brand_id', 'category_id'];
                                     const hasRequiredMissing = keys.some(k => requiredKeys.includes(k));
 
                                     // If server says required fields missing, show consolidated toast and show inline errors where possible
@@ -402,68 +407,7 @@
                 // ------------------------------
                 // Toast Notification
                 // ------------------------------
-                window.showToast = function (message, type = 'success') {
-                    let container = document.getElementById("toast-container");
-                    if (!container) {
-                        container = document.createElement("div");
-                        container.id = "toast-container";
-                        container.className = "fixed top-4 right-4 z-50 flex flex-col gap-2";
-                        document.body.appendChild(container);
-                    }
-
-                    const toast = document.createElement("div");
-                    toast.className = `px-4 py-3 rounded-xl shadow-lg text-white flex items-center justify-between transform transition-all duration-300 ease-in-out relative overflow-hidden ${type === 'success'
-                        ? 'bg-green-500 border-l-4 border-green-600'
-                        : 'bg-red-500 border-l-4 border-red-600'
-                        }`;
-
-                    const icon = type === 'success'
-                        ? `<svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>`
-                        : `<svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>`;
-
-                    toast.innerHTML = `
-                <div class="flex items-center">
-                    ${icon}
-                    <span class="font-medium">${message}</span>
-                </div>
-                <button class="ml-4 opacity-70 hover:opacity-100 transition-opacity" onclick="this.parentElement.remove()">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-                <div class="absolute bottom-0 left-0 right-0 h-1 bg-black/10">
-                    <div class="h-full ${type === 'success' ? 'bg-green-600' : 'bg-red-600'} progress-bar"></div>
-                </div>
-            `;
-
-                    // Add slide-in animation
-                    toast.style.transform = 'translateX(100%)';
-                    toast.style.opacity = '0';
-
-                    container.appendChild(toast);
-
-                    // Trigger animation
-                    requestAnimationFrame(() => {
-                        toast.style.transform = 'translateX(0)';
-                        toast.style.opacity = '1';
-                    });
-
-                    // Progress bar animation
-                    const progressBar = toast.querySelector('.progress-bar');
-                    progressBar.style.width = '100%';
-                    progressBar.style.transition = 'width 3s linear';
-
-                    setTimeout(() => {
-                        progressBar.style.width = '0%';
-                    }, 10);
-
-                    // Auto remove after delay
-                    setTimeout(() => {
-                        toast.style.transform = 'translateX(100%)';
-                        toast.style.opacity = '0';
-                        setTimeout(() => toast.remove(), 300);
-                    }, 3000);
-                };
+                // Use the global `showToast(message, type)` provided by resources/js/utils/toast.js
 
                 // ------------------------------
                 // Brand Modal Handling
@@ -571,6 +515,7 @@
                             const basePriceError = document.getElementById('basePriceError');
                             const brandError = document.getElementById('brandError');
                             const mainCategoryError = document.getElementById('mainCategoryError');
+                            // const subCategoryError = document.getElementById('subCategoryError');
                             if (productNameError) productNameError.classList.add('hidden');
                             if (basePriceError) basePriceError.classList.add('hidden');
                             if (brandError) brandError.classList.add('hidden');

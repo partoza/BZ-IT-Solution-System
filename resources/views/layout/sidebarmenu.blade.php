@@ -138,9 +138,9 @@
                                 </svg>
                             </button>
 
-                            <div class="relative w-full max-w-xl">
+                            <div class="relative w-full max-w-xl global-focus">
                                 <input type="search" name="q" placeholder="Search..."
-                                    class="w-full border border-neutral-200 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-300" />
+                                    class="w-full border border-neutral-200 rounded-md py-2 px-3" />
                             </div>
                         </div>
 
@@ -150,7 +150,22 @@
                                 <div class="text-xs text-neutral-500">{{ $user->role ?? 'Admin' }}</div>
                             </div>
                             <div class="flex items-center gap-2">
-                                <img src="#" alt="avatar" class="w-10 h-10 rounded-full object-cover">
+                                @php
+                                    // Determine avatar URL (employee.avatar exists in migration)
+                                    $avatar = $user->avatar ?? $user->image ?? null;
+                                    $initial = strtoupper(substr($user->full_name ?? $user->name ?? 'J', 0, 1));
+                                @endphp
+
+                                @if ($avatar)
+                                    @php
+                                        $avatarSrc = Str::startsWith($avatar, ['http://', 'https://', '/']) ? $avatar : asset('storage/' . $avatar);
+                                    @endphp
+                                    <img src="{{ $avatarSrc }}" alt="avatar" class="w-10 h-10 rounded-full object-cover">
+                                @else
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-r from-emerald-600 to-emerald-500 text-white">
+                                        {{ $initial }}
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
