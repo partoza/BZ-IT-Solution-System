@@ -6,47 +6,29 @@
         <!-- Total Transactions Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
             <h2 class="text-base font-medium text-gray-700 mb-1">Total Transactions</h2>
-            <div class="flex items-end justify-between">
-                <div>
-                    <h3 class="text-2xl font-semibold text-gray-900">1,247</h3>
-                    <div class="mt-1 space-y-0.5">
-                        <div class="flex items-center text-xs text-green-600">
-                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                            </svg>
-                            78% Completed
-                        </div>
-                        <div class="flex items-center text-xs text-red-600">
-                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                            </svg>
-                            22% Cancelled
-                        </div>
-                    </div>
-                </div>
-                <p class="text-xs text-gray-500">Last 30 Days</p>
-            </div>
+            <h3 class="text-2xl font-semibold text-gray-900">{{ number_format($totalSales) }}</h3>
+            <p class="text-sm text-gray-500 mt-1">Overall recorded sales</p>
         </div>
 
         <!-- Total Revenue Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
-            <h2 class="text-base font-medium text-gray-700 mb-1">Total Revenue</h2>
-            <h3 class="text-2xl font-semibold text-gray-900">₱124,580</h3>
-            <p class="text-sm text-gray-500 mt-1">Last 30 Days</p>
+            <h2 class="text-base font-medium text-gray-700 mb-1">Completed Sales</h2>
+            <h3 class="text-2xl font-semibold text-green-700">{{ number_format($completedSales) }}</h3>
+            <p class="text-sm text-gray-500 mt-1">₱{{ number_format($salesThisMonth ?? 0, 2) }} this month</p>
         </div>
 
         <!-- Average Transaction Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
-            <h2 class="text-base font-medium text-gray-700 mb-1">Average Transaction</h2>
-            <h3 class="text-2xl font-semibold text-gray-900">₱1,250</h3>
-            <p class="text-sm text-gray-500 mt-1">Per Transaction</p>
+            <h2 class="text-base font-medium text-gray-700 mb-1">Cancelled Sales</h2>
+            <h3 class="text-2xl font-semibold text-red-600">{{ number_format($cancelledSales) }}</h3>
+            <p class="text-sm text-gray-500 mt-1">₱{{ number_format($cancelledValue ?? 0, 2) }} total cancelled</p>
         </div>
 
         <!-- Pending Transactions Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
-            <h2 class="text-base font-medium text-gray-700 mb-1">Pending Transactions</h2>
-            <h3 class="text-2xl font-semibold text-gray-900">18</h3>
-            <p class="text-sm text-gray-500 mt-1">Awaiting Processing</p>
+            <h2 class="text-base font-medium text-gray-700 mb-1">Reserved Sales</h2>
+            <h3 class="text-2xl font-semibold text-amber-600">{{ number_format($reservedSales) }}</h3>
+            <p class="text-sm text-gray-500 mt-1">₱{{ number_format($reservedValue ?? 0, 2) }} reserved value</p>
         </div>
     </div>
 
@@ -58,131 +40,139 @@
                 <h2 class="text-lg font-semibold text-gray-800">Transaction History</h2>
                 
                 <div class="flex flex-col xl:flex-row gap-3 w-full xl:w-auto">
-                    <!-- Search Input -->
-                    <div class="relative flex-1 xl:w-72">
-                        <input 
-                            type="text" 
-                            placeholder="Search Transaction ID or Customer ..." 
-                            class="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-400"
-                        >
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                            </svg>
+                    <form method="GET" class="flex flex-wrap gap-3">
+                        <!-- Search -->
+                        <div class="relative flex-1 xl:w-72">
+                            <input 
+                                type="text"
+                                name="search"
+                                value="{{ request('search') }}"
+                                placeholder="ID, Serial, Product, or Customer..."
+                                class="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-400"
+                            >
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Date Range Filter -->
-                    <div class="flex items-center border border-gray-300 rounded-lg px-3">
-                        <svg class="h-4 w-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                        <input type="text" placeholder="Date Range" class="py-2.5 text-sm bg-transparent focus:outline-none w-40">
-                    </div>
+                        <!-- Status -->
+                        <select name="status"
+                            class="px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
+                            <option value="">All Status</option>
+                            <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
+                            <option value="reserved" {{ request('status') == 'reserved' ? 'selected' : '' }}>Reserved</option>
+                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                            <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                        </select>
 
-                    <!-- Status Filter -->
-                    <select class="px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
-                        <option>All Status</option>
-                        <option>Completed</option>
-                        <option>Pending</option>
-                        <option>Cancelled</option>
-                        <option>Voided</option>
-                        <option>Refunded</option>
-                    </select>
+                        <!-- Payment Method -->
+                        <select name="payment_method"
+                            class="px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
+                            <option value="">All Payment Methods</option>
+                            <option value="cash" {{ request('payment_method') == 'cash' ? 'selected' : '' }}>Cash</option>
+                            <option value="gcash" {{ request('payment_method') == 'gcash' ? 'selected' : '' }}>GCash</option>
+                        </select>
 
-                    <!-- Payment Method Filter -->
-                    <select class="px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
-                        <option>All Payment Methods</option>
-                        <option>Cash</option>
-                        <option>Credit Card</option>
-                        <option>Debit Card</option>
-                        <option>GCash</option>
-                        <option>PayMaya</option>
-                    </select>
+                        <!-- Buttons -->
+                        <button type="submit"
+                            class="px-5 py-2.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+                            Search
+                        </button>
 
-                    <!-- Export Report Button -->
-                    <button id="exportReportBtn" class="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center justify-center">
-                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        Export Report
-                    </button>
+                        <a href="{{ route('pos.sales.index') }}"
+                            class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium flex items-center justify-center">
+                            Clear
+                        </a>
+
+                        <button type="button"
+                            class="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center justify-center">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Export Report
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
 
         <div class="overflow-x-auto">
+            <!-- Table -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+        <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 text-sm">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Transaction ID</th>
-                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Date & Time</th>
+                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Transaction #</th>
+                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Date</th>
                         <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Customer</th>
-                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Items</th>
-                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Payment Method</th>
+                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Created By</th>
+                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Payment</th>
                         <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Amount</th>
                         <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Status</th>
                         <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-100">
-                    <!-- Sample Transaction 1 -->
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-3 text-gray-800 font-medium">#TRX-2023-00125</td>
-                        <td class="px-6 py-3 text-gray-600">Nov 15, 2023 10:30 AM</td>
-                        <td class="px-6 py-3 text-gray-600">Maria Santos</td>
-                        <td class="px-6 py-3 text-gray-600">3 items</td>
-                        <td class="px-6 py-3 text-gray-600">GCash</td>
-                        <td class="px-6 py-3 text-gray-600 font-medium">₱2,450</td>
-                        <td class="px-6 py-3">
-                            <span class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800">Completed</span>
-                        </td>
-                        <td class="px-6 py-3">
-                            <div class="flex space-x-2">
-                                <button class="viewBtn text-indigo-600 hover:text-indigo-900 text-sm font-medium" data-transaction-id="TRX-2023-00125">View</button>
-                                <button class="receiptBtn text-green-600 hover:text-green-900 text-sm font-medium" data-transaction-id="TRX-2023-00125">Receipt</button>
-                                <button class="voidBtn text-red-600 hover:text-red-900 text-sm font-medium" data-transaction-id="TRX-2023-00125">Void</button>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <!-- Sample Voided Transaction -->
-                    <tr class="hover:bg-gray-50 transition-colors bg-red-50">
-                        <td class="px-6 py-3 text-gray-800 font-medium">#TRX-2023-00124</td>
-                        <td class="px-6 py-3 text-gray-600">Nov 15, 2023 09:15 AM</td>
-                        <td class="px-6 py-3 text-gray-600">Carlos Rodriguez</td>
-                        <td class="px-6 py-3 text-gray-600">1 item</td>
-                        <td class="px-6 py-3 text-gray-600">Cash</td>
-                        <td class="px-6 py-3 text-gray-600 font-medium line-through">₱890</td>
-                        <td class="px-6 py-3">
-                            <span class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-800">Voided</span>
-                        </td>
-                        <td class="px-6 py-3">
-                            <div class="flex space-x-2">
-                                <button class="viewBtn text-indigo-600 hover:text-indigo-900 text-sm font-medium" data-transaction-id="TRX-2023-00124">View</button>
-                                <button class="receiptBtn text-green-600 hover:text-green-900 text-sm font-medium" data-transaction-id="TRX-2023-00124">Receipt</button>
-                                <button class="text-gray-400 text-sm font-medium cursor-not-allowed" disabled>Voided</button>
-                            </div>
-                        </td>
-                    </tr>
+                    @forelse($sales as $sale)
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-3 font-medium text-gray-900">#{{ $sale->sales_number }}</td>
+                            <td class="px-6 py-3 text-gray-600">
+                                {{ $sale->sold_at ? $sale->sold_at->format('M d, Y h:i A') : '—' }}
+                            </td>
+                            <td class="px-6 py-3 text-gray-700">
+                                {{ $sale->customer?->name ?? 'Walk-in' }}
+                            </td>
+                            <td class="px-6 py-3 text-gray-700">
+                                {{ $sale->employee?->full_name ?? '—' }}
+                            </td>
+                            <td class="px-6 py-3 text-gray-600 capitalize">
+                                {{ $sale->payment_method ?? '—' }}
+                            </td>
+                            <td class="px-6 py-3 text-gray-800 font-medium">
+                                ₱{{ number_format($sale->grand_total ?? 0, 2) }}
+                            </td>
+                            <td class="px-6 py-3">
+                                @php
+                                    $statusColor = match($sale->status) {
+                                        'completed' => 'bg-green-100 text-green-700',
+                                        'reserved' => 'bg-amber-100 text-amber-700',
+                                        'cancelled' => 'bg-red-100 text-red-700',
+                                        default => 'bg-gray-100 text-gray-700',
+                                    };
+                                @endphp
+                                <span class="px-2.5 py-0.5 text-xs font-medium rounded-full {{ $statusColor }}">
+                                    {{ ucfirst($sale->status) }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-3">
+                                <div class="flex space-x-2">
+                                    <a href="#" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">View</a>
+                                    <a href="#" class="text-green-600 hover:text-green-900 text-sm font-medium">Receipt</a>
+                                    @if($sale->status !== 'cancelled')
+                                        <a href="#" class="text-red-600 hover:text-red-900 text-sm font-medium">Void</a>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="text-center py-6 text-gray-500">
+                                No transactions found.
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
 
         <!-- Pagination -->
         <div class="bg-white px-6 py-4 border-t border-gray-200">
-            <div class="flex items-center justify-between">
-                <div class="text-sm text-gray-700">
-                    Showing <span class="font-medium">1</span> to <span class="font-medium">4</span> of <span class="font-medium">1,247</span> results
-                </div>
-                <div class="flex space-x-2">
-                    <button class="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">Previous</button>
-                    <button class="px-3 py-1 text-sm bg-green-600 text-white rounded-lg">1</button>
-                    <button class="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">2</button>
-                    <button class="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">3</button>
-                    <button class="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">Next</button>
-                </div>
-            </div>
+            {{ $sales->links() }}
         </div>
     </div>
 

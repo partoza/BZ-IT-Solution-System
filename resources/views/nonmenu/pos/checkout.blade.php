@@ -23,7 +23,8 @@
         <!-- Product List -->
         <div class="p-6 border-b space-y-4">
             @forelse($cartProducts as $product)
-                <div class="border border-dashed border-gray-300 rounded-lg p-4 relative flex gap-4 items-center">
+                <div class="border border-dashed border-gray-300 rounded-lg p-4 relative flex gap-4 items-center"
+                    data-product-id="{{ $product['product_id'] }}">
                     <!-- Remove button -->
                     <button 
                         class="absolute top-2 right-2 text-gray-400 hover:text-red-500 transition-colors"
@@ -47,7 +48,8 @@
                         <div class="text-sm text-gray-600 mt-1">Qty: {{ $product['quantity'] }}</div>
                         <div class="text-blue-600 font-bold text-md mt-1 product-price"
                             data-price="{{ $product['price'] }}"
-                            data-quantity="{{ $product['quantity'] }}">
+                            data-quantity="{{ $product['quantity'] }}"
+                            data-track-serial="{{ $product['track_serial'] ? '1' : '0' }}">
                             ₱{{ $product['track_serial'] ? '0.00' : number_format($product['price'] * $product['quantity'], 2) }}
                         </div>
 
@@ -222,24 +224,35 @@
                     <span class="text-gray-700 font-medium">Change</span>
                 </div>
                 <div class="flex gap-3">
-                    <input type="text" placeholder="Enter amount" class="flex-1 border border-gray-300 rounded-lg px-4 py-3 text-sm" />
+                    <input type="text" id="amountPaid" placeholder="Enter amount" class="flex-1 border border-gray-300 rounded-lg px-4 py-3 text-sm" />
                     <div class="flex-1 border border-gray-300 rounded-lg px-4 py-3 text-sm bg-gray-50 flex items-center justify-center font-medium">0.00</div>
                 </div>
             </div>
             
+            <!-- Reference -->
+            <div class="mb-8">
+                <div class="flex justify-between mb-3">
+                    <span class="text-gray-700 font-medium">Reference Number</span>
+
+                </div>
+                <div class="flex gap-3">
+                    <input type="text" placeholder="Enter reference number" class="flex-1 border border-gray-300 rounded-lg px-4 py-3 text-sm" />
+                </div>
+            </div>
+
             <!-- Order Summary -->
-            <div class="border-t pt-6">
+            <div class="border-t pt-6" id="orderSummary">
                 <div class="flex justify-between text-md mb-2">
                     <span class="text-gray-700">Subtotal:</span>
-                    <span class="text-gray-800">₱20,800.00</span>
+                    <span id="subtotal" class="text-gray-800">₱0.00</span>
                 </div>
                 <div class="flex justify-between text-md mb-4">
                     <span class="text-gray-700">Discount:</span>
-                    <span class="text-gray-800">₱0.00</span>
+                    <span id="discount" class="text-gray-800">₱0.00</span>
                 </div>
                 <div class="flex justify-between text-md font-bold pt-4 border-t">
                     <span class="text-gray-800">Total Amount:</span>
-                    <span class="text-blue-600">₱20,800.00</span>
+                    <span id="totalAmount" class="text-blue-600">₱0.00</span>
                 </div>
             </div>
             
@@ -309,6 +322,8 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
+    recalculateTotals();
+
     let currentProductQty = 0;
 
     const serialModal = document.getElementById('serialModal');
@@ -316,6 +331,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const serialProductId = document.getElementById('serialProductId');
     const serialCancelBtn = document.getElementById('serialCancelBtn');
     const serialSaveBtn = document.getElementById('serialSaveBtn');
+
+    function recalculateTotals() {
+        let subtotal = 0;
+
+        // Sum all product prices in the cart/grid
+        document.querySelectorAll('.product-price').forEach(node => {
+            const text = node.textContent.replace(/[₱,]/g, '').trim();
+            const val = parseFloat(text) || 0;
+            subtotal += val;
+        });
+
+        const discount = 0; // apply promo logic later if needed
+        const total = subtotal - discount;
+
+        document.getElementById('subtotal').textContent = '₱' + subtotal.toFixed(2);
+        document.getElementById('discount').textContent = '₱' + discount.toFixed(2);
+        document.getElementById('totalAmount').textContent = '₱' + total.toFixed(2);
+    }
 
     // Open serial modal dynamically
     function openSerialModal(btn) {
@@ -354,27 +387,53 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Save serials on the product button for reopening
+        // preserve existing approach: find element that has data-product-id
         const productBtn = document.querySelector(`[data-product-id="${productIdVal}"]`);
         if (productBtn) productBtn.dataset.serials = JSON.stringify(serials);
 
         axios.post('/pos/validate-serials', { product_id: productIdVal, serials })
         .then(res => {
-            const data = res.data;
+            const data = res.data || {};
             if (data.success) {
                 showToast('Serials validated and prices updated!', 'success');
+
+                // mark validated and persist serials where checkout will read them
+                if (productBtn) {
+                    // productBtn might be the product container - prefer the serial-btn element
+                    const serialBtn = document.querySelector(`.serial-btn[data-product-id="${productIdVal}"]`);
+                    if (serialBtn) {
+                        serialBtn.dataset.serials = JSON.stringify(serials);
+                        serialBtn.dataset.serialsValid = '1';
+                    }
+                    // also set on product container for redundancy
+                    productBtn.dataset.serials = JSON.stringify(serials);
+                    productBtn.dataset.serialsValid = '1';
+                }
+
                 closeSerialModal();
 
-                // Optional: update frontend price
-                if (data.updatedPrice !== undefined && productBtn) {
-                    const priceNode = productBtn.closest('div').querySelector('.product-price');
-                    if (priceNode) priceNode.textContent = '₱' + parseFloat(data.updatedPrice).toFixed(2);
+                // Update frontend price: server returns total of unit prices; convert to per-unit
+                const priceNode = productBtn ? productBtn.closest('div').querySelector('.product-price') : null;
+                if (priceNode && data.updatedPrice !== undefined) {
+                    const qty = parseInt(priceNode.dataset.quantity) || 1;
+                    // interpret updatedPrice as total price for the serials (sum of unit prices)
+                    // compute unit price = total / qty
+                    const totalPrice = parseFloat(data.updatedPrice) || 0;
+                    const unit = qty > 0 ? (totalPrice / qty) : 0;
+
+                    if (!Number.isNaN(unit)) {
+                        // set dataset.price so checkout reads it
+                        priceNode.dataset.price = unit.toFixed(2);
+                        priceNode.textContent = '₱' + (unit * qty).toFixed(2);
+                    }
                 }
+
+                recalculateTotals();
             } else {
                 showToast(data.message || 'Some serials are invalid', 'error');
             }
         })
         .catch(err => {
-            console.error(err);
             showToast('Error validating serials', 'error');
         });
     }
@@ -387,72 +446,6 @@ document.addEventListener('DOMContentLoaded', () => {
     serialCancelBtn.addEventListener('click', closeSerialModal);
     serialSaveBtn.addEventListener('click', saveSerialNumbers);
 
-
-    // ------------------------------
-    // Toast Notification
-    // ------------------------------
-    window.showToast = function (message, type = 'success') {
-        let container = document.getElementById("toast-container");
-        if (!container) {
-            container = document.createElement("div");
-            container.id = "toast-container";
-            container.className = "fixed top-4 right-4 z-50 flex flex-col gap-2";
-            document.body.appendChild(container);
-        }
-
-        const toast = document.createElement("div");
-        toast.className = `px-4 py-3 rounded-xl shadow-lg text-white flex items-center justify-between transform transition-all duration-300 ease-in-out relative overflow-hidden ${type === 'success'
-            ? 'bg-green-500 border-l-4 border-green-600'
-            : 'bg-red-500 border-l-4 border-red-600'
-            }`;
-
-        const icon = type === 'success'
-            ? `<svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>`
-            : `<svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>`;
-
-        toast.innerHTML = `
-    <div class="flex items-center">
-        ${icon}
-        <span class="font-medium">${message}</span>
-    </div>
-    <button class="ml-4 opacity-70 hover:opacity-100 transition-opacity" onclick="this.parentElement.remove()">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-    </button>
-    <div class="absolute bottom-0 left-0 right-0 h-1 bg-black/10">
-        <div class="h-full ${type === 'success' ? 'bg-green-600' : 'bg-red-600'} progress-bar"></div>
-    </div>
-`;
-
-        // Add slide-in animation
-        toast.style.transform = 'translateX(100%)';
-        toast.style.opacity = '0';
-
-        container.appendChild(toast);
-
-        // Trigger animation
-        requestAnimationFrame(() => {
-            toast.style.transform = 'translateX(0)';
-            toast.style.opacity = '1';
-        });
-
-        // Progress bar animation
-        const progressBar = toast.querySelector('.progress-bar');
-        progressBar.style.width = '100%';
-        progressBar.style.transition = 'width 3s linear';
-
-        setTimeout(() => {
-            progressBar.style.width = '0%';
-        }, 10);
-
-        // Auto remove after delay
-        setTimeout(() => {
-            toast.style.transform = 'translateX(100%)';
-            toast.style.opacity = '0';
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
-    };
   // ensure axios present
   if (window.axios) {
     const tokenMeta = document.querySelector('meta[name="csrf-token"]');
@@ -598,7 +591,6 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         })
         .catch(err => {
-          console.error('Add customer error:', err);
           if (err.response && err.response.status === 422 && err.response.data) {
             const errs = err.response.data.errors || {};
             Object.values(errs).flat().forEach(m => showToast(m, 'error'));
@@ -611,21 +603,134 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })();
 
-  document.querySelectorAll('.product-price').forEach(priceNode => {
+    document.querySelectorAll('.product-price').forEach(priceNode => {
         const container = priceNode.closest('div');
         const btn = container.querySelector('.serial-btn');
+        const price = parseFloat(priceNode.dataset.price) || 0;
+        const qty = parseInt(priceNode.dataset.quantity) || 1;
 
-        // If no serial tracking, calculate subtotal immediately
-        if (!btn) {
-            const price = parseFloat(priceNode.dataset.price) || 0;
-            const qty = parseInt(priceNode.dataset.quantity) || 1;
+        const trackSerial = priceNode.dataset.trackSerial === '1';
+        if (trackSerial) {
+            priceNode.textContent = '₱0.00';
+        } else {
             priceNode.textContent = '₱' + (price * qty).toFixed(2);
         }
     });
 
+    // --------- CHECKOUT / LOGGING ----------
+    // Find your Checkout Now button by text (keeps markup untouched)
+    const checkoutButton = Array.from(document.querySelectorAll('button')).find(b => b.innerText && b.innerText.trim().startsWith('Checkout Now'));
+    if (checkoutButton) {
+        checkoutButton.addEventListener('click', async (ev) => {
+            ev.preventDefault();
+
+            // Build items payload from DOM
+            const items = [];
+
+            // For each product-price entry, try to locate product id from closest [data-product-id] or from serial-btn if present
+            document.querySelectorAll('.product-price').forEach(priceNode => {
+                const qty = parseInt(priceNode.dataset.quantity) || 1;
+                const unitFromDataset = parseFloat(priceNode.dataset.price) || 0;
+
+                // locate the nearest ancestor with data-product-id
+                let container = priceNode.closest('[data-product-id]');
+                let productId = container ? container.dataset.productId : null;
+
+                // fallback: look for serial-btn in same visual product row and use its data-product-id
+                if (!productId) {
+                    const serialBtn = priceNode.closest('div').querySelector('.serial-btn');
+                    if (serialBtn && serialBtn.dataset.productId) productId = serialBtn.dataset.productId;
+                }
+
+                // determine unit price: if dataset.price present use it; else derive from displayed text / qty
+                let displayedText = (priceNode.textContent || '').replace(/[₱,]/g, '').trim();
+                let displayedVal = parseFloat(displayedText) || 0;
+                let unitPrice = unitFromDataset || (qty > 0 ? displayedVal / qty : 0);
+
+                // try to get serials array
+                let serials = [];
+                const btnForSerials = (container && container.querySelector('.serial-btn')) || document.querySelector(`.serial-btn[data-product-id="${productId}"]`);
+                if (btnForSerials && btnForSerials.dataset.serials) {
+                    try { serials = JSON.parse(btnForSerials.dataset.serials); } catch(e) { serials = []; }
+                }
+
+                if (productId) {
+                    items.push({
+                        product_id: productId,
+                        quantity: qty,
+                        unit_price: parseFloat(unitPrice.toFixed(2)),
+                        serial_numbers: serials
+                    });
+                } else {
+                    // productId missing - still push with null id so you can see in logs and correct in DOM if necessary
+                    items.push({
+                        product_id: null,
+                        quantity: qty,
+                        unit_price: parseFloat(unitPrice.toFixed(2)),
+                        serial_numbers: []
+                    });
+                }
+            });
+
+            if (items.length === 0) {
+                showToast('No items to checkout', 'error');
+                return;
+            }
+
+            // Get total and amount paid
+            const totalText = document.getElementById('totalAmount')?.textContent.replace(/[₱,]/g, '').trim();
+            const total = parseFloat(totalText) || 0;
+            const amountPaidInput = document.getElementById('amountPaid');
+            const amountPaid = parseFloat(amountPaidInput?.value || 0);
+
+            if (amountPaid <= 0) {
+                showToast('Please enter an amount paid', 'error');
+                amountPaidInput?.focus();
+                return;
+            }
+
+            const payload = {
+                branch_id: document.querySelector('meta[name="branch-id"]') ? document.querySelector('meta[name="branch-id"]').getAttribute('content') : null,
+                employee_id: document.querySelector('meta[name="employee-id"]') ? document.querySelector('meta[name="employee-id"]').getAttribute('content') : null,
+                customer_id: document.getElementById('customerId') ? (document.getElementById('customerId').value || null) : null,
+                payment_method: 'cash', // cash-only for now
+                payment_reference: null,
+                amount_paid: amountPaid,
+                status: 'completed',
+                items: items
+            };
+
+            // send ajax to server
+            try {
+                const resp = await axios.post('/pos/sales', payload);
+                const data = resp.data || {};
+                if (data.success) {
+                    showToast(data.message || 'Sale recorded', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/pos/sales'; 
+                    }, 800);
+                } else {
+                    showToast(data.message || 'Sale failed', 'error');
+                    console.error('POS sale response', data);
+                }
+            } catch (err) {
+                if (err.response && err.response.data && err.response.data.errors) {
+                    const errs = err.response.data.errors;
+                    Object.values(errs).flat().forEach(msg => showToast(msg, 'error'));
+                } else if (err.response && err.response.data && err.response.data.message) {
+                    showToast(err.response.data.message, 'error');
+                } else {
+                    showToast('Failed to create sale', 'error');
+                }
+            }
+        });
+    }
+    // --------- END CHECKOUT ----------
+
 });
 </script>
 @endpush
+
 
 <style>
 .scrollbar-thin::-webkit-scrollbar {

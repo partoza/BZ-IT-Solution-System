@@ -147,17 +147,21 @@ class POSController extends Controller
                     $inventorySample = $items->first();
                     $product = $inventorySample->product;
 
-                    $displayPrice = $items->min('unit_price');
                     $cartItem = collect($cartItems)->firstWhere('id', $product->product_id);
                     $quantity = $cartItem['qty'] ?? 1;
+
+                    // For non-serialized items, pick unit_price from any in-stock inventory item
+                    $unitPrice = $product->track_serials
+                        ? 0 // serialized items: price set after serial validation in JS
+                        : $items->first()->unit_price; // non-serialized: take first available
 
                     return [
                         'product_id'   => $product->product_id,
                         'name'         => $product->product_name,
                         'description'  => $product->description ?? '',
-                        'price'        => (float) $displayPrice,
+                        'price'        => (float) $unitPrice,
                         'quantity'     => $quantity,
-                        'subtotal'     => $displayPrice * $quantity,
+                        'subtotal'     => $unitPrice * $quantity,
                         'stock_count'  => $items->count(),
                         'image'        => $product->image ?? null,
                         'brand'        => $product->brand->name ?? null,
@@ -166,20 +170,15 @@ class POSController extends Controller
                     ];
                 })
                 ->values();
-
-            Log::info('Mapped products:', $products->toArray());
-
-            
             return view('nonmenu.pos.checkout', [
                 'cartProducts' => $products,
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Checkout error: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
             return redirect()->back()->with('error', 'Checkout failed. ' . $e->getMessage());
         }
     }
+    
 
     public function validateSerials(Request $request)
     {
@@ -245,6 +244,4 @@ class POSController extends Controller
             'updatedPrice' => $totalPrice
         ]);
     }
-
-
 }

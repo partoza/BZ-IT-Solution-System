@@ -2,203 +2,159 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\DB;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\InventoryItem;
-use App\Models\BranchProduct;
-use Exception;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use App\Models\Product;
 
 class SaleService
 {
-    /**
-     * Create sale from inventory (by inventory_item_ids / serials OR by product qty)
-     *
-     * $payload = [
-     *   'branch_id' => int,
-     *   'employee_id' => int|null,
-     *   'status' => 'completed'|'reserved',
-     *   'items' => [
-     *       // inventory allocation
-     *       ['product_id'=>10, 'inventory_item_ids'=>[100,101], 'sold_prices'=>[100=>1200,101=>1200]],
-     *       // or quantity allocation
-     *       ['product_id'=>11, 'quantity'=>3, 'unit_price'=>600.00]
-     *   ]
-     * ]
-     */
-    public function createFromPayload(array $payload)
+    public function store(array $data)
     {
-        $branchId = $payload['branch_id'];
-        $employeeId = $payload['employee_id'] ?? null;
-        $status = $payload['status'] ?? 'completed';
-        $items = $payload['items'] ?? [];
+        // Defensive check: ensure serialized products have serials
+        $missing = [];
 
-        if (empty($items)) {
-            throw new Exception('No items provided');
+        foreach ($data['items'] as $item) {
+            $productId = $item['product_id'];
+            $qty = intval($item['quantity'] ?? 0);
+
+            $product = Product::find($productId);
+            $requiresSerial = false;
+
+            if ($product) {
+                // try common boolean column names
+                if (isset($product->track_serial)) $requiresSerial = (bool) $product->track_serial;
+                elseif (isset($product->requires_serial)) $requiresSerial = (bool) $product->requires_serial;
+                elseif (isset($product->is_serialized)) $requiresSerial = (bool) $product->is_serialized;
+            }
+
+            // fallback heuristic: if there are inventory items for this product with a serial, treat as serialized
+            if (!$requiresSerial) {
+                $hasSerialInventory = InventoryItem::where('product_id', $productId)
+                    ->whereNotNull('serial_number')
+                    ->where('serial_number', '!=', '')
+                    ->exists();
+                if ($hasSerialInventory) $requiresSerial = true;
+            }
+
+            if ($requiresSerial) {
+                $serials = $item['serial_numbers'] ?? [];
+                $serialCount = is_array($serials) ? count(array_filter($serials, 'strlen')) : 0;
+
+                if ($serialCount !== $qty) {
+                    $missing[] = $product->product_name ?? $product->name ?? "Product ID {$productId}";
+                }
+            }
         }
 
-        return DB::transaction(function () use ($branchId, $employeeId, $status, $items) {
+        if (!empty($missing)) {
+            return [
+                'success' => false,
+                'message' => 'Serial numbers required for: ' . implode(', ', $missing) . '.'
+            ];
+        }
 
-            // create sale header
+        $branchId = auth()->guard('employee')->user()?->branch_id;
+        DB::beginTransaction();
+
+        try {
+            // Generate sales number
+            $salesNumber = 'S-' . now()->format('YmdHis') . '-' . strtoupper(Str::random(4));
+            $branchId = auth()->guard('employee')->user()?->branch_id;
             $sale = Sale::create([
-                'sales_number' => $this->generateSalesNumber(),
+                'sales_number' => $salesNumber,
                 'branch_id' => $branchId,
-                'employee_id' => $employeeId,
-                'status' => $status,
-                'sub_total' => 0,
-                'grand_total' => 0,
-                'sold_at' => $status === 'completed' ? now() : null,
-                'createdby_id' => $employeeId,
+                'employee_id' => $data['employee_id'] ?? auth()->guard('employee')->user()?->employee_id,
+                'customer_id' => $data['customer_id'] ?? null,
+                'payment_method' => $data['payment_method'],
+                'payment_reference' => $data['payment_reference'] ?? null,
+                'status' => $data['status'] ?? 'completed',
+                'sold_at' => now(),
+                'createdby_id' => auth()->user()->employee_id ?? null,
             ]);
 
             $subTotal = 0;
+            $discountTotal = 0;
+            $taxTotal = 0;
 
-            foreach ($items as $line) {
-                if (!empty($line['inventory_item_ids'])) {
-                    // explicit inventory rows mode
-                    $invIds = $line['inventory_item_ids'];
+            foreach ($data['items'] as $item) {
+                $unitPrice = $item['unit_price'];
+                $quantity = $item['quantity'];
+                $discount = $item['line_discount'] ?? 0;
+                $serialNumbers = $item['serial_numbers'] ?? [];
 
-                    $inventoryRows = InventoryItem::where('branch_id', $branchId)
-                        ->whereIn('id', $invIds)
-                        ->lockForUpdate()
-                        ->get();
+                $lineTotal = ($unitPrice * $quantity) - $discount;
 
-                    if ($inventoryRows->count() !== count($invIds)) {
-                        throw new Exception('Some provided inventory items were not found for this branch.');
-                    }
+                $saleItem = $sale->items()->create([
+                    'product_id' => $item['product_id'],
+                    'quantity' => $quantity,
+                    'unit_price' => $unitPrice,
+                    'line_discount' => $discount,
+                    'tax' => 0,
+                    'line_total' => $lineTotal,
+                    'is_serialized' => !empty($serialNumbers),
+                ]);
 
-                    foreach ($inventoryRows as $inv) {
-                        if (! in_array($inv->status, ['in_stock','reserved'])) {
-                            throw new Exception("Inventory {$inv->serial_number} (id {$inv->id}) is not available (status={$inv->status}).");
-                        }
-                    }
+                $subTotal += $unitPrice * $quantity;
+                $discountTotal += $discount;
 
-                    $grouped = $inventoryRows->groupBy('product_id');
-
-                    foreach ($grouped as $productId => $rows) {
-                        $quantity = $rows->count();
-                        $lineTotal = 0;
-
-                        foreach ($rows as $inv) {
-                            $soldPrice = $line['sold_prices'][$inv->id] ?? $inv->unit_price;
-                            $lineTotal += (float) $soldPrice;
-                        }
-
-                        $unitPrice = $quantity ? ($lineTotal / $quantity) : 0;
-
-                        $saleItem = SaleItem::create([
-                            'sale_id' => $sale->id,
-                            'product_id' => $productId,
-                            'quantity' => $quantity,
-                            'unit_price' => $unitPrice,
-                            'line_total' => $lineTotal,
-                            'is_serialized' => true,
-                        ]);
-
-                        foreach ($rows as $inv) {
-                            $soldPrice = $line['sold_prices'][$inv->id] ?? $inv->unit_price;
-                            $inv->status = ($status === 'completed') ? 'sold' : 'reserved';
-                            $inv->sale_id = $sale->id;
-                            $inv->sale_item_id = $saleItem->id;
-                            $inv->sold_price = $soldPrice;
-                            $inv->sold_at = ($status === 'completed') ? now() : null;
-                            $inv->updatedby_id = $employeeId;
-                            $inv->save();
-                        }
-
-                        $subTotal += $lineTotal;
-                        $this->updateBranchProductStats($branchId, $productId, $quantity, $status);
+                // 🔹 Update inventory
+                if (!empty($serialNumbers)) {
+                    foreach ($serialNumbers as $serial) {
+                        InventoryItem::where('serial_number', $serial)
+                            ->where('branch_id', $branchId)
+                            ->where('product_id', $item['product_id'])
+                            ->where('status', 'in_stock')
+                            ->limit(1)
+                            ->update([
+                                'status' => 'sold',
+                                'sale_id' => $sale->id,
+                                'sale_item_id' => $saleItem->id,
+                                'sold_price' => $unitPrice,
+                                'sold_at' => now(),
+                            ]);
                     }
                 } else {
-                    // allocation-by-quantity mode
-                    $productId = $line['product_id'] ?? null;
-                    $qty = intval($line['quantity'] ?? 0);
-                    $unitPriceOverride = $line['unit_price'] ?? null;
-
-                    if (! $productId || $qty <= 0) {
-                        throw new Exception('Invalid product/quantity for a line.');
-                    }
-
-                    $inventoryQuery = InventoryItem::where('branch_id', $branchId)
-                        ->where('product_id', $productId)
-                        ->whereIn('status', ['in_stock','reserved'])
-                        ->orderBy('id','asc')
-                        ->lockForUpdate()
-                        ->limit($qty);
-
-                    $selected = $inventoryQuery->get();
-
-                    if ($selected->count() < $qty) {
-                        throw new Exception("Not enough stock for product_id {$productId} in branch {$branchId}. Requested {$qty}, available {$selected->count()}.");
-                    }
-
-                    $lineTotal = 0;
-                    foreach ($selected as $inv) {
-                        $soldPrice = $unitPriceOverride ?? $inv->unit_price;
-                        $lineTotal += (float) $soldPrice;
-                    }
-                    $unitPrice = $qty ? ($lineTotal/$qty) : 0;
-
-                    $saleItem = SaleItem::create([
-                        'sale_id' => $sale->id,
-                        'product_id' => $productId,
-                        'quantity' => $qty,
-                        'unit_price' => $unitPrice,
-                        'line_total' => $lineTotal,
-                        'is_serialized' => true,
-                    ]);
-
-                    foreach ($selected as $inv) {
-                        $soldPrice = $unitPriceOverride ?? $inv->unit_price;
-                        $inv->status = ($status === 'completed') ? 'sold' : 'reserved';
-                        $inv->sale_id = $sale->id;
-                        $inv->sale_item_id = $saleItem->id;
-                        $inv->sold_price = $soldPrice;
-                        $inv->sold_at = ($status === 'completed') ? now() : null;
-                        $inv->updatedby_id = $employeeId;
-                        $inv->save();
-                    }
-
-                    $subTotal += $lineTotal;
-                    $this->updateBranchProductStats($branchId, $productId, $qty, $status);
+                    InventoryItem::where('branch_id', $branchId)
+                        ->where('product_id', $item['product_id'])
+                        ->where('status', 'in_stock')
+                        ->limit($quantity)
+                        ->update([
+                            'status' => 'sold',
+                            'sale_id' => $sale->id,
+                            'sale_item_id' => $saleItem->id,
+                            'sold_price' => $unitPrice,
+                            'sold_at' => now(),
+                        ]);
                 }
             }
 
-            // finalize totals
-            $sale->sub_total = $subTotal;
-            $sale->grand_total = $subTotal;
-            $sale->save();
+            $grandTotal = $subTotal - $discountTotal + $taxTotal;
 
-            return $sale->fresh();
-        });
-    }
+            $sale->update([
+                'sub_total' => $subTotal,
+                'discount_total' => $discountTotal,
+                'tax_total' => $taxTotal,
+                'grand_total' => $grandTotal,
+            ]);
 
-    protected function updateBranchProductStats($branchId, $productId, $qty, $status)
-    {
-        if (!class_exists(BranchProduct::class)) return;
+            DB::commit();
 
-        $bp = BranchProduct::where('branch_id', $branchId)
-            ->where('product_id', $productId)
-            ->lockForUpdate()
-            ->first();
-
-        if (! $bp) return;
-
-        if ($status === 'completed') {
-            $bp->quantity_in_stock = max(0, $bp->quantity_in_stock - $qty);
-            if (isset($bp->reserved_quantity)) {
-                $bp->reserved_quantity = max(0, $bp->reserved_quantity - $qty);
-            }
-        } else {
-            if (isset($bp->reserved_quantity)) {
-                $bp->reserved_quantity += $qty;
-            }
+            return [
+                'success' => true,
+                'sale' => $sale->fresh(['items']),
+                'message' => 'Sale recorded successfully.',
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('SaleService@store error: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+            ];
         }
-        $bp->save();
-    }
-
-    protected function generateSalesNumber()
-    {
-        return 'S' . now()->format('YmdHis') . rand(100,999);
     }
 }

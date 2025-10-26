@@ -20,10 +20,6 @@ class CreateSaleItemsTable extends Migration
             $table->decimal('line_discount', 12, 2)->default(0);
             $table->decimal('tax', 12, 2)->default(0);
             $table->decimal('line_total', 12, 2)->default(0);
-
-            // for serialized tracking
-            $table->boolean('is_serialized')->default(true);
-
             $table->timestamps();
 
             // foreign keys

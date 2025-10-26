@@ -11,6 +11,7 @@ use App\Http\Controllers\BrandController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\POSController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\SaleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -165,6 +166,9 @@ Route::middleware(['auth:employee'])->group(function () {
         Route::post('/pos/checkout', [PosController::class, 'checkout'])->name('pos.checkout');
         Route::post('/pos/validate-serials', [POSController::class, 'validateSerials'])
             ->name('pos.validate-serials');
+        Route::post('/pos/sales', [SaleController::class, 'store'])->name('pos.sales.store');
+        Route::get('/pos/sales', [App\Http\Controllers\SaleController::class, 'index'])
+            ->name('pos.sales.index');
 
         // Purchase Orders
         Route::get('history/purchase-order', [PurchaseOrderController::class, 'index'])
