@@ -166,7 +166,7 @@
                             </button>
                         </div>
 
-                        <div id="po-items" class="space-y-3 pr-2">
+                        <div id="po-items" class="space-y-3 pr-2 overflow-y-auto" style="max-height:45vh;">
                             <!-- PO items will be dynamically inserted here -->
                             <div class="text-center py-8 text-gray-500">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-2"
@@ -446,21 +446,44 @@
                         // Bulk (non-serial) row: qty + cost editable (no markup)
                         if (!item.serials) {
                             div.innerHTML = `
-                                    <div class="flex justify-between items-center">
-                                        <span class="font-semibold">${escapeHtml(item.name)}</span>
-                                        <button class="remove-item text-red-500 font-bold" data-index="${itemIndex}">&times;</button>
+                                   <div class="flex justify-between items-center mb-3">
+                                    <span class="font-semibold text-lg">${escapeHtml(item.name)}</span>
+                                    <button class="remove-item text-black font-bold text-xl hover:text-red-600" data-index="${itemIndex}" aria-label="Remove item"></button>
+                                </div>
+                                
+                                <div class="flex gap-4 items-center">
+                                    <!-- Image Section -->
+                                    <div class="flex-shrink-0">
+                                    <img src="${item.image || '/placeholder-image.jpg'}" 
+                                        alt="${escapeHtml(item.name)}" 
+                                        class="w-20 h-20 object-cover rounded-lg border">
                                     </div>
-                                    <div class="flex gap-2 items-center text-sm mt-1">
-                                        <div class="flex items-center gap-1">
-                                            <label class="text-xs text-gray-500 mr-1">Qty:</label>
-                                            <input type="number" class="po-qty w-16 border rounded px-2 py-1 text-sm" min="1" value="${item.quantity}">
-                                        </div>
-                                        <div class="flex items-center gap-1">
-                                            <label class="text-xs text-gray-500 mr-1">Cost:</label>
-                                            <input type="number" class="po-cost w-28 border rounded px-2 py-1 text-sm" min="0" step="0.01" value="${item.costPrice}">
-                                        </div>
+                                    
+                                    <!-- Qty and Cost Controls - Vertical Layout (aligned to image) -->
+                                    <div class="flex flex-col justify-between flex-grow h-20">
+                                    <div class="flex flex-col">
+                                        <label class="text-xs text-gray-500 mb-1">Quantity</label>
+                                        <input type="number" 
+                                            class="po-qty w-full border rounded px-2 py-1 text-sm h-9" 
+                                            min="1" 
+                                            value="${item.quantity}">
                                     </div>
-                                    <div class="text-green-600 font-bold mt-2">Cost Total: ₱<span class="line-total">${(item.costPrice * item.quantity).toFixed(2)}</span></div>
+                                    
+                                    <div class="flex flex-col">
+                                        <label class="text-xs text-gray-500 mb-1">Cost</label>
+                                        <input type="number" 
+                                            class="po-cost w-full border rounded px-2 py-1 text-sm h-9" 
+                                            min="0" 
+                                            step="0.01" 
+                                            value="${item.costPrice}">
+                                    </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Total Cost -->
+                                <div class="font-medium mt-3 pt-3 border-t">
+                                    Cost Total: ₱<span class="line-total">${(item.costPrice * item.quantity).toFixed(2)}</span>
+                                </div>
                                 `;
 
                             const qtyInput = div.querySelector('.po-qty');
@@ -489,7 +512,7 @@
                             // Serial-tracked: each row shows serial input + unit cost. No per-serial markup input.
                             div.innerHTML = `<div class="flex justify-between items-center">
                                         <span class="font-semibold">${escapeHtml(item.name)}</span>
-                                        <button class="remove-item text-red-500 font-bold" data-index="${itemIndex}">&times;</button>
+                                        <button class="remove-item text-black font-bold hover:text-red-600" data-index="${itemIndex}" aria-label="Remove item">&times;</button>
                                     </div>`;
 
                             const serialContainer = document.createElement('div');
@@ -525,7 +548,7 @@
                                 // selling price display removed from UI per your request (we keep only cost)
                                 const removeSerialBtn = document.createElement('button');
                                 removeSerialBtn.type = 'button';
-                                removeSerialBtn.className = 'text-red-500 ml-2';
+                                removeSerialBtn.className = 'remove-serial-btn text-black hover:text-red-600 ml-2';
                                 removeSerialBtn.innerHTML = '&times;';
                                 removeSerialBtn.addEventListener('click', () => {
                                     item.serials.splice(sIndex, 1);
@@ -652,13 +675,16 @@
                         existing.quantity = (existing.quantity || 0) + qty;
                         existing.costPrice = costPrice;
                         existing.branch_id = currentProduct.branch_id;
+                        // ensure image is present/updated
+                        existing.image = currentProduct.image || existing.image || '';
                     } else {
                         poItems.push({
                             id: currentProduct.id,
                             name: currentProduct.name,
                             quantity: qty,
                             costPrice: costPrice,
-                            branch_id: currentProduct.branch_id
+                            branch_id: currentProduct.branch_id,
+                            image: currentProduct.image || ''
                         });
                     }
 
