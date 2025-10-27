@@ -306,9 +306,15 @@
                                                 data-po-id="{{ $po->id }}">Void</button>
                                         @endif
 
+
                                         <button
                                             class="block w-full text-left px-3 py-1 text-sm hover:bg-gray-100 view-btn text-center"
-                                            data-po-id="{{ $po->id }}">View Items</button>
+                                            data-po-id="{{ $po->id }}" data-po-number="{{ $po->po_number }}"
+                                            data-po-order-date="{{ $po->order_date?->toDateString() ?? '' }}"
+                                            data-po-received-date="{{ $po->received_date?->toDateString() ?? '' }}"
+                                            data-po-created-by="{{ $po->creator?->full_name ?? '' }}"
+                                            data-po-supplier="{{ $po->supplier?->company_name ?? '' }}"
+                                            data-po-status="{{ $po->status ?? '' }}">View Items</button>
                                     </div>
                                 </div>
                             </td>
@@ -329,95 +335,196 @@
     </div>
 
     <!-- Receive Modal -->
-    <div id="receive-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-lg w-3/4 max-w-3xl p-6 overflow-y-auto max-h-[80vh]">
-            <h2 class="text-lg font-semibold mb-4">Receive Purchase Order</h2>
-            <form id="receive-form">
-                <div id="receive-products-container" class="space-y-4">
-                    <!-- Dynamically filled with products & serial inputs & markup -->
+    <div id="receive-modal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-4xl overflow-hidden max-h-[90vh] flex flex-col">
+            <!-- Header -->
+            <div
+                class="flex items-center justify-between gap-4 p-6 border-b border-gray-200 bg-gradient-to-r from-green-50 to-blue-50">
+                <div class="flex items-center gap-3">
+                    <div class="rounded-full bg-green-100 p-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                            class="size-6 text-green-600">
+                            <path fill-rule="evenodd"
+                                d="M7.502 6h7.128A3.375 3.375 0 0 1 18 9.375v9.375a3 3 0 0 0 3-3V6.108c0-1.505-1.125-2.811-2.664-2.94a48.972 48.972 0 0 0-.673-.05A3 3 0 0 0 15 1.5h-1.5a3 3 0 0 0-2.663 1.618c-.225.015-.45.032-.673.05C8.662 3.295 7.554 4.542 7.502 6ZM13.5 3A1.5 1.5 0 0 0 12 4.5h4.5A1.5 1.5 0 0 0 15 3h-1.5Z"
+                                clip-rule="evenodd" />
+                            <path fill-rule="evenodd"
+                                d="M3 9.375C3 8.339 3.84 7.5 4.875 7.5h9.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-9.75A1.875 1.875 0 0 1 3 20.625V9.375Z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Receive Purchase Order</h2>
+                        <p class="text-sm text-gray-600">Confirm received items and serial numbers</p>
+                    </div>
                 </div>
-                <div class="flex justify-end mt-6">
-                    <button type="button" class="px-5 py-2.5 bg-gray-200 rounded-lg mr-2"
-                        id="receive-cancel">Cancel</button>
-                    <button type="submit" class="px-5 py-2.5 bg-green-600 text-white rounded-lg">Confirm Receive</button>
+
+                <button id="receive-close-x"
+                    class="text-gray-500 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-red-50">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Body (scrollable) -->
+            <div class="p-6 overflow-y-auto flex-1 bg-gray-50">
+                <form id="receive-form">
+                    <div id="receive-products-container" class="space-y-5">
+                        <!-- Dynamically filled with products & serial inputs & markup -->
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer -->
+            <div class="flex items-center justify-end p-5 border-t border-gray-200 bg-white">
+                
+                <div class="flex items-center gap-3">
+                    <button id="receive-cancel" type="button"
+                        class="px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium transition-colors">Cancel</button>
+                    <button form="receive-form" type="submit" id="confirm-receive-btn"
+                        class="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors shadow-sm disabled:bg-gray-400 disabled:cursor-not-allowed">Confirm
+                        Receive</button>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 
     <!-- View Items Modal -->
-    <div id="view-items-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-4xl overflow-hidden">
+    <div id="view-items-modal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-4xl overflow-hidden max-h-[90vh] flex flex-col">
             <!-- Header -->
-            <div class="flex items-start justify-between gap-4 p-5 border-b">
+            <div class="flex items-start gap-4 p-5 border-b border-gray-200 bg-gray-50">
                 <div class="flex items-start gap-4">
-                    <div class="rounded-full bg-primary/10 p-3">
-                        <svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M3 7a1 1 0 011-1h12a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V7z"></path>
+                    <div class="rounded-full bg-primary/20 p-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                            class="size-6 text-primary">
+                            <path fill-rule="evenodd"
+                                d="M7.502 6h7.128A3.375 3.375 0 0 1 18 9.375v9.375a3 3 0 0 0 3-3V6.108c0-1.505-1.125-2.811-2.664-2.94a48.972 48.972 0 0 0-.673-.05A3 3 0 0 0 15 1.5h-1.5a3 3 0 0 0-2.663 1.618c-.225.015-.45.032-.673.05C8.662 3.295 7.554 4.542 7.502 6ZM13.5 3A1.5 1.5 0 0 0 12 4.5h4.5A1.5 1.5 0 0 0 15 3h-1.5Z"
+                                clip-rule="evenodd" />
+                            <path fill-rule="evenodd"
+                                d="M3 9.375C3 8.339 3.84 7.5 4.875 7.5h9.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-9.75A1.875 1.875 0 0 1 3 20.625V9.375ZM6 12a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H6.75a.75.75 0 0 1-.75-.75V12Zm2.25 0a.75.75 0 0 1 .75-.75h3.75a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75ZM6 15a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H6.75a.75.75 0 0 1-.75-.75V15Zm2.25 0a.75.75 0 0 1 .75-.75h3.75a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75ZM6 18a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H6.75a.75.75 0 0 1-.75-.75V18Zm2.25 0a.75.75 0 0 1 .75-.75h3.75a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75Z"
+                                clip-rule="evenodd" />
                         </svg>
                     </div>
-                    <div>
-                        <h3 class="text-lg font-semibold" id="po-number">—</h3>
-                        <p class="text-sm text-gray-500" id="po-supplier">Supplier: —</p>
+                    <!-- make this supplier block a vertical flex so status can be placed at the bottom -->
+                    <div class="flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800" id="po-number">—</h3>
+                            <p class="text-sm text-gray-600 mt-1" id="po-supplier">Supplier: —</p>
+                        </div>
+
+                        <!-- moved status into supplier column so it's positioned under supplier info -->
+                        <div class="mt-1">
+                            <span class="text-xs text-gray-500">Status</span>
+                            <span id="po-status"
+                                class="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">—</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex items-start gap-3">
-                    <!-- status badge (will be styled by JS to match table badges) -->
+                <div class="flex items-start gap-3 self-end justify-end ml-auto">
+
+                    <!-- Export & Print buttons -->
                     <div class="flex items-center gap-2">
-                        <span class="text-xs text-gray-500">Status</span>
-                        <span id="po-status" class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">—</span>
-                    </div>
+                        <button id="export-pdf-btn"
+                            class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium w-36">
+                            <!-- small PDF icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                class="size-4 text-white">
+                                <path fill-rule="evenodd"
+                                    d="M5.625 1.5H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375c0-1.036.84-1.875 1.875-1.875Zm5.845 17.03a.75.75 0 0 0 1.06 0l3-3a.75.75 0 1 0-1.06-1.06l-1.72 1.72V12a.75.75 0 0 0-1.5 0v4.19l-1.72-1.72a.75.75 0 0 0-1.06 1.06l3 3Z"
+                                    clip-rule="evenodd" />
+                                <path
+                                    d="M14.25 5.25a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 16.5 7.5h-1.875a.375.375 0 0 1-.375-.375V5.25Z" />
+                            </svg>
 
-                    <!-- Close (X) button -->
-                    <button id="view-close-x" aria-label="Close" class="text-gray-500 hover:text-gray-700 p-2 rounded-md">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
+                            <span>Export PDF</span>
+                        </button>
+
+                        <button id="print-btn"
+                            class="inline-flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium w-36">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                                <path fill-rule="evenodd"
+                                    d="M7.875 1.5C6.839 1.5 6 2.34 6 3.375v2.99c-.426.053-.851.11-1.274.174-1.454.218-2.476 1.483-2.476 2.917v6.294a3 3 0 0 0 3 3h.27l-.155 1.705A1.875 1.875 0 0 0 7.232 22.5h9.536a1.875 1.875 0 0 0 1.867-2.045l-.155-1.705h.27a3 3 0 0 0 3-3V9.456c0-1.434-1.022-2.7-2.476-2.917A48.716 48.716 0 0 0 18 6.366V3.375c0-1.036-.84-1.875-1.875-1.875h-8.25ZM16.5 6.205v-2.83A.375.375 0 0 0 16.125 3h-8.25a.375.375 0 0 0-.375.375v2.83a49.353 49.353 0 0 1 9 0Zm-.217 8.265c.178.018.317.16.333.337l.526 5.784a.375.375 0 0 1-.374.409H7.232a.375.375 0 0 1-.374-.409l.526-5.784a.373.373 0 0 1 .333-.337 41.741 41.741 0 0 1 8.566 0Zm.967-3.97a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H18a.75.75 0 0 1-.75-.75V10.5ZM15 9.75a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V10.5a.75.75 0 0 0-.75-.75H15Z"
+                                    clip-rule="evenodd" />
+                            </svg>
+
+                            <span>Print</span>
+                        </button>
+                    </div>
                 </div>
+                <!-- Close (X) button -->
+                <button id="view-close-x" class="text-gray-400 hover:text-red-600 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
             </div>
 
             <!-- Body: scrollable -->
-            <div id="view-items-body" class="p-5 max-h-[60vh] overflow-y-auto space-y-6">
-                <!-- Summary -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div class="bg-gray-50 p-3 rounded-lg">
-                        <div class="text-xs text-gray-500">Total Line Items</div>
-                        <div id="po-total-items" class="text-lg font-semibold">0</div>
+            <div id="view-items-body" class="p-5 overflow-y-auto space-y-6 flex-1">
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                        <div class="text-sm text-blue-600 font-medium">Total Line Items</div>
+                        <div id="po-total-items" class="text-xl font-bold text-gray-800 mt-1">0</div>
                     </div>
-                    <div class="bg-gray-50 p-3 rounded-lg">
-                        <div class="text-xs text-gray-500">Total Quantity</div>
-                        <div id="po-total-qty" class="text-lg font-semibold">0</div>
+                    <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
+                        <div class="text-sm text-yellow-600 font-medium">Total Quantity</div>
+                        <div id="po-total-qty" class="text-xl font-bold text-gray-800 mt-1">0</div>
                     </div>
-                    <div class="bg-gray-50 p-3 rounded-lg">
-                        <div class="text-xs text-gray-500">Estimated Total</div>
-                        <div id="po-total-amount" class="text-lg font-semibold">₱ 0.00</div>
+                    <div class="bg-green-50 p-4 rounded-lg border border-green-100">
+                        <div class="text-sm font-medium text-green-600">Estimated Total</div>
+                        <div id="po-total-amount" class="text-xl font-bold text-gray-800 mt-1">₱ 0.00</div>
                     </div>
                 </div>
 
-                <!-- PO meta row: display values copied from the table row so modal matches table exactly -->
-                <div id="po-meta-row" class="mt-4 flex flex-wrap gap-3">
-                    <div class="px-3 py-2 bg-gray-50 rounded-lg text-sm text-gray-600">PO Number: <span id="po-number-meta">—</span></div>
-                    <div class="px-3 py-2 bg-gray-50 rounded-lg text-sm text-gray-600">Order Date: <span id="po-order-date">—</span></div>
-                    <div class="px-3 py-2 bg-gray-50 rounded-lg text-sm text-gray-600">Received: <span id="po-received-date">—</span></div>
-                    <div class="px-3 py-2 bg-gray-50 rounded-lg text-sm text-gray-600">Created by: <span id="po-created-by">—</span></div>
+                <!-- PO meta information -->
+                <div id="po-meta-row" class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-3">Order Details</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div>
+                            <div class="text-xs text-gray-500">PO Number</div>
+                            <div id="po-number-meta" class="text-sm font-medium">—</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500">Order Date</div>
+                            <div id="po-order-date" class="text-sm font-medium">—</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500">Received Date</div>
+                            <div id="po-received-date" class="text-sm font-medium">—</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500">Created By</div>
+                            <div id="po-created-by" class="text-sm font-medium">—</div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Products list -->
-                <div id="view-items-container" class="space-y-4">
-                    <!-- Dynamically filled product cards -->
+                <div>
+                    <h4 class="text-lg font-semibold text-gray-800 mb-4">Order Items</h4>
+                    <div id="view-items-container" class="space-y-4">
+                        <!-- Dynamically filled product cards -->
+                    </div>
                 </div>
             </div>
 
             <!-- Footer -->
-            <div class="flex items-center justify-end gap-3 p-4 border-t">
-                <button id="view-close" class="px-4 py-2 rounded-lg bg-gray-100 text-sm">Close</button>
+            <div class="flex items-center justify-end gap-3 p-4 border-t border-gray-200 bg-gray-50">
+                <button id="view-close"
+                    class="px-5 py-2.5 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-medium transition-colors">Close</button>
             </div>
         </div>
     </div>
-   @push('scripts')
-       <script>
+
+    @push('scripts')
+        <script>
             document.addEventListener('DOMContentLoaded', function () {
                 // Use the global `showToast(message, type)` provided by resources/js/utils/toast.js
 
@@ -553,23 +660,45 @@
                                     div.dataset.productId = item.product_id;
                                     div.dataset.poItemId = item.id;
 
-                                    // Base markup input
+                                    // store base purchase price (unit price from PO item)
+                                    const basePrice = parseFloat(item.unit_price || 0);
+                                    div.dataset.basePrice = basePrice;
+
+                                    // Build markup + unit cost UI
                                     div.innerHTML = `
-                                                                                                                                                            <div class="flex justify-between items-center mb-2">
-                                                                                                                                                                <span class="font-semibold">${item.product_name}</span>
-                                                                                                                                                                <span>${item.quantity_ordered} units</span>
-                                                                                                                                                            </div>
-                                                                                                                                                            <div class="mb-2">
-                                                                                                                                                                <label class="block mb-1 font-medium">Markup %:</label>
-                                                                                                                                                                <input type="number" min="0" value="20" class="border rounded px-2 py-1 w-24 markup-input">
-                                                                                                                                                            </div>
-                                                                                                                                                        `;
+                                                <div class="flex justify-between items-center mb-2">
+                                                    <span class="font-semibold">${item.product_name}</span>
+                                                    <span class="qty-span">${item.quantity_ordered} units</span>
+                                                </div>
+
+                                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                                                    <div>
+                                                        <label class="block mb-1 text-xs text-gray-500">Purchase Price</label>
+                                                        <div class="text-sm font-medium">₱ ${basePrice.toFixed(2)}</div>
+                                                        <div class="mt-2 track-info">
+                                                            <div class="serial-inputs mt-1"></div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
+                                                        <label class="block mb-1 font-medium">Unit Cost (₱)</label>
+                                                        <input type="number" min="0" step="0.01" class="border rounded px-2 py-1 w-full unit-cost-input" value="${(basePrice * 1.2).toFixed(2)}">
+                                                    </div>
+
+                                                    <div>
+                                                        <label class="block mb-1 font-medium">Markup %</label>
+                                                        <input type="number" min="0" step="0.01" value="20" class="border rounded px-2 py-1 w-full markup-input">
+                                                    </div>
+                                                </div>
+
+                                                <div class="mt-2">
+                                                    <div class="receive-error text-red-600 text-sm mt-2 hidden">Unit cost must be >= purchase price (no negative markup allowed).</div>
+                                                </div>
+                                            `;
 
                                     // Serial inputs container
-                                    const serialInputsContainer = document.createElement('div');
-                                    serialInputsContainer.className = 'serial-inputs mt-2';
+                                    const serialInputsContainer = div.querySelector('.serial-inputs');
 
-                                    // Automatically render serial inputs if track_serials is true
                                     if (item.track_serials) {
                                         for (let i = 0; i < item.quantity_ordered; i++) {
                                             const input = document.createElement('input');
@@ -579,11 +708,72 @@
                                             serialInputsContainer.appendChild(input);
                                         }
                                     } else {
-                                        serialInputsContainer.classList.add('hidden');
+                                        // show not-tracked message similar to view modal
+                                        serialInputsContainer.innerHTML = `
+                                                    <div class="flex items-center gap-3 p-3 bg-amber-50 rounded-lg border border-amber-100">
+                                                        <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                        </svg>
+                                                        <span class="text-amber-700">This product does not use serial numbers.</span>
+                                                    </div>
+                                                `;
                                     }
 
-                                    div.appendChild(serialInputsContainer);
                                     receiveProductsContainer.appendChild(div);
+
+                                    // Hook up sync logic between markup and unit cost
+                                    const markupInput = div.querySelector('.markup-input');
+                                    const unitCostInput = div.querySelector('.unit-cost-input');
+                                    const errorEl = div.querySelector('.receive-error');
+
+                                    const setError = (msg) => {
+                                        errorEl.textContent = msg;
+                                        errorEl.classList.remove('hidden');
+                                        div.dataset.invalid = '1';
+                                    };
+
+                                    const clearError = () => {
+                                        errorEl.classList.add('hidden');
+                                        div.dataset.invalid = '0';
+                                    };
+
+                                    // initialize validity
+                                    clearError();
+
+                                    // When markup changes, update unit cost (based on basePrice)
+                                    markupInput.addEventListener('input', () => {
+                                        let m = parseFloat(markupInput.value);
+                                        if (isNaN(m)) m = 0;
+                                        if (m < 0) {
+                                            setError('Markup cannot be negative.');
+                                            m = 0;
+                                            markupInput.value = '0';
+                                        }
+                                        const newUnit = +(basePrice * (1 + (m / 100))).toFixed(2);
+                                        unitCostInput.value = newUnit;
+                                        // clear error if profitable
+                                        if (newUnit >= basePrice) clearError();
+                                    });
+
+                                    // When unit cost changes, update markup
+                                    unitCostInput.addEventListener('input', () => {
+                                        let uc = parseFloat(unitCostInput.value);
+                                        if (isNaN(uc) || uc < 0) {
+                                            setError('Unit cost must be a positive number.');
+                                            return;
+                                        }
+                                        const computedMarkup = ((uc / basePrice) - 1) * 100;
+                                        if (isFinite(computedMarkup) && !isNaN(computedMarkup)) {
+                                            const rounded = Math.round(computedMarkup * 100) / 100;
+                                            markupInput.value = rounded < 0 ? '0' : rounded;
+                                        }
+                                        // validate profitability
+                                        if (uc < basePrice) {
+                                            setError('Unit cost must be >= purchase price (no negative markup allowed).');
+                                        } else {
+                                            clearError();
+                                        }
+                                    });
                                 });
 
                                 receiveModal.classList.remove('hidden');
@@ -598,33 +788,54 @@
                 // Cancel button
                 document.getElementById('receive-cancel').addEventListener('click', () => receiveModal.classList.add('hidden'));
 
+                // Close (X) button in receive modal (matches view modal behavior)
+                const receiveCloseX = document.getElementById('receive-close-x');
+                if (receiveCloseX) {
+                    receiveCloseX.addEventListener('click', () => receiveModal.classList.add('hidden'));
+                }
+
                 // Submit receive form
                 document.getElementById('receive-form').addEventListener('submit', e => {
                     e.preventDefault();
                     if (!currentPoId) return;
 
                     const itemsPayload = [];
+                    let hasInvalid = false;
 
                     receiveProductsContainer.querySelectorAll('div.border').forEach(div => {
                         const productId = div.dataset.productId;
                         const poItemId = div.dataset.poItemId;
-                        const qty = parseInt(div.querySelector('span:last-child').textContent.split(' ')[0]);
-                        const markup = parseFloat(div.querySelector('.markup-input').value) || 20;
+                        const qty = parseInt((div.querySelector('.qty-span') || div.querySelector('span:last-child')).textContent.split(' ')[0]) || 0;
+                        const basePrice = parseFloat(div.dataset.basePrice || 0);
 
-                        // Collect serials if inputs exist
+                        const markupInputEl = div.querySelector('.markup-input');
+                        const unitCostEl = div.querySelector('.unit-cost-input');
+                        const serialInputs = div.querySelectorAll('.serial-inputs input');
+
                         const serials = [];
-                        div.querySelectorAll('.serial-inputs input').forEach(inp => {
-                            if (inp.value.trim()) serials.push(inp.value.trim());
-                        });
+                        serialInputs.forEach(inp => { if (inp.value.trim()) serials.push(inp.value.trim()); });
+
+                        const unit_cost = parseFloat(unitCostEl?.value) || basePrice;
+                        const markup = parseFloat(markupInputEl?.value) || Math.round(((unit_cost / basePrice) - 1) * 100 * 100) / 100 || 0;
+
+                        if (div.dataset.invalid === '1' || markup < 0) {
+                            hasInvalid = true;
+                        }
 
                         itemsPayload.push({
                             po_item_id: poItemId,
                             product_id: productId,
                             quantity: qty,
                             serials: serials,
-                            markup: markup
+                            markup: markup,
+                            unit_cost: unit_cost
                         });
                     });
+
+                    if (hasInvalid) {
+                        showToast('One or more items have invalid unit cost / negative markup. Please fix before submitting.', 'error');
+                        return;
+                    }
 
                     axios.post(`/purchase-orders/${currentPoId}/receive`, { items: itemsPayload })
                         .then(res => {
@@ -637,6 +848,8 @@
                             showToast(err.response?.data?.message || 'Failed to receive PO', 'error');
                         });
                 });
+
+                //View Items Modal Logic
 
                 const viewModal = document.getElementById('view-items-modal');
                 const viewContainer = document.getElementById('view-items-container');
@@ -651,133 +864,413 @@
                 const poTotalQty = document.getElementById('po-total-qty');
                 const poTotalAmount = document.getElementById('po-total-amount');
 
+                // Status mapping for consistent styling
+                const statusMap = {
+                    'pending': { class: 'bg-yellow-100 text-yellow-800', label: 'Pending' },
+                    'received': { class: 'bg-green-100 text-green-800', label: 'Received' },
+                    'partial': { class: 'bg-blue-100 text-blue-800', label: 'Partial' },
+                    'cancelled': { class: 'bg-red-100 text-red-800', label: 'Cancelled' },
+                    'void': { class: 'bg-red-100 text-red-800', label: 'Void' },
+                    'voided': { class: 'bg-red-100 text-red-800', label: 'Voided' }
+                };
+
+                // Helper functions
+                const formatCurrency = (amount) => `₱ ${parseFloat(amount || 0).toFixed(2)}`;
+                const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString() : '—';
+
+                const updatePOMetadata = (po, poId) => {
+                    const rawStatus = (po.status || '').toLowerCase();
+                    const statusConfig = statusMap[rawStatus] || { class: 'bg-gray-100 text-gray-600', label: rawStatus || '—' };
+
+                    poNumberEl.textContent = po.po_number || poId;
+                    poNumberMeta.textContent = po.po_number || poId;
+                    poSupplier.textContent = `Supplier: ${po.supplier?.company_name || '—'}`;
+                    poOrderDate.textContent = formatDate(po.order_date);
+                    poReceivedDate.textContent = formatDate(po.received_date);
+                    poCreatedBy.textContent = po.creator?.full_name || '—';
+
+                    poStatus.textContent = statusConfig.label.charAt(0).toUpperCase() + statusConfig.label.slice(1);
+                    poStatus.className = `px-3 py-1 rounded-full text-xs font-medium ${statusConfig.class}`;
+                };
+
+                // Keep the currently viewed PO & items available for export/print
+                window.currentViewedPO = null;
+
+                // Build printable HTML for PO (simple professional layout)
+                const buildPrintableHtml = ({ po, items }) => {
+                    // small inline logo SVG
+                    const logoSvg = `
+                                                <svg width="120" height="36" viewBox="0 0 240 72" xmlns="http://www.w3.org/2000/svg">
+                                                    <rect rx="8" width="240" height="72" fill="#10b981"></rect>
+                                                    <text x="28" y="46" font-family="Arial, Helvetica, sans-serif" font-size="28" fill="#ffffff">BZ Solutions</text>
+                                                </svg>`;
+
+                    const poNumber = po.po_number || '—';
+                    const supplier = po.supplier?.company_name || '—';
+                    const orderDate = po.order_date ? new Date(po.order_date).toLocaleDateString() : '—';
+                    const receivedDate = po.received_date ? new Date(po.received_date).toLocaleDateString() : '—';
+                    const createdBy = po.creator?.full_name || '—';
+                    const status = po.status ? po.status.charAt(0).toUpperCase() + po.status.slice(1) : '—';
+
+                    const rows = (items || []).map(it => {
+                        const unit = parseFloat(it.unit_price || 0);
+                        const qty = parseInt(it.quantity_ordered || 0) || 0;
+                        const line = unit * qty;
+                        return `
+                                                    <tr>
+                                                        <td class="td">${it.product_name || '—'}</td>
+                                                        <td class="td">${it.sku || '—'}</td>
+                                                        <td class="td" style="text-align:center">${qty}</td>
+                                                        <td class="td" style="text-align:right">${unit ? `₱ ${unit.toFixed(2)}` : '—'}</td>
+                                                        <td class="td" style="text-align:right">₱ ${line.toFixed(2)}</td>
+                                                    </tr>
+                                                `;
+                    }).join('');
+
+                    const totalAmount = (items || []).reduce((s, it) => s + (parseFloat(it.unit_price || 0) * (parseInt(it.quantity_ordered || 0) || 0)), 0);
+
+                    return `
+                                            <!doctype html>
+                                            <html>
+                                            <head>
+                                                <meta charset="utf-8" />
+                                                <title>PO ${poNumber}</title>
+                                                <meta name="viewport" content="width=device-width,initial-scale=1" />
+                                                <style>
+                                                    body { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color: #111827; padding: 24px; }
+                                                    .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+                                                    .meta { text-align:right; }
+                                                    h1 { margin:0; font-size:20px; }
+                                                    .box { border:1px solid #e5e7eb; padding:12px; border-radius:6px; }
+                                                    table { width:100%; border-collapse:collapse; margin-top:12px; }
+                                                    th { text-align:left; padding:8px 6px; border-bottom:1px solid #e5e7eb; font-size:12px; color:#6b7280; }
+                                                    td.td { padding:10px 6px; border-bottom:1px solid #f3f4f6; font-size:13px; }
+                                                    .totals { margin-top:12px; text-align:right; font-weight:600; }
+                                                    @media print { @page { size: A4; margin: 20mm; } body { padding:0; } .no-print { display:none !important } }
+                                                </style>
+                                            </head>
+                                            <body>
+                                                <div class="header">
+                                                    <div class="brand">${logoSvg}</div>
+                                                    <div class="meta">
+                                                        <div style="font-size:12px;color:#6b7280">Purchase Order</div>
+                                                        <h1>PO ${poNumber}</h1>
+                                                        <div style="font-size:12px;color:#374151">${supplier}</div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="grid" style="display:flex; gap:12px; margin-bottom:12px;">
+                                                    <div class="box" style="flex:1">
+                                                        <div style="font-size:12px;color:#6b7280">Order Date</div>
+                                                        <div style="font-weight:600">${orderDate}</div>
+                                                    </div>
+                                                    <div class="box" style="flex:1">
+                                                        <div style="font-size:12px;color:#6b7280">Received Date</div>
+                                                        <div style="font-weight:600">${receivedDate}</div>
+                                                    </div>
+                                                    <div class="box" style="flex:1">
+                                                        <div style="font-size:12px;color:#6b7280">Created By</div>
+                                                        <div style="font-weight:600">${createdBy}</div>
+                                                    </div>
+                                                    <div class="box" style="flex:1">
+                                                        <div style="font-size:12px;color:#6b7280">Status</div>
+                                                        <div style="font-weight:600">${status}</div>
+                                                    </div>
+                                                </div>
+
+                                                <table>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Item</th>
+                                                            <th>SKU</th>
+                                                            <th style="text-align:center">Qty</th>
+                                                            <th style="text-align:right">Unit</th>
+                                                            <th style="text-align:right">Line Total</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        ${rows}
+                                                    </tbody>
+                                                </table>
+
+                                                <div class="totals">Estimated Total: ₱ ${totalAmount.toFixed(2)}</div>
+
+                                            </body>
+                                            </html>
+                                            `;
+                };
+
+                // NOTE: removed named openPrintableWindow per request; handlers below inline the open/print flow
+
+                const createProductCard = (item, inventoryItems, totalAmount) => {
+                    const unitPrice = parseFloat(item.unit_price || 0);
+                    const qtyOrdered = parseInt(item.quantity_ordered || 0) || 0;
+                    const lineTotal = unitPrice * qtyOrdered;
+
+                    const card = document.createElement('div');
+                    card.className = 'bg-white border border-2 border-dashed border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow';
+
+                    const skuLabel = item.sku ?
+                        `<span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">SKU: ${item.sku}</span>` : '';
+
+                    const trackingBadge = item.track_serials ?
+                        '<span class="px-2 py-1 text-xs rounded bg-emerald-100 text-emerald-800 border border-emerald-200">Tracked</span>' :
+                        '<span class="px-2 py-1 text-xs rounded bg-amber-100 text-amber-800 border border-amber-200">Not tracked</span>';
+
+                    card.innerHTML = `
+                                                <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                                                    <div class="flex-1">
+                                                        <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                                                            <h5 class="font-semibold text-gray-800 text-lg">${item.product_name || 'Unnamed product'}</h5>
+                                                            <div class="flex flex-wrap gap-2">
+                                                                ${skuLabel}
+                                                                ${trackingBadge}
+                                                            </div>
+                                                        </div>
+                                                        <div class="text-sm text-gray-600 mt-2">
+                                                            <div class="flex flex-wrap gap-4">
+                                                                <span>Ordered: <strong class="text-gray-800">${qtyOrdered}</strong> unit(s)</span>
+                                                                ${unitPrice ? `<span>Unit Price: <strong class="text-gray-800">${formatCurrency(unitPrice)}</strong></span>` : ''}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="text-right">
+                                                        <div class="text-sm font-medium text-gray-500">Line Total</div>
+                                                        <div class="text-xl font-bold text-primary">${formatCurrency(lineTotal)}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-4 pt-4 border-t border-gray-100">
+                                                    <div class="flex items-center gap-2 mb-2">
+                                                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                        </svg>
+                                                        <h6 class="text-sm font-medium text-gray-700">Serial ID</h6>
+                                                    </div>
+                                                    <div class="text-sm text-gray-700" id="serials-${item.product_id}"></div>
+                                                </div>
+                                            `;
+
+                    return { card, lineTotal, qtyOrdered, productId: item.product_id };
+                };
+
+                const populateSerialsInfo = (productId, trackSerials, inventoryItems) => {
+                    const serialsEl = document.getElementById(`serials-${productId}`);
+
+                    if (!serialsEl) return;
+
+                    if (!trackSerials) {
+                        serialsEl.innerHTML = `
+                                                    <div class="flex items-center gap-3 p-3 bg-amber-50 rounded-lg border border-amber-100">
+                                                        <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                                        </svg>
+                                                        <span class="text-amber-700">This product does not use serial numbers.</span>
+                                                    </div>
+                                                `;
+                    } else if (inventoryItems.length === 0) {
+                        serialsEl.innerHTML = `
+                                                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                                        <svg class="w-5 h-5 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m8-8V4a1 1 0 00-1-1h-2a1 1 0 00-1 1v1M9 7h6"></path>
+                                                        </svg>
+                                                        <span class="text-gray-600">No serials recorded for this product.</span>
+                                                    </div>
+                                                `;
+                    } else {
+                        const tableContainer = document.createElement('div');
+                        // give a small horizontal margin so the table doesn't stretch too wide
+                        tableContainer.className = 'overflow-x-auto rounded-lg border border-gray-200 mx-2';
+
+                        const table = document.createElement('table');
+                        // use w-full and reduce horizontal paddings for narrower width
+                        table.className = 'w-full divide-y divide-gray-200 text-center text-sm';
+
+                        table.innerHTML = `
+                                                    <thead class="bg-gray-50">
+                                                        <tr>
+                                                            <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                                            <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Serial Number</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="bg-white divide-y divide-gray-200">
+                                                        ${inventoryItems.map(inv => `
+                                                            <tr class="hover:bg-gray-50">
+                                                                <td class="px-2 py-3 text-sm text-gray-700">${inv.id}</td>
+                                                                <td class="px-2 py-3 text-sm text-gray-700 font-mono">${inv.serial_number || 'N/A'}</td>
+                                                            </tr>
+                                                        `).join('')}
+                                                    </tbody>
+                                                `;
+
+                        tableContainer.appendChild(table);
+                        serialsEl.appendChild(tableContainer);
+                    }
+                };
+
+                const renderItems = (items) => {
+                    viewContainer.innerHTML = '';
+
+                    let totalQty = 0;
+                    let totalLines = items.length;
+                    let totalAmount = 0;
+
+                    items.forEach(item => {
+                        const inventoryItems = Array.isArray(item.inventory_items) ? item.inventory_items : [];
+
+                        const { card, lineTotal, qtyOrdered, productId } = createProductCard(item, inventoryItems, totalAmount);
+                        viewContainer.appendChild(card);
+
+                        totalQty += qtyOrdered;
+                        totalAmount += lineTotal;
+
+                        // Populate serials information after card is added to DOM
+                        setTimeout(() => {
+                            populateSerialsInfo(productId, item.track_serials, inventoryItems);
+                        }, 0);
+                    });
+
+                    // Update totals
+                    poTotalItems.textContent = totalLines;
+                    poTotalQty.textContent = totalQty;
+                    poTotalAmount.textContent = formatCurrency(totalAmount);
+                };
+
+                // Event listeners for view buttons
                 document.querySelectorAll('.view-btn').forEach(btn => {
                     btn.addEventListener('click', e => {
                         closeAllDropdowns();
                         const poId = btn.dataset.poId;
-
-                        // Use PO id to fetch items AND PO metadata from the server, then populate modal
                         const url = `/purchase-orders/${poId}/items?inventory=1`;
+
+                        // Show loading state
+                        viewContainer.innerHTML = `
+                                                    <div class="flex justify-center items-center py-12">
+                                                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                                                        <span class="ml-3 text-gray-600">Loading purchase order details...</span>
+                                                    </div>
+                                                `;
+
+                        viewModal.classList.remove('hidden');
 
                         axios.get(url)
                             .then(res => {
                                 const items = Array.isArray(res.data.items) ? res.data.items : [];
                                 const po = res.data.po || res.data.purchase_order || {};
 
-                                // Populate PO meta from API response (uses returned `po` object)
-                                poNumberEl.textContent = po.po_number || poId;
-                                poNumberMeta.textContent = po.po_number || poId;
-                                poSupplier.textContent = `Supplier: ${po.supplier?.company_name || '—'}`;
-                                poOrderDate.textContent = po.order_date ? new Date(po.order_date).toLocaleDateString() : '—';
-                                poReceivedDate.textContent = po.received_date ? new Date(po.received_date).toLocaleDateString() : '—';
-                                poCreatedBy.textContent = po.creator?.full_name || '—';
+                                // Merge dataset with API response
+                                const ds = btn.dataset || {};
+                                po.po_number = po.po_number || ds.poNumber || poId;
+                                po.supplier = po.supplier || { company_name: ds.poSupplier || '' };
+                                po.order_date = po.order_date || ds.poOrderDate || '';
+                                po.received_date = po.received_date || ds.poReceivedDate || '';
+                                po.creator = po.creator || { full_name: ds.poCreatedBy || '' };
+                                po.status = po.status || ds.poStatus || '';
 
-                                // Map statuses to the same badge styles used in the table
-                                const statusMap = {
-                                    'pending': 'bg-yellow-100 text-yellow-800',
-                                    'received': 'bg-green-100 text-green-800',
-                                    'partial': 'bg-blue-100 text-blue-800',
-                                    'cancelled': 'bg-red-100 text-red-800',
-                                    'void': 'bg-red-100 text-red-800',
-                                    'voided': 'bg-red-100 text-red-800'
-                                };
+                                updatePOMetadata(po, poId);
+                                renderItems(items);
 
-                                const rawStatus = (po.status || '').toLowerCase();
-                                poStatus.textContent = rawStatus ? (rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1)) : '—';
-                                poStatus.className = 'px-2.5 py-0.5 rounded-full text-xs font-medium ' + (statusMap[rawStatus] || 'bg-gray-100 text-gray-600');
-
-                                // Clear and render items
-                                viewContainer.innerHTML = '';
-
-                                let totalQty = 0;
-                                let totalLines = items.length;
-                                let totalAmount = 0;
-
-                                items.forEach(item => {
-                                    const card = document.createElement('div');
-                                    card.className = 'bg-white border rounded-lg p-4 shadow-sm';
-
-                                    const inventoryItems = Array.isArray(item.inventory_items) ? item.inventory_items : [];
-
-                                    // calculate line totals if unit_price present
-                                    const unitPrice = parseFloat(item.unit_price || 0);
-                                    const qtyOrdered = parseInt(item.quantity_ordered || 0) || 0;
-                                    totalQty += qtyOrdered;
-                                    totalAmount += unitPrice * qtyOrdered;
-
-                                    // build a clearer card layout with SKU, qty, price, and serials placeholder
-                                    const skuLabel = item.sku ? `<span class="text-xs text-gray-400">SKU: ${item.sku}</span>` : '';
-                                    const trackingBadge = item.track_serials ? '<span class="px-2 py-0.5 text-xs rounded bg-emerald-100 text-emerald-800">Tracked</span>' : '<span class="px-2 py-0.5 text-xs rounded bg-yellow-100 text-yellow-800">Not tracked</span>';
-
-                                    card.innerHTML = `
-                                        <div class="flex items-start justify-between gap-4">
-                                            <div class="flex-1">
-                                                <div class="flex items-center gap-3">
-                                                    <div class="font-semibold text-gray-800">${item.product_name || 'Unnamed product'}</div>
-                                                    ${skuLabel}
-                                                    <div class="ml-2">${trackingBadge}</div>
-                                                </div>
-                                                <div class="text-xs text-gray-500 mt-1">Ordered: <strong>${qtyOrdered}</strong> unit(s) ${unitPrice ? `• Unit: ₱ ${unitPrice.toFixed(2)}` : ''}</div>
-                                            </div>
-
-                                            <div class="text-right">
-                                                <div class="text-sm font-medium text-gray-600">Line total</div>
-                                                <div class="text-lg font-semibold">₱ ${(unitPrice * qtyOrdered).toFixed(2)}</div>
-                                            </div>
-                                        </div>
-                                        <div class="mt-3">
-                                            <div class="text-sm font-medium mb-2">Serials / Inventory</div>
-                                            <div class="text-sm text-gray-700" id="serials-${item.product_id}"></div>
-                                        </div>
-                                    `;
-
-                                    // Insert into DOM then populate serials block
-                                    viewContainer.appendChild(card);
-
-                                    const serialsEl = document.getElementById(`serials-${item.product_id}`);
-
-                                    if (!item.track_serials) {
-                                        // Product doesn't track serials: friendly message
-                                        serialsEl.innerHTML = `
-                                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                                <span class="px-2 py-0.5 rounded bg-yellow-100 text-yellow-800 text-xs">Not tracked</span>
-                                                <span>This product does not use serials or warranty numbers.</span>
-                                            </div>
-                                        `;
-                                    } else {
-                                        // Tracks serials - list inventory items if present
-                                        if (inventoryItems.length === 0) {
-                                            serialsEl.innerHTML = `<div class="text-gray-500">No serials recorded for this product.</div>`;
-                                        } else {
-                                            const ul = document.createElement('ul');
-                                            ul.className = 'list-disc list-inside text-sm space-y-1';
-                                            inventoryItems.forEach(inv => {
-                                                const li = document.createElement('li');
-                                                li.innerHTML = `<span class="font-medium">ID:</span> ${inv.id} ${inv.serial_number ? `| Serial: ${inv.serial_number}` : '| Serial: N/A'} ${inv.warranty ? `| Warranty: ${inv.warranty}` : ''}`;
-                                                ul.appendChild(li);
-                                            });
-                                            serialsEl.appendChild(ul);
-                                        }
-                                    }
-                                });
-
-                                // Totals
-                                poTotalItems.textContent = totalLines;
-                                poTotalQty.textContent = totalQty;
-                                poTotalAmount.textContent = `₱ ${totalAmount.toFixed(2)}`;
-
-                                viewModal.classList.remove('hidden');
+                                // keep a snapshot for export/print
+                                window.currentViewedPO = { po: po, items: items };
                             })
                             .catch(err => {
-                                console.error(err);
-                                showToast('Failed to fetch items', 'error');
+                                console.error('Failed to fetch PO items:', err);
+                                viewContainer.innerHTML = `
+                                                            <div class="text-center py-8">
+                                                                <svg class="w-12 h-12 text-red-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                                </svg>
+                                                                <h3 class="text-lg font-medium text-gray-900 mb-2">Failed to load purchase order</h3>
+                                                                <p class="text-gray-600 mb-4">Please try again or contact support if the problem persists.</p>
+                                                                <button onclick="viewModal.classList.add('hidden')" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                                                                    Close
+                                                                </button>
+                                                            </div>
+                                                        `;
+                                showToast('Failed to fetch purchase order details', 'error');
                             });
                     });
                 });
 
-                // Close modal
+                // Export / Print button handlers
+                const exportBtn = document.getElementById('export-pdf-btn');
+                const printBtn = document.getElementById('print-btn');
+
+                if (exportBtn) {
+                    exportBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (!window.currentViewedPO) {
+                            showToast('No purchase order loaded to export', 'error');
+                            return;
+                        }
+
+                        // Inline flow: open new window with printable HTML and call print()
+                        try {
+                            const html = buildPrintableHtml(window.currentViewedPO);
+                            const w = window.open('', '_blank', 'noopener');
+                            if (!w) {
+                                showToast('Pop-up blocked. Please allow pop-ups for this site to export/print.', 'error');
+                                return;
+                            }
+                            w.document.open();
+                            w.document.write(html);
+                            w.document.close();
+                            w.focus();
+                            // give the browser a short moment to render
+                            setTimeout(() => {
+                                try { w.print(); } catch (err) { console.error('Print failed', err); }
+                            }, 400);
+                        } catch (err) {
+                            console.error('Export failed', err);
+                            showToast('Failed to export PO', 'error');
+                        }
+                    });
+                }
+
+                if (printBtn) {
+                    printBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (!window.currentViewedPO) {
+                            showToast('No purchase order loaded to print', 'error');
+                            return;
+                        }
+
+                        // Inline flow: open new window with printable HTML and call print()
+                        try {
+                            const html = buildPrintableHtml(window.currentViewedPO);
+                            const w = window.open('', '_blank', 'noopener');
+                            if (!w) {
+                                showToast('Pop-up blocked. Please allow pop-ups for this site to export/print.', 'error');
+                                return;
+                            }
+                            w.document.open();
+                            w.document.write(html);
+                            w.document.close();
+                            w.focus();
+                            setTimeout(() => {
+                                try { w.print(); } catch (err) { console.error('Print failed', err); }
+                            }, 400);
+                        } catch (err) {
+                            console.error('Print failed', err);
+                            showToast('Failed to print PO', 'error');
+                        }
+                    });
+                }
+
+                // Close modal handlers
                 document.getElementById('view-close').addEventListener('click', () => {
                     viewModal.classList.add('hidden');
+                });
+
+                document.getElementById('view-close-x').addEventListener('click', () => {
+                    viewModal.classList.add('hidden');
+                });
+
+                // Close modal when clicking outside
+                viewModal.addEventListener('click', (e) => {
+                    if (e.target === viewModal) {
+                        viewModal.classList.add('hidden');
+                    }
                 });
 
                 // Close (X) in header
