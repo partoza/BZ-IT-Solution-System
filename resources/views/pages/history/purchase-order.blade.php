@@ -148,7 +148,8 @@
                 <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
                     <div class="w-8 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-center"
                         style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5 text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                            class="size-5 text-white">
                             <path
                                 d="M10.464 8.746c.227-.18.497-.311.786-.394v2.795a2.252 2.252 0 0 1-.786-.393c-.394-.313-.546-.681-.546-1.004 0-.323.152-.691.546-1.004ZM12.75 15.662v-2.824c.347.085.664.228.921.421.427.32.579.686.579.991 0 .305-.152.671-.579.991a2.534 2.534 0 0 1-.921.42Z" />
                             <path fill-rule="evenodd"
@@ -345,20 +346,78 @@
     </div>
 
     <!-- View Items Modal -->
-    <div id="view-items-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-lg w-3/4 max-w-3xl p-6 overflow-y-auto max-h-[80vh]">
-            <h2 class="text-lg font-semibold mb-4">PO Items & Serials</h2>
-            <div id="view-items-container" class="space-y-3">
-                <!-- Dynamically filled -->
+    <div id="view-items-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-4xl overflow-hidden">
+            <!-- Header -->
+            <div class="flex items-start justify-between gap-4 p-5 border-b">
+                <div class="flex items-start gap-4">
+                    <div class="rounded-full bg-primary/10 p-3">
+                        <svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M3 7a1 1 0 011-1h12a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V7z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold" id="po-number">—</h3>
+                        <p class="text-sm text-gray-500" id="po-supplier">Supplier: —</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-3">
+                    <!-- status badge (will be styled by JS to match table badges) -->
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-500">Status</span>
+                        <span id="po-status" class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">—</span>
+                    </div>
+
+                    <!-- Close (X) button -->
+                    <button id="view-close-x" aria-label="Close" class="text-gray-500 hover:text-gray-700 p-2 rounded-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
             </div>
-            <div class="flex justify-end mt-6">
-                <button type="button" class="px-5 py-2.5 bg-gray-200 rounded-lg" id="view-close">Close</button>
+
+            <!-- Body: scrollable -->
+            <div id="view-items-body" class="p-5 max-h-[60vh] overflow-y-auto space-y-6">
+                <!-- Summary -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <div class="text-xs text-gray-500">Total Line Items</div>
+                        <div id="po-total-items" class="text-lg font-semibold">0</div>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <div class="text-xs text-gray-500">Total Quantity</div>
+                        <div id="po-total-qty" class="text-lg font-semibold">0</div>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <div class="text-xs text-gray-500">Estimated Total</div>
+                        <div id="po-total-amount" class="text-lg font-semibold">₱ 0.00</div>
+                    </div>
+                </div>
+
+                <!-- PO meta row: display values copied from the table row so modal matches table exactly -->
+                <div id="po-meta-row" class="mt-4 flex flex-wrap gap-3">
+                    <div class="px-3 py-2 bg-gray-50 rounded-lg text-sm text-gray-600">PO Number: <span id="po-number-meta">—</span></div>
+                    <div class="px-3 py-2 bg-gray-50 rounded-lg text-sm text-gray-600">Order Date: <span id="po-order-date">—</span></div>
+                    <div class="px-3 py-2 bg-gray-50 rounded-lg text-sm text-gray-600">Received: <span id="po-received-date">—</span></div>
+                    <div class="px-3 py-2 bg-gray-50 rounded-lg text-sm text-gray-600">Created by: <span id="po-created-by">—</span></div>
+                </div>
+
+                <!-- Products list -->
+                <div id="view-items-container" class="space-y-4">
+                    <!-- Dynamically filled product cards -->
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="flex items-center justify-end gap-3 p-4 border-t">
+                <button id="view-close" class="px-4 py-2 rounded-lg bg-gray-100 text-sm">Close</button>
             </div>
         </div>
     </div>
-
-    @push('scripts')
-        <script>
+   @push('scripts')
+       <script>
             document.addEventListener('DOMContentLoaded', function () {
                 // Use the global `showToast(message, type)` provided by resources/js/utils/toast.js
 
@@ -432,6 +491,13 @@
                     });
                 };
 
+                // Ensure any open dropdowns are closed when an option is clicked
+                document.querySelectorAll('.receive-btn, .cancel-btn, .void-btn, .view-btn').forEach(optBtn => {
+                    optBtn.addEventListener('click', () => {
+                        closeAllDropdowns();
+                    });
+                });
+
                 document.querySelectorAll('.options-btn').forEach(btn => {
                     btn.addEventListener('click', e => {
                         e.stopPropagation();
@@ -470,6 +536,10 @@
                 // Open receive modal
                 document.querySelectorAll('.receive-btn').forEach(btn => {
                     btn.addEventListener('click', e => {
+
+                        // close dropdown before opening modal
+                        closeAllDropdowns();
+
                         currentPoId = btn.dataset.poId;
 
                         axios.get(`/purchase-orders/${currentPoId}/items`)
@@ -485,15 +555,15 @@
 
                                     // Base markup input
                                     div.innerHTML = `
-                                                                                                                                    <div class="flex justify-between items-center mb-2">
-                                                                                                                                        <span class="font-semibold">${item.product_name}</span>
-                                                                                                                                        <span>${item.quantity_ordered} units</span>
-                                                                                                                                    </div>
-                                                                                                                                    <div class="mb-2">
-                                                                                                                                        <label class="block mb-1 font-medium">Markup %:</label>
-                                                                                                                                        <input type="number" min="0" value="20" class="border rounded px-2 py-1 w-24 markup-input">
-                                                                                                                                    </div>
-                                                                                                                                `;
+                                                                                                                                                            <div class="flex justify-between items-center mb-2">
+                                                                                                                                                                <span class="font-semibold">${item.product_name}</span>
+                                                                                                                                                                <span>${item.quantity_ordered} units</span>
+                                                                                                                                                            </div>
+                                                                                                                                                            <div class="mb-2">
+                                                                                                                                                                <label class="block mb-1 font-medium">Markup %:</label>
+                                                                                                                                                                <input type="number" min="0" value="20" class="border rounded px-2 py-1 w-24 markup-input">
+                                                                                                                                                            </div>
+                                                                                                                                                        `;
 
                                     // Serial inputs container
                                     const serialInputsContainer = document.createElement('div');
@@ -570,44 +640,131 @@
 
                 const viewModal = document.getElementById('view-items-modal');
                 const viewContainer = document.getElementById('view-items-container');
+                const poNumberEl = document.getElementById('po-number');
+                const poSupplier = document.getElementById('po-supplier');
+                const poNumberMeta = document.getElementById('po-number-meta');
+                const poOrderDate = document.getElementById('po-order-date');
+                const poReceivedDate = document.getElementById('po-received-date');
+                const poCreatedBy = document.getElementById('po-created-by');
+                const poStatus = document.getElementById('po-status');
+                const poTotalItems = document.getElementById('po-total-items');
+                const poTotalQty = document.getElementById('po-total-qty');
+                const poTotalAmount = document.getElementById('po-total-amount');
 
                 document.querySelectorAll('.view-btn').forEach(btn => {
                     btn.addEventListener('click', e => {
+                        closeAllDropdowns();
                         const poId = btn.dataset.poId;
 
-                        // Request getItems with inventory items
+                        // Use PO id to fetch items AND PO metadata from the server, then populate modal
                         const url = `/purchase-orders/${poId}/items?inventory=1`;
 
                         axios.get(url)
                             .then(res => {
-                                console.log('PO Items response:', res.data);
-                                const items = res.data.items;
+                                const items = Array.isArray(res.data.items) ? res.data.items : [];
+                                const po = res.data.po || res.data.purchase_order || {};
+
+                                // Populate PO meta from API response (uses returned `po` object)
+                                poNumberEl.textContent = po.po_number || poId;
+                                poNumberMeta.textContent = po.po_number || poId;
+                                poSupplier.textContent = `Supplier: ${po.supplier?.company_name || '—'}`;
+                                poOrderDate.textContent = po.order_date ? new Date(po.order_date).toLocaleDateString() : '—';
+                                poReceivedDate.textContent = po.received_date ? new Date(po.received_date).toLocaleDateString() : '—';
+                                poCreatedBy.textContent = po.creator?.full_name || '—';
+
+                                // Map statuses to the same badge styles used in the table
+                                const statusMap = {
+                                    'pending': 'bg-yellow-100 text-yellow-800',
+                                    'received': 'bg-green-100 text-green-800',
+                                    'partial': 'bg-blue-100 text-blue-800',
+                                    'cancelled': 'bg-red-100 text-red-800',
+                                    'void': 'bg-red-100 text-red-800',
+                                    'voided': 'bg-red-100 text-red-800'
+                                };
+
+                                const rawStatus = (po.status || '').toLowerCase();
+                                poStatus.textContent = rawStatus ? (rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1)) : '—';
+                                poStatus.className = 'px-2.5 py-0.5 rounded-full text-xs font-medium ' + (statusMap[rawStatus] || 'bg-gray-100 text-gray-600');
+
+                                // Clear and render items
                                 viewContainer.innerHTML = '';
 
+                                let totalQty = 0;
+                                let totalLines = items.length;
+                                let totalAmount = 0;
+
                                 items.forEach(item => {
-                                    const div = document.createElement('div');
-                                    div.className = 'border rounded p-3';
+                                    const card = document.createElement('div');
+                                    card.className = 'bg-white border rounded-lg p-4 shadow-sm';
 
                                     const inventoryItems = Array.isArray(item.inventory_items) ? item.inventory_items : [];
-                                    let serialList = '';
 
-                                    if (inventoryItems.length > 0) {
-                                        serialList = '<ul class="list-disc list-inside">';
-                                        inventoryItems.forEach(inv => {
-                                            serialList += `<li>ID: ${inv.id} | Serial: ${inv.serial_number || 'N/A'}</li>`;
-                                        });
-                                        serialList += '</ul>';
+                                    // calculate line totals if unit_price present
+                                    const unitPrice = parseFloat(item.unit_price || 0);
+                                    const qtyOrdered = parseInt(item.quantity_ordered || 0) || 0;
+                                    totalQty += qtyOrdered;
+                                    totalAmount += unitPrice * qtyOrdered;
+
+                                    // build a clearer card layout with SKU, qty, price, and serials placeholder
+                                    const skuLabel = item.sku ? `<span class="text-xs text-gray-400">SKU: ${item.sku}</span>` : '';
+                                    const trackingBadge = item.track_serials ? '<span class="px-2 py-0.5 text-xs rounded bg-emerald-100 text-emerald-800">Tracked</span>' : '<span class="px-2 py-0.5 text-xs rounded bg-yellow-100 text-yellow-800">Not tracked</span>';
+
+                                    card.innerHTML = `
+                                        <div class="flex items-start justify-between gap-4">
+                                            <div class="flex-1">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="font-semibold text-gray-800">${item.product_name || 'Unnamed product'}</div>
+                                                    ${skuLabel}
+                                                    <div class="ml-2">${trackingBadge}</div>
+                                                </div>
+                                                <div class="text-xs text-gray-500 mt-1">Ordered: <strong>${qtyOrdered}</strong> unit(s) ${unitPrice ? `• Unit: ₱ ${unitPrice.toFixed(2)}` : ''}</div>
+                                            </div>
+
+                                            <div class="text-right">
+                                                <div class="text-sm font-medium text-gray-600">Line total</div>
+                                                <div class="text-lg font-semibold">₱ ${(unitPrice * qtyOrdered).toFixed(2)}</div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <div class="text-sm font-medium mb-2">Serials / Inventory</div>
+                                            <div class="text-sm text-gray-700" id="serials-${item.product_id}"></div>
+                                        </div>
+                                    `;
+
+                                    // Insert into DOM then populate serials block
+                                    viewContainer.appendChild(card);
+
+                                    const serialsEl = document.getElementById(`serials-${item.product_id}`);
+
+                                    if (!item.track_serials) {
+                                        // Product doesn't track serials: friendly message
+                                        serialsEl.innerHTML = `
+                                            <div class="flex items-center gap-2 text-sm text-gray-600">
+                                                <span class="px-2 py-0.5 rounded bg-yellow-100 text-yellow-800 text-xs">Not tracked</span>
+                                                <span>This product does not use serials or warranty numbers.</span>
+                                            </div>
+                                        `;
                                     } else {
-                                        serialList = '<span class="text-gray-500">No serials / inventory items</span>';
+                                        // Tracks serials - list inventory items if present
+                                        if (inventoryItems.length === 0) {
+                                            serialsEl.innerHTML = `<div class="text-gray-500">No serials recorded for this product.</div>`;
+                                        } else {
+                                            const ul = document.createElement('ul');
+                                            ul.className = 'list-disc list-inside text-sm space-y-1';
+                                            inventoryItems.forEach(inv => {
+                                                const li = document.createElement('li');
+                                                li.innerHTML = `<span class="font-medium">ID:</span> ${inv.id} ${inv.serial_number ? `| Serial: ${inv.serial_number}` : '| Serial: N/A'} ${inv.warranty ? `| Warranty: ${inv.warranty}` : ''}`;
+                                                ul.appendChild(li);
+                                            });
+                                            serialsEl.appendChild(ul);
+                                        }
                                     }
-
-                                    div.innerHTML = `
-                                                                                                                                    <div class="font-semibold mb-1">${item.product_name} - ${item.quantity_ordered} units</div>
-                                                                                                                                    <div>${serialList}</div>
-                                                                                                                                `;
-
-                                    viewContainer.appendChild(div);
                                 });
+
+                                // Totals
+                                poTotalItems.textContent = totalLines;
+                                poTotalQty.textContent = totalQty;
+                                poTotalAmount.textContent = `₱ ${totalAmount.toFixed(2)}`;
 
                                 viewModal.classList.remove('hidden');
                             })
@@ -622,7 +779,13 @@
                 document.getElementById('view-close').addEventListener('click', () => {
                     viewModal.classList.add('hidden');
                 });
-            });
+
+                // Close (X) in header
+                const viewCloseX = document.getElementById('view-close-x');
+                if (viewCloseX) {
+                    viewCloseX.addEventListener('click', () => viewModal.classList.add('hidden'));
+                }
+            }); // <-- Close document.addEventListener('DOMContentLoaded', ...)
         </script>
     @endpush
 

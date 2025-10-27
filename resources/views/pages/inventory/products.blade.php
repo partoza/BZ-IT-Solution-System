@@ -135,10 +135,18 @@
                 <p class="text-xs text-gray-500 mt-1">Need Restock</p>
                 <div class="flex items-center gap-2 mt-2">
                     <div class="relative inline-block group">
+                        @php
+                            $noProducts = isset($totalProducts) && $totalProducts == 0;
+                        @endphp
+
                         <div
-                            class="flex items-center {{ $lowStock > 0 ? 'text-orange-600 bg-orange-600/10' : 'text-green-600 bg-primary/10' }} text-xs cursor-pointer px-2 py-1 rounded-lg">
+                            class="flex items-center {{ $noProducts ? 'text-sky-600 bg-sky-600/10' : ($lowStock > 0 ? 'text-orange-600 bg-orange-600/10' : 'text-green-600 bg-primary/10') }} text-xs cursor-pointer px-2 py-1 rounded-lg">
                             <svg class="size-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                @if($lowStock > 0)
+                                @if($noProducts)
+                                    <!-- Info icon for no products (blue) -->
+                                      <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/>
+                                        
+                                @elseif($lowStock > 0)
                                     <!-- Warning icon for low stock -->
                                     <path fill-rule="evenodd"
                                         d="M8.257 3.099c.765-1.36 2.721-1.36 3.486 0l6.518 11.593c.75 1.335-.213 2.983-1.743 2.983H3.482c-1.53 0-2.493-1.648-1.743-2.983L8.257 3.1zM10 6.5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 6.5zm0 7.75a.75.75 0 100 1.5.75.75 0 000-1.5z"
@@ -149,7 +157,9 @@
                                         d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
                                 @endif
                             </svg>
-                            <span>{{ $lowStock > 0 ? 'Attention Needed' : 'All Products in Stock' }}</span>
+                            <span>
+                                {{ $noProducts ? 'No Existing Product' : ($lowStock > 0 ? 'Attention Needed' : 'All Products in Stock') }}
+                            </span>
                         </div>
 
                         @if($lowStock > 0)
@@ -194,7 +204,8 @@
                                         @endphp
                                         <div class="flex items-center justify-between">
                                             <div class="flex items-center gap-2 min-w-0">
-                                                <span class="w-2 h-2 rounded-full {{ $stock == 0 ? 'bg-red-400' : 'bg-yellow-400' }} inline-block"></span>
+                                                <span
+                                                    class="w-2 h-2 rounded-full {{ $stock == 0 ? 'bg-red-400' : 'bg-yellow-400' }} inline-block"></span>
                                                 <span class="text-xs text-gray-600 truncate">{{ $name }}</span>
                                             </div>
                                             <span class="font-semibold text-gray-800 text-xs">
@@ -256,16 +267,16 @@
                             </select>
 
                             <!-- <select id="subCategorySelect" name="sub_category"
-                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm flex-1 min-w-32" {{ $subCategories ? '' : 'disabled' }}>
-                                    <option value="">All Subcategories</option>
-                                    @if($subCategories)
-                                        @foreach($subCategories as $sub)
-                                            <option value="{{ $sub->id }}" {{ $subCategory == $sub->id ? 'selected' : '' }}>
-                                                {{ $sub->name }}
-                                            </option>
-                                        @endforeach
-                                    @endif
-                                </select> -->
+                                        class="px-3 py-2 border border-gray-300 rounded-lg text-sm flex-1 min-w-32" {{ $subCategories ? '' : 'disabled' }}>
+                                        <option value="">All Subcategories</option>
+                                        @if($subCategories)
+                                            @foreach($subCategories as $sub)
+                                                <option value="{{ $sub->id }}" {{ $subCategory == $sub->id ? 'selected' : '' }}>
+                                                    {{ $sub->name }}
+                                                </option>
+                                            @endforeach
+                                        @endif
+                                    </select> -->
 
                             <select name="stock"
                                 class="px-3 py-2 border border-gray-300 rounded-lg text-sm flex-1 min-w-32">

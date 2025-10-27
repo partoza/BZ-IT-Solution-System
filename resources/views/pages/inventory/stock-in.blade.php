@@ -16,7 +16,7 @@
             <!-- toast container is provided globally in layout -->
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 h-auto lg:h-[calc(100vh-8rem)]">
-                <!-- 🟩 LEFT COLUMN: Supplier Info + Product Catalog -->
+                <!-- LEFT COLUMN: Supplier Info + Product Catalog -->
                 <div class="lg:col-span-2 flex flex-col min-h-0">
                     <!-- Supplier Information -->
                     <div class="bg-white rounded-xl shadow-sm p-6 py-4 mb-3 border border-gray-100">
@@ -51,30 +51,30 @@
                             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                 <div class="supplier-info">
                                     <label class="block text-xs text-gray-500 mb-1">Company</label>
-                                    <div class="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm min-h-[42px] flex items-center"
+                                    <div class="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm min-h-[42px] flex items-center min-w-0"
                                         data-field="company_name">
-                                        <span class="text-gray-500">Select a supplier</span>
+                                        <span class="text-gray-500 truncate block w-full">Select a supplier</span>
                                     </div>
                                 </div>
                                 <div class="supplier-info">
                                     <label class="block text-xs text-gray-500 mb-1">Contact Person</label>
-                                    <div class="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm min-h-[42px] flex items-center"
+                                    <div class="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm min-h-[42px] flex items-center min-w-0"
                                         data-field="contact_person">
-                                        <span class="text-gray-500">Select a supplier</span>
+                                        <span class="text-gray-500 truncate block w-full">Select a supplier</span>
                                     </div>
                                 </div>
                                 <div class="supplier-info">
                                     <label class="block text-xs text-gray-500 mb-1">Email</label>
-                                    <div class="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm min-h-[42px] flex items-center"
+                                    <div class="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm min-h-[42px] flex items-center min-w-0"
                                         data-field="email">
-                                        <span class="text-gray-500">Select a supplier</span>
+                                        <span class="text-gray-500 truncate block w-full">Select a supplier</span>
                                     </div>
                                 </div>
                                 <div class="supplier-info">
                                     <label class="block text-xs text-gray-500 mb-1">Phone</label>
-                                    <div class="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm min-h-[42px] flex items-center"
+                                    <div class="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm min-h-[42px] flex items-center min-w-0"
                                         data-field="phone_number">
-                                        <span class="text-gray-500">Select a supplier</span>
+                                        <span class="text-gray-500 truncate block w-full">Select a supplier</span>
                                     </div>
                                 </div>
                             </div>
@@ -318,22 +318,33 @@
                 if (this.value) supplierErrorEl.classList.add('hidden');
                 const supplierId = this.value;
                 if (!supplierId) {
-                    supplierInfoBoxes.forEach(box => { box.innerHTML = '<span class="text-gray-500">Select a supplier</span>'; });
+                    supplierInfoBoxes.forEach(box => {
+                        box.innerHTML = '<span class="text-gray-500 truncate block w-full">Select a supplier</span>';
+                    });
                     return;
                 }
-                supplierInfoBoxes.forEach(box => { box.innerHTML = '<span class="text-gray-500">Loading...</span>'; });
+                supplierInfoBoxes.forEach(box => {
+                    box.innerHTML = '<span class="text-gray-500 truncate block w-full">Loading...</span>';
+                });
                 fetch(`/supplier/${supplierId}/details`)
                     .then(response => { if (!response.ok) throw new Error('Supplier not found'); return response.json(); })
                     .then(data => {
                         supplierInfoBoxes.forEach(box => {
                             const field = box.getAttribute('data-field');
-                            box.textContent = data[field] || 'N/A';
+                            // create a span so truncation classes remain intact and set textContent to avoid XSS
+                            const sp = document.createElement('span');
+                            sp.className = 'text-gray-700 truncate block w-full';
+                            sp.textContent = data[field] || 'N/A';
+                            box.innerHTML = '';
+                            box.appendChild(sp);
                             box.classList.remove('text-gray-500');
                         });
                         //showToast(`Supplier ${data.company_name} selected`, 'success');
                     })
                     .catch(() => {
-                        supplierInfoBoxes.forEach(box => { box.innerHTML = '<span class="text-red-500">Error loading</span>'; });
+                        supplierInfoBoxes.forEach(box => {
+                            box.innerHTML = '<span class="text-red-500 truncate block w-full">Error loading</span>';
+                        });
                         showToast('Error loading supplier details', 'error');
                     });
             });
@@ -454,22 +465,30 @@
                 supplierSelect.addEventListener('change', function () {
                     const supplierId = this.value;
                     if (!supplierId) {
-                        supplierInfoBoxes.forEach(box => { box.innerHTML = '<span class="text-gray-500">Select a supplier</span>'; });
+                        supplierInfoBoxes.forEach(box => {
+                            box.innerHTML = '<span class="text-gray-500 truncate block w-full">Select a supplier</span>';
+                        });
                         return;
                     }
-                    supplierInfoBoxes.forEach(box => { box.innerHTML = '<span class="text-gray-500">Loading...</span>'; });
+                    supplierInfoBoxes.forEach(box => {
+                        box.innerHTML = '<span class="text-gray-500 truncate block w-full">Loading...</span>';
+                    });
                     fetch(`/supplier/${supplierId}/details`)
                         .then(response => { if (!response.ok) throw new Error('Supplier not found'); return response.json(); })
                         .then(data => {
                             supplierInfoBoxes.forEach(box => {
                                 const field = box.getAttribute('data-field');
-                                box.textContent = data[field] || 'N/A';
+                                const sp = document.createElement('span');
+                                sp.className = 'text-gray-700 truncate block w-full';
+                                sp.textContent = data[field] || 'N/A';
+                                box.innerHTML = '';
+                                box.appendChild(sp);
                                 box.classList.remove('text-gray-500');
                             });
                             showToast(`Supplier ${data.company_name} selected`, 'success');
                         })
                         .catch(() => {
-                            supplierInfoBoxes.forEach(box => { box.innerHTML = '<span class="text-red-500">Error loading</span>'; });
+                            supplierInfoBoxes.forEach(box => { box.innerHTML = '<span class="text-red-500 truncate block w-full">Error loading</span>'; });
                             showToast('Error loading supplier details', 'error');
                         });
                 });
@@ -481,17 +500,17 @@
                     poItemsContainer.innerHTML = '';
 
                     if (poItems.length === 0) {
-                    poItemsContainer.innerHTML = `
-                            <div class="text-center py-8 text-gray-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-12 text-gray-300 mx-auto mb-2" style="width:48px; height:48px;">
-                <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
-                <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
-            </svg>
+                        poItemsContainer.innerHTML = `
+                                    <div class="text-center py-8 text-gray-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-12 text-gray-300 mx-auto mb-2" style="width:48px; height:48px;">
+                        <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
+                        <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
+                    </svg>
 
-                                <p class="font-medium">Purchase Order is Empty</p>
-                                <p class="text-xs">Add products from the catalog</p>
-                            </div>
-                        `;
+                                        <p class="font-medium">Purchase Order is Empty</p>
+                                        <p class="text-xs">Add products from the catalog</p>
+                                    </div>
+                                `;
                         updatePOTotals();
                         return;
                     }
@@ -503,58 +522,58 @@
                         // Bulk (non-serial) row: qty + cost editable (no markup)
                         if (!item.serials) {
                             div.innerHTML = `
-                                                                           <div class="flex justify-between items-center">
-                                          <span class="font-medium text-md">${escapeHtml(item.name)}</span>
-                                          <button class="remove-item" data-index="${itemIndex}" aria-label="Remove item">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                                                 class="w-5 h-5 text-black hover:text-red-600 transition-colors duration-150">
-                                              <path fill-rule="evenodd"
-                                                    d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                          </button>
-                                        </div>
+                                                                                   <div class="flex justify-between items-center">
+                                                  <span class="font-medium text-md">${escapeHtml(item.name)}</span>
+                                                  <button class="remove-item" data-index="${itemIndex}" aria-label="Remove item">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                                         class="w-5 h-5 text-black hover:text-red-600 transition-colors duration-150">
+                                                      <path fill-rule="evenodd"
+                                                            d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                                                            clip-rule="evenodd" />
+                                                    </svg>
+                                                  </button>
+                                                </div>
 
-                                        <!-- Image + Inputs Column -->
-                                        <div class="flex items-start gap-6">
-                                          <!-- Product Image -->
-                                          <div class="flex-shrink-0">
-                                            <img src="${item.image || '/placeholder-image.jpg'}"
-                                                 alt="${escapeHtml(item.name)}"
-                                                 class="w-[110px] h-[110px] object-cover rounded-lg border">
-                                          </div>
+                                                <!-- Image + Inputs Column -->
+                                                <div class="flex items-start gap-6">
+                                                  <!-- Product Image -->
+                                                  <div class="flex-shrink-0">
+                                                    <img src="${item.image || '/placeholder-image.jpg'}"
+                                                         alt="${escapeHtml(item.name)}"
+                                                         class="w-[110px] h-[110px] object-cover rounded-lg border">
+                                                  </div>
 
-                                          <!-- Quantity and Cost stacked vertically -->
-                                          <div class="flex flex-col flex-1 justify-between gap-1">
-                                            <!-- Quantity -->
-                                            <div class="flex flex-col">
-                                              <label class="text-xs text-gray-500">Quantity</label>
-                                              <input type="number"
-                                                     class="po-qty w-full border rounded px-2 py-1 text-sm h-9"
-                                                     min="1"s
-                                                     placeholder="Enter Quantity"
-                                                     value="${item.quantity}">
-                                            </div>
+                                                  <!-- Quantity and Cost stacked vertically -->
+                                                  <div class="flex flex-col flex-1 justify-between gap-1">
+                                                    <!-- Quantity -->
+                                                    <div class="flex flex-col">
+                                                      <label class="text-xs text-gray-500">Quantity</label>
+                                                      <input type="number"
+                                                             class="po-qty w-full border rounded px-2 py-1 text-sm h-9"
+                                                             min="1"s
+                                                             placeholder="Enter Quantity"
+                                                             value="${item.quantity}">
+                                                    </div>
 
-                                            <!-- Cost -->
-                                            <div class="flex flex-col">
-                                              <label class="text-xs text-gray-500">Cost</label>
-                                              <input type="number"
-                                                     class="po-cost w-full border rounded px-2 py-1 text-sm h-9"
-                                                     min="0"
-                                                     step="0.01"
-                                                     placeholder="Enter Cost"
-                                                     value="${item.costPrice}">
-                                            </div>
-                                          </div>
-                                        </div>
+                                                    <!-- Cost -->
+                                                    <div class="flex flex-col">
+                                                      <label class="text-xs text-gray-500">Cost</label>
+                                                      <input type="number"
+                                                             class="po-cost w-full border rounded px-2 py-1 text-sm h-9"
+                                                             min="0"
+                                                             step="0.01"
+                                                             placeholder="Enter Cost"
+                                                             value="${item.costPrice}">
+                                                    </div>
+                                                  </div>
+                                                </div>
 
-                                        <!-- Total Cost -->
-                                        <div class="mt-3 pt-3 border-t text-sm">
-                                          Cost Total: ₱<span class="line-total">${(item.costPrice * item.quantity).toFixed(2)}</span>
-                                        </div>
+                                                <!-- Total Cost -->
+                                                <div class="mt-3 pt-3 border-t text-sm">
+                                                  Cost Total: ₱<span class="line-total">${(item.costPrice * item.quantity).toFixed(2)}</span>
+                                                </div>
 
-                                                                        `;
+                                                                                `;
 
                             const qtyInput = div.querySelector('.po-qty');
                             const costInput = div.querySelector('.po-cost');
@@ -581,9 +600,9 @@
                         } else {
                             // Serial-tracked: each row shows serial input + unit cost. No per-serial markup input.
                             div.innerHTML = `<div class="flex justify-between items-center">
-                                                                                                        <span class="font-semibold">${escapeHtml(item.name)}</span>
-                                                                                                        <button class="remove-item text-black font-bold hover:text-red-600" data-index="${itemIndex}" aria-label="Remove item">&times;</button>
-                                                                                                    </div>`;
+                                                                                                                <span class="font-semibold">${escapeHtml(item.name)}</span>
+                                                                                                                <button class="remove-item text-black font-bold hover:text-red-600" data-index="${itemIndex}" aria-label="Remove item">&times;</button>
+                                                                                                            </div>`;
 
                             const serialContainer = document.createElement('div');
                             serialContainer.className = 'flex flex-col gap-2 mt-2';
@@ -783,7 +802,7 @@
                         supplierErrorEl.classList.remove('hidden');
                         supplierSelect.focus();
                         return;
-                 }
+                    }
                     // show confirmation modal
                     confirmModal.classList.remove('hidden');
                 });
@@ -866,7 +885,7 @@
                                 poItems = [];
                                 updatePODisplay();
                                 setTimeout(() => {
-                                    window.location.href = '/history/purchase-order'; 
+                                    window.location.href = '/history/purchase-order';
                                 }, 900);
                             } else {
                                 showToast(data.message || 'Failed to create order', 'error');

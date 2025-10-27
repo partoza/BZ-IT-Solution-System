@@ -204,7 +204,13 @@
                                 </div>
                             </div>
 
-                            <div id="warrantyPanel" class="space-y-3">
+                             <div class="flex items-center gap-2">
+                                <input type="hidden" name="track_serials" value="0">
+                                <input type="checkbox" name="track_serials" id="trackSerials" value="1" checked class="accent-primary">
+                                <label for="trackSerials" class="text-gray-700">Track serials for this product</label>
+                            </div>
+
+                            <div id="warrantyPanel" class="space-y-3 hidden">
                                 <label class="block text-sm text-gray-600">Warranty</label>
                                 <select name="warranty_period"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white">
@@ -215,11 +221,7 @@
                                 </select>
                             </div>
 
-                            <div class="flex items-center gap-2">
-                                <input type="hidden" name="track_serials" value="0">
-                                <input type="checkbox" name="track_serials" id="trackSerials" value="1" checked>
-                                <label for="trackSerials" class="text-gray-700">Track serials for this product</label>
-                            </div>
+                           
 
                         </div>
                         <div class="mt-4">
@@ -408,6 +410,29 @@
                 // Toast Notification
                 // ------------------------------
                 // Use the global `showToast(message, type)` provided by resources/js/utils/toast.js
+
+                // ------------------------------
+                // Toggle warrantyPanel when tracking serials
+                // ------------------------------
+                const trackSerialsCheckbox = document.getElementById('trackSerials');
+                const warrantyPanel = document.getElementById('warrantyPanel');
+
+                function updateWarrantyPanel() {
+                    if (!trackSerialsCheckbox || !warrantyPanel) return;
+                    if (trackSerialsCheckbox.checked) {
+                        warrantyPanel.classList.remove('hidden');
+                    } else {
+                        warrantyPanel.classList.add('hidden');
+                    }
+                }
+
+                if (trackSerialsCheckbox) {
+                    // initialize visibility on load
+                    updateWarrantyPanel();
+                    // update when checkbox changes
+                    trackSerialsCheckbox.addEventListener('change', updateWarrantyPanel);
+                }
+
 
                 // ------------------------------
                 // Brand Modal Handling
