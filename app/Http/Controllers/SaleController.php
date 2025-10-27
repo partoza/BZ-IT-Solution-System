@@ -263,4 +263,101 @@ class SaleController extends Controller
             'topCustomer'
         ));
     }
+
+    public function showJson(\App\Models\Sale $sale): \Illuminate\Http\JsonResponse
+    {
+        // Load relations used by the response
+        $sale->load(['customer', 'employee', 'items.product', 'items.inventoryItems']);
+
+        $items = [];
+        foreach ($sale->items as $index => $item) {
+            $quantity = (int) ($item->quantity ?? 0);
+
+            // Try to use stored unit_price from the sale_item record first
+            $unitPrice = (float) ($item->unit_price ?? $item->unitPrice ?? 0);
+
+            // If unit price missing, follow store() logic to fetch/derive it
+            if ($unitPrice <= 0) {
+                $product = $item->product;
+                $requiresSerial = $product ? ($product->track_serials ?? false) : false;
+
+                if ($requiresSerial) {
+                    // Attempt to derive from linked inventory items (serials)
+                    $serials = $item->inventoryItems->pluck('serial_number')->filter()->values()->all();
+
+                    if (!empty($serials)) {
+                        $serialPrices = \App\Models\InventoryItem::whereIn('serial_number', $serials)
+                            ->where('product_id', $item->product_id)
+                            ->pluck('unit_price')
+                            ->toArray();
+
+                        if (!empty($serialPrices)) {
+                            $unitPrice = array_sum($serialPrices) / count($serialPrices);
+                        }
+                    }
+                } else {
+                    // Non-serialized: try to fetch any in-stock inventory unit_price for the branch
+                    $inventoryItem = \App\Models\InventoryItem::where('product_id', $item->product_id)
+                        ->when($sale->branch_id, fn($q) => $q->where('branch_id', $sale->branch_id))
+                        ->where('status', 'in_stock')
+                        ->first();
+
+                    if ($inventoryItem) {
+                        $unitPrice = $inventoryItem->unit_price;
+                    }
+                }
+            }
+
+            $lineDiscount = (float) ($item->line_discount ?? 0);
+            $lineTotal = round(($quantity * $unitPrice) - $lineDiscount, 2);
+
+            $serials = $item->inventoryItems->pluck('serial_number')->filter()->values()->all();
+
+            $items[] = [
+                'line' => $index + 1,
+                'product_id' => $item->product->product_id ?? $item->product_id ?? null,
+                'product_name' => $item->product->product_name ?? $item->product->name ?? 'Unknown',
+                'qty' => $quantity,
+                'unit_price' => round($unitPrice, 2),
+                'line_discount' => round($lineDiscount, 2),
+                'line_total' => $lineTotal,
+                'serials' => $serials,
+            ];
+        }
+
+        // Subtotal: sum of line totals before sale-level discount/vat
+        $subtotal = array_sum(array_map(fn($i) => ($i['qty'] * $i['unit_price']), $items));
+
+        // Sale-level discount / VAT logic: prefer stored values if present
+        $saleDiscount = (float) ($sale->discount ?? 0);
+        $vat = null;
+        if (isset($sale->vat)) {
+            $vat = (float) $sale->vat;
+        } else {
+            // default VAT rate 12% on (subtotal - saleDiscount)
+            $vat = round(($subtotal - $saleDiscount) * 0.12, 2);
+        }
+
+        $grandTotal = (float) ($sale->grand_total ?? round($subtotal - $saleDiscount + $vat, 2));
+        $amountPaid = (float) ($sale->amount_paid ?? 0);
+        $change = $amountPaid > $grandTotal ? round($amountPaid - $grandTotal, 2) : 0.00;
+
+        $payload = [
+            'id' => $sale->id,
+            'sales_number' => $sale->sales_number,
+            'sold_at' => optional($sale->sold_at)->toDateTimeString(),
+            'cashier' => $sale->employee?->full_name ?? $sale->createdBy?->full_name ?? null,
+            'customer' => $sale->customer?->name ?? 'Walk-in',
+            'payment_method' => $sale->payment_method ?? 'cash',
+            'amount_paid' => round($amountPaid, 2),
+            'change' => $change,
+            'subtotal' => round($subtotal, 2),
+            'vat' => round($vat, 2),
+            'discount' => round($saleDiscount, 2),
+            'grand_total' => round($grandTotal, 2),
+            'items' => $items,
+        ];
+
+        return response()->json(['success' => true, 'sale' => $payload]);
+    }
 }

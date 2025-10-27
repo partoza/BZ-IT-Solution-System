@@ -64,6 +64,9 @@ class SaleService
             // Generate sales number
             $salesNumber = 'S-' . now()->format('YmdHis') . '-' . strtoupper(Str::random(4));
             $branchId = auth()->guard('employee')->user()?->branch_id;
+            $amountPaid = isset($data['amount_paid']) ? (float) $data['amount_paid'] : 0.00;
+            $initialChange = 0.00;
+
             $sale = Sale::create([
                 'sales_number' => $salesNumber,
                 'branch_id' => $branchId,
@@ -73,6 +76,8 @@ class SaleService
                 'payment_reference' => $data['payment_reference'] ?? null,
                 'status' => $data['status'] ?? 'completed',
                 'sold_at' => now(),
+                'amount_paid' => round($amountPaid, 2),   
+                'change' => round($initialChange, 2),            
                 'createdby_id' => auth()->user()->employee_id ?? null,
             ]);
 
@@ -134,11 +139,19 @@ class SaleService
 
             $grandTotal = $subTotal - $discountTotal + $taxTotal;
 
+            $amountPaid = isset($data['amount_paid']) ? (float) $data['amount_paid'] : 0.00;
+            $change = 0.00;
+            if ($amountPaid > $grandTotal) {
+                $change = round($amountPaid - $grandTotal, 2);
+            }
+
             $sale->update([
                 'sub_total' => $subTotal,
                 'discount_total' => $discountTotal,
                 'tax_total' => $taxTotal,
                 'grand_total' => $grandTotal,
+                'amount_paid' => round($amountPaid, 2),
+                'change' => round($change, 2),
             ]);
 
             DB::commit();

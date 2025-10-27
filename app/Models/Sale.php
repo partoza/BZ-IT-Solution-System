@@ -35,7 +35,8 @@ class Sale extends Model
         // payment fields
         'payment_method',       // 'cash'|'gcash'
         'payment_reference',    // e.g. gcash transaction ref or manual note
-        'payment_amount',       // optional explicit amount paid
+        'amount_paid',       // optional explicit amount paid
+        'change',
         // audit
         'createdby_id',
         'updatedby_id',
@@ -46,7 +47,7 @@ class Sale extends Model
         'tax_total' => 'decimal:2',
         'discount_total' => 'decimal:2',
         'grand_total' => 'decimal:2',
-        'payment_amount' => 'decimal:2',
+        'amount_paid' => 'decimal:2',
         'sold_at' => 'datetime',
     ];
 

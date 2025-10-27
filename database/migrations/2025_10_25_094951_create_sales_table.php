@@ -27,6 +27,8 @@ class CreateSalesTable extends Migration
             $table->enum('status', ['draft','reserved','completed','cancelled'])->default('draft');
 
             // monetary fields
+            $table->decimal('amount_paid', 12, 2)->default(0);
+            $table->decimal('change', 12, 2)->default(0);
             $table->decimal('sub_total', 12, 2)->default(0);
             $table->decimal('tax_total', 12, 2)->default(0);
             $table->decimal('discount_total', 12, 2)->default(0);

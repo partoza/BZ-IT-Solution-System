@@ -152,7 +152,13 @@
                             <td class="px-6 py-3">
                                 <div class="flex space-x-2">
                                     <a href="#" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">View</a>
-                                    <a href="#" class="text-green-600 hover:text-green-900 text-sm font-medium">Receipt</a>
+                                    <button
+                                        type="button"
+                                        class="openReceiptBtn text-green-600 hover:text-green-900 text-sm font-medium"
+                                        data-sale-id="{{ $sale->id }}"
+                                    >
+                                        Receipt
+                                    </button>
                                     @if($sale->status !== 'cancelled')
                                         <a href="#" class="text-red-600 hover:text-red-900 text-sm font-medium">Void</a>
                                     @endif
@@ -501,541 +507,312 @@
 
     <!-- Receipt Modal -->
     <div id="receiptModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <div class="relative top-10 mx-auto p-4 border w-full max-w-md shadow-2xl rounded-lg bg-white">
+        <div class="relative top-10 mx-auto p-4 border w-full max-w-4xl shadow-2xl rounded-lg bg-white">
             <!-- Receipt Content -->
-            <div class="bg-white p-6 rounded-lg">
+            <div class="bg-white p-8 rounded-lg">
                 <!-- Receipt Header -->
-                <div class="text-center border-b border-gray-300 pb-4 mb-4">
-                    <h2 class="text-xl font-bold text-gray-800">Your Store Name</h2>
-                    <p class="text-sm text-gray-600">123 Business Street, City</p>
-                    <p class="text-sm text-gray-600">Phone: (02) 8123-4567</p>
-                    <p class="text-xs text-gray-500 mt-1">VAT Reg TIN: 123-456-789-000</p>
+                <div class="text-center border-b border-gray-300 pb-6 mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">BZ It Solutions</h2>
+                    <p class="text-sm text-gray-600">123 Business Street, City, Philippines 1000</p>
+                    <p class="text-sm text-gray-600">Phone: (02) 8123-4567 | Email: bzitsolutions@gmail.com</p>
+                    <p class="text-xs text-gray-500 mt-2">VAT Reg TIN: 123-456-789-000</p>
                 </div>
 
                 <!-- Transaction Details -->
-                <div class="mb-4">
-                    <div class="flex justify-between text-sm mb-2">
-                        <span class="text-gray-600">Receipt No:</span>
-                        <span class="font-medium" id="receiptTransactionId">#TRX-2023-00125</span>
+                <div class="grid grid-cols-2 gap-8 mb-6">
+                    <div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-600 font-medium">Receipt No:</span>
+                            <span class="font-bold" id="receiptTransactionId">#TRX-2023-00125</span>
+                        </div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-600 font-medium">Date:</span>
+                            <span class="font-medium" id="receiptDate">Nov 15, 2023 10:30 AM</span>
+                        </div>
                     </div>
-                    <div class="flex justify-between text-sm mb-2">
-                        <span class="text-gray-600">Date:</span>
-                        <span class="font-medium" id="receiptDate">Nov 15, 2023 10:30 AM</span>
-                    </div>
-                    <div class="flex justify-between text-sm mb-2">
-                        <span class="text-gray-600">Cashier:</span>
-                        <span class="font-medium" id="receiptCashier">Maria Santos</span>
+                    <div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-600 font-medium">Cashier:</span>
+                            <span class="font-medium" id="receiptCashier">Maria Santos</span>
+                        </div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-600 font-medium">Customer:</span>
+                            <span class="font-medium" id="receiptCustomer">Maria Santos</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Items List -->
-                <div class="border-y border-gray-300 py-3 mb-4">
-                    <div class="flex justify-between text-sm font-medium mb-2">
-                        <span>Item</span>
-                        <span>Amount</span>
+                <!-- Items Table -->
+                <div class="mb-6">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b-2 border-gray-300">
+                                <th class="text-left pb-3 font-semibold text-gray-700">Serial No.</th>
+                                <th class="text-left pb-3 font-semibold text-gray-700">Item Description</th>
+                                <th class="text-right pb-3 font-semibold text-gray-700">Qty</th>
+                                <th class="text-right pb-3 font-semibold text-gray-700">Unit Price</th>
+                                <th class="text-right pb-3 font-semibold text-gray-700">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="receiptItems">
+                            <!-- Items will be dynamically inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Totals Section -->
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <!-- Payment Details -->
+                        <div class="border-t border-gray-300 pt-4">
+                            <h4 class="font-semibold text-gray-800 mb-3">Payment Details</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Payment Method:</span>
+                                    <span class="font-medium" id="receiptPaymentMethod">GCash</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Amount Paid:</span>
+                                    <span class="font-medium" id="receiptAmountPaid">₱2,500.00</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Change:</span>
+                                    <span class="font-medium" id="receiptChange">₱50.00</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="space-y-2" id="receiptItems">
-                        <!-- Items will be dynamically inserted here -->
-                    </div>
-                </div>
-
-                <!-- Totals -->
-                <div class="mb-4 space-y-2">
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">Subtotal:</span>
-                        <span id="receiptSubtotal">₱2,200.00</span>
-                    </div>
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">VAT (12%):</span>
-                        <span id="receiptVat">₱264.00</span>
-                    </div>
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">Discount:</span>
-                        <span id="receiptDiscount">-₱14.00</span>
-                    </div>
-                    <div class="flex justify-between text-base font-bold border-t border-gray-300 pt-2 mt-2">
-                        <span>TOTAL:</span>
-                        <span id="receiptTotal">₱2,450.00</span>
-                    </div>
-                </div>
-
-                <!-- Payment Details -->
-                <div class="border-t border-gray-300 pt-3 mb-4">
-                    <div class="flex justify-between text-sm mb-1">
-                        <span class="text-gray-600">Payment Method:</span>
-                        <span class="font-medium" id="receiptPaymentMethod">GCash</span>
-                    </div>
-                    <div class="flex justify-between text-sm mb-1">
-                        <span class="text-gray-600">Amount Paid:</span>
-                        <span class="font-medium" id="receiptAmountPaid">₱2,500.00</span>
-                    </div>
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">Change:</span>
-                        <span class="font-medium" id="receiptChange">₱50.00</span>
+                    <div>
+                        <!-- Summary -->
+                        <div class="border-t border-gray-300 pt-4">
+                            <h4 class="font-semibold text-gray-800 mb-3">Summary</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Subtotal:</span>
+                                    <span id="receiptSubtotal">₱2,200.00</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">VAT (12%):</span>
+                                    <span id="receiptVat">₱264.00</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Discount:</span>
+                                    <span id="receiptDiscount">-₱14.00</span>
+                                </div>
+                                <div class="flex justify-between text-base font-bold border-t border-gray-300 pt-2 mt-2">
+                                    <span class="text-gray-800">TOTAL:</span>
+                                    <span id="receiptTotal" class="text-green-600">₱2,450.00</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Footer -->
-                <div class="text-center border-t border-gray-300 pt-4">
-                    <p class="text-xs text-gray-500 mb-2">Thank you for your purchase!</p>
+                <div class="text-center border-t border-gray-300 pt-6 mt-6">
+                    <p class="text-sm text-gray-600 mb-2">Thank you for your purchase!</p>
                     <p class="text-xs text-gray-500">Items can be exchanged within 7 days with original receipt</p>
                     <p class="text-xs text-gray-500 mt-2">*** THIS IS NOT AN OFFICIAL RECEIPT ***</p>
                 </div>
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex justify-center gap-3 mt-6 pt-4 border-t border-gray-200">
-                <button type="button" class="closeReceiptModalBtn px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm">
+            <div class="flex justify-center gap-4 mt-8 pt-6 border-t border-gray-200">
+                <button type="button" class="closeReceiptModalBtn px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
                     Close
                 </button>
-                <button type="button" id="printReceiptBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm flex items-center">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button type="button" id="printReceiptBtn" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
                     </svg>
                     Print Receipt
                 </button>
+                <button type="button" id="downloadReceiptBtn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Download PDF
+                </button>
             </div>
         </div>
     </div>
+
 @push('scripts')
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // Export Modal Functionality
-    const exportModal = document.getElementById('exportReportModal');
-    const exportForm = document.getElementById('exportForm');
-    const exportBtn = document.getElementById('exportReportBtn');
-    const closeExportBtns = exportModal.querySelectorAll('.closeExportModalBtn');
+    const openButtons = document.querySelectorAll('.openReceiptBtn');
+    const modalWrap = document.getElementById('receiptModal');
+    const closeBtns = document.querySelectorAll('.closeReceiptModalBtn');
 
-    // View Modal Functionality
-    const viewModal = document.getElementById('viewModal');
-    const closeViewBtns = viewModal.querySelectorAll('.closeViewModalBtn');
-    const viewBtns = document.querySelectorAll('.viewBtn');
-    const voidTransactionBtn = document.getElementById('voidTransactionBtn');
+    // modal elements
+    const elTransactionId = document.getElementById('receiptTransactionId');
+    const elDate = document.getElementById('receiptDate');
+    const elCashier = document.getElementById('receiptCashier');
+    const elCustomer = document.getElementById('receiptCustomer');
+    const elItems = document.getElementById('receiptItems');
+    const elPaymentMethod = document.getElementById('receiptPaymentMethod');
+    const elAmountPaid = document.getElementById('receiptAmountPaid');
+    const elChange = document.getElementById('receiptChange');
+    const elSubtotal = document.getElementById('receiptSubtotal');
+    const elVat = document.getElementById('receiptVat');
+    const elDiscount = document.getElementById('receiptDiscount');
+    const elTotal = document.getElementById('receiptTotal');
 
-    // Void Modal Functionality
-    const voidModal = document.getElementById('voidModal');
-    const closeVoidBtns = voidModal.querySelectorAll('.closeVoidModalBtn');
-    const voidBtns = document.querySelectorAll('.voidBtn');
-    const confirmVoidBtn = document.getElementById('confirmVoidBtn');
-    const confirmVoidCheckbox = document.getElementById('confirmVoid');
-    const voidReasonSelect = document.getElementById('voidReason');
-    const otherReasonContainer = document.getElementById('otherReasonContainer');
-    const otherReasonTextarea = document.getElementById('otherReason');
-
-    // Receipt Modal Functionality
-    const receiptModal = document.getElementById('receiptModal');
-    const closeReceiptBtns = receiptModal.querySelectorAll('.closeReceiptModalBtn');
-    const printReceiptBtn = document.getElementById('printReceiptBtn');
-    const receiptBtns = document.querySelectorAll('.receiptBtn');
-
-    // Sample transaction data
-    const transactionData = {
-        'TRX-2023-00125': {
-            transactionId: 'TRX-2023-00125',
-            date: 'Nov 15, 2023 10:30 AM',
-            customerName: 'Maria Santos',
-            customerPhone: '+63 912 345 6789',
-            customerEmail: 'maria.santos@email.com',
-            items: [
-                { name: 'Wireless Bluetooth Headphones', price: 1200.00, quantity: 1 },
-                { name: 'Phone Case - Premium', price: 850.00, quantity: 1 },
-                { name: 'Screen Protector', price: 150.00, quantity: 1 }
-            ],
-            subtotal: 2200.00,
-            vat: 264.00,
-            discount: 14.00,
-            total: 2450.00,
-            paymentMethod: 'GCash',
-            amountPaid: 2500.00,
-            change: 50.00,
-            status: 'Completed',
-            notes: 'Customer requested electronic receipt via email. Items were properly packaged and handed over.'
-        },
-        'TRX-2023-00126': {
-            transactionId: 'TRX-2023-00126',
-            date: 'Nov 15, 2023 11:15 AM',
-            customerName: 'Juan Dela Cruz',
-            customerPhone: '+63 917 654 3210',
-            customerEmail: 'juan.delacruz@email.com',
-            items: [
-                { name: 'Smartphone XYZ Model', price: 2500.00, quantity: 1 },
-                { name: 'Wireless Charger', price: 980.00, quantity: 1 },
-                { name: 'USB-C Cable', price: 300.00, quantity: 2 }
-            ],
-            subtotal: 3780.00,
-            vat: 453.60,
-            discount: 0.00,
-            total: 3780.00,
-            paymentMethod: 'Cash',
-            amountPaid: 4000.00,
-            change: 220.00,
-            status: 'Pending',
-            notes: 'Customer will pick up items tomorrow. Payment received in full.'
-        },
-        'TRX-2023-00127': {
-            transactionId: 'TRX-2023-00127',
-            date: 'Nov 14, 2023 02:45 PM',
-            customerName: 'Ana Reyes',
-            customerPhone: '+63 918 765 4321',
-            customerEmail: 'ana.reyes@email.com',
-            items: [
-                { name: 'Laptop Sleeve', price: 750.00, quantity: 1 },
-                { name: 'Mouse Pad - Large', price: 500.00, quantity: 1 }
-            ],
-            subtotal: 1250.00,
-            vat: 150.00,
-            discount: 0.00,
-            total: 1250.00,
-            paymentMethod: 'Credit Card',
-            amountPaid: 1250.00,
-            change: 0.00,
-            status: 'Completed',
-            notes: 'Regular customer. Items delivered to shipping address.'
-        },
-        'TRX-2023-00124': {
-            transactionId: 'TRX-2023-00124',
-            date: 'Nov 15, 2023 09:15 AM',
-            customerName: 'Carlos Rodriguez',
-            customerPhone: '+63 920 123 4567',
-            customerEmail: 'carlos.rodriguez@email.com',
-            items: [
-                { name: 'Power Bank 10000mAh', price: 890.00, quantity: 1 }
-            ],
-            subtotal: 890.00,
-            vat: 106.80,
-            discount: 0.00,
-            total: 890.00,
-            paymentMethod: 'Cash',
-            amountPaid: 1000.00,
-            change: 110.00,
-            status: 'Voided',
-            notes: 'Transaction voided due to incorrect item scanning. Customer was charged for wrong product.',
-            voidReason: 'incorrect_amount',
-            voidNotes: 'Scanned wrong product barcode. Correct product should have been Power Bank 20000mAh.'
-        }
-    };
-
-    let currentTransactionId = null;
-
-    // Export Modal Functions
-    function openExportModal() {
-        exportModal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
+    function formatCurrency(value) {
+        // Philippine peso formatting
+        return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(value);
     }
 
-    function closeExportModal() {
-        exportModal.classList.add('hidden');
-        document.body.style.overflow = 'auto';
+    function formatDate(dateString) {
+        if (!dateString) return '—';
+        const d = new Date(dateString);
+        // e.g., Nov 15, 2023 10:30 AM
+        return d.toLocaleString('en-PH', {
+            year: 'numeric', month: 'short', day: '2-digit',
+            hour: 'numeric', minute: '2-digit', hour12: true
+        });
     }
 
-    // View Modal Functions
-    function openViewModal(transactionId) {
-        const data = transactionData[transactionId];
-        if (data) {
-            currentTransactionId = transactionId;
-            
-            // Populate view modal data
-            document.getElementById('viewTransactionId').textContent = `#${data.transactionId}`;
-            document.getElementById('viewDateTime').textContent = data.date;
-            document.getElementById('viewCustomerName').textContent = data.customerName;
-            document.getElementById('viewCustomerPhone').textContent = data.customerPhone;
-            document.getElementById('viewCustomerEmail').textContent = data.customerEmail;
-            document.getElementById('viewPaymentMethod').textContent = data.paymentMethod;
-            document.getElementById('viewSubtotal').textContent = `₱${data.subtotal.toFixed(2)}`;
-            document.getElementById('viewVat').textContent = `₱${data.vat.toFixed(2)}`;
-            document.getElementById('viewDiscount').textContent = data.discount > 0 ? `-₱${data.discount.toFixed(2)}` : '₱0.00';
-            document.getElementById('viewTotal').textContent = `₱${data.total.toFixed(2)}`;
-            document.getElementById('viewAmountPaid').textContent = `₱${data.amountPaid.toFixed(2)}`;
-            document.getElementById('viewChange').textContent = `₱${data.change.toFixed(2)}`;
-            document.getElementById('viewNotes').textContent = data.notes;
-
-            // Update status badge
-            const statusElement = document.getElementById('viewStatus');
-            statusElement.textContent = data.status;
-            statusElement.className = 'px-2.5 py-0.5 text-xs font-medium rounded-full ' + 
-                (data.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                 data.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                 data.status === 'Voided' ? 'bg-red-100 text-red-800' :
-                 data.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
-                 'bg-blue-100 text-blue-800');
-
-            // Show/hide void button based on status
-            if (data.status === 'Voided' || data.status === 'Cancelled') {
-                voidTransactionBtn.classList.add('hidden');
-            } else {
-                voidTransactionBtn.classList.remove('hidden');
+    async function fetchSaleJson(saleId) {
+        try {
+            const res = await fetch(`/sales/${saleId}/json`, {
+                headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin'
+            });
+            if (!res.ok) {
+                const txt = await res.text();
+                throw new Error(txt || 'Failed to fetch sale');
             }
+            return await res.json();
+        } catch (err) {
+            showToast('Unable to load receipt. See console for details.');
+            return null;
+        }
+    }
 
-            // Populate items list
-            const itemsContainer = document.getElementById('viewItemsList');
-            itemsContainer.innerHTML = '';
-            data.items.forEach(item => {
-                const itemElement = document.createElement('div');
-                itemElement.className = 'flex justify-between items-center border-b border-gray-100 pb-2';
-                itemElement.innerHTML = `
-                    <div>
-                        <p class="font-medium text-gray-800">${item.name}</p>
-                        <p class="text-sm text-gray-600">Qty: ${item.quantity}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="font-medium text-gray-800">₱${(item.price * item.quantity).toFixed(2)}</p>
-                        <p class="text-sm text-gray-600">₱${item.price.toFixed(2)} each</p>
-                    </div>
-                `;
-                itemsContainer.appendChild(itemElement);
+    function openModal() {
+        modalWrap.classList.remove('hidden');
+    }
+    function closeModal() {
+        modalWrap.classList.add('hidden');
+    }
+
+    openButtons.forEach(btn => {
+        btn.addEventListener('click', async (ev) => {
+            ev.preventDefault();
+            const saleId = btn.dataset.saleId;
+            if (!saleId) return;
+
+            const data = await fetchSaleJson(saleId);
+            if (!data || !data.success) return;
+
+            const sale = data.sale;
+
+            // header
+            elTransactionId.textContent = sale.sales_number ? `#${sale.sales_number}` : `#${sale.id}`;
+            elDate.textContent = formatDate(sale.sold_at ?? new Date().toISOString());
+            elCashier.textContent = sale.cashier ?? '—';
+            elCustomer.textContent = sale.customer ?? 'Walk-in';
+
+            // items
+            elItems.innerHTML = '';
+            (sale.items || []).forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = '';
+
+                // Serial column: join serials with <br> if present
+                const serialTd = document.createElement('td');
+                serialTd.className = 'py-2';
+                serialTd.innerHTML = (item.serials && item.serials.length) ? item.serials.join('<br>') : '—';
+
+                const descTd = document.createElement('td');
+                descTd.className = 'py-2';
+                descTd.textContent = item.product_name;
+
+                const qtyTd = document.createElement('td');
+                qtyTd.className = 'py-2 text-right';
+                qtyTd.textContent = item.qty;
+
+                const unitTd = document.createElement('td');
+                unitTd.className = 'py-2 text-right';
+                unitTd.textContent = formatCurrency(item.unit_price);
+
+                const totalTd = document.createElement('td');
+                totalTd.className = 'py-2 text-right';
+                totalTd.textContent = formatCurrency(item.line_total);
+
+                tr.appendChild(serialTd);
+                tr.appendChild(descTd);
+                tr.appendChild(qtyTd);
+                tr.appendChild(unitTd);
+                tr.appendChild(totalTd);
+
+                elItems.appendChild(tr);
             });
 
-            viewModal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-    }
+            // payment
+            elPaymentMethod.textContent = (sale.payment_method || '—').toUpperCase();
+            elAmountPaid.textContent = formatCurrency(sale.amount_paid || 0);
+            elChange.textContent = formatCurrency(sale.change || 0);
 
-    function closeViewModal() {
-        viewModal.classList.add('hidden');
-        document.body.style.overflow = 'auto';
-        currentTransactionId = null;
-    }
+            // summary
+            elSubtotal.textContent = formatCurrency(sale.subtotal || 0);
+            elVat.textContent = formatCurrency(sale.vat || 0);
+            elDiscount.textContent = (sale.discount && sale.discount > 0) ? `-${formatCurrency(sale.discount)}` : formatCurrency(0);
+            elTotal.textContent = formatCurrency(sale.grand_total || 0);
 
-    // Void Modal Functions
-    function openVoidModal(transactionId) {
-        currentTransactionId = transactionId;
-        const data = transactionData[transactionId];
-        
-        if (data) {
-            document.getElementById('voidTransactionId').textContent = `#${data.transactionId}`;
-            
-            // Reset form
-            voidReasonSelect.value = '';
-            otherReasonContainer.classList.add('hidden');
-            otherReasonTextarea.value = '';
-            document.getElementById('voidNotes').value = '';
-            confirmVoidCheckbox.checked = false;
-            confirmVoidBtn.disabled = true;
-            
-            voidModal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-    }
+            openModal();
+        });
+    });
 
-    function closeVoidModal() {
-        voidModal.classList.add('hidden');
-        document.body.style.overflow = 'auto';
-        currentTransactionId = null;
-    }
+    closeBtns.forEach(b => b.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeModal();
+    }));
 
-    function confirmVoidTransaction() {
-        const reason = voidReasonSelect.value;
-        const otherReason = otherReasonTextarea.value;
-        const notes = document.getElementById('voidNotes').value;
-        
-        if (!reason) {
-            showToast('Please select a reason for voiding the transaction.', 'error');
-            return;
-        }
+    // Close modal when clicking outside content area
+    modalWrap.addEventListener('click', function (e) {
+        if (e.target === modalWrap) closeModal();
+    });
 
-        if (reason === 'other' && !otherReason.trim()) {
-            showToast('Please specify the reason for voiding.', 'error');
-            return;
-        }
+    // Print and Download
+    document.getElementById('printReceiptBtn')?.addEventListener('click', function () {
+        // Create a printable window with receipt content
+        const receiptContent = document.querySelector('#receiptModal > div > .bg-white')?.outerHTML || document.querySelector('#receiptModal')?.outerHTML;
+        const w = window.open('', '_blank', 'width=800,height=900');
+        if (!w) { alert('Unable to open print window. Allow popups or use browser print shortcut.'); return; }
 
-        // Update transaction status to voided
-        if (transactionData[currentTransactionId]) {
-            transactionData[currentTransactionId].status = 'Voided';
-            transactionData[currentTransactionId].voidReason = reason;
-            transactionData[currentTransactionId].voidNotes = reason === 'other' ? otherReason : notes;
-            
-            // Update UI
-            updateTransactionUI(currentTransactionId);
-            
-            showToast('Transaction has been successfully voided.', 'success');
-            closeVoidModal();
-            closeViewModal();
-        }
-    }
-
-    function updateTransactionUI(transactionId) {
-        // Update the table row for the voided transaction
-        const data = transactionData[transactionId];
-        if (data) {
-            // This would typically update the DOM, but for this example, we'll just reload the page
-            // In a real application, you would update the specific row via JavaScript
-            setTimeout(() => {
-                window.location.reload();
-            }, 1500);
-        }
-    }
-
-    // Receipt Modal Functions
-    function openReceiptModal(transactionId) {
-        const data = transactionData[transactionId];
-        if (data) {
-            // Populate receipt data
-            document.getElementById('receiptTransactionId').textContent = `#${data.transactionId}`;
-            document.getElementById('receiptDate').textContent = data.date;
-            document.getElementById('receiptCashier').textContent = data.customerName;
-            document.getElementById('receiptSubtotal').textContent = `₱${data.subtotal.toFixed(2)}`;
-            document.getElementById('receiptVat').textContent = `₱${data.vat.toFixed(2)}`;
-            document.getElementById('receiptDiscount').textContent = data.discount > 0 ? `-₱${data.discount.toFixed(2)}` : '₱0.00';
-            document.getElementById('receiptTotal').textContent = `₱${data.total.toFixed(2)}`;
-            document.getElementById('receiptPaymentMethod').textContent = data.paymentMethod;
-            document.getElementById('receiptAmountPaid').textContent = `₱${data.amountPaid.toFixed(2)}`;
-            document.getElementById('receiptChange').textContent = `₱${data.change.toFixed(2)}`;
-
-            // Populate items
-            const itemsContainer = document.getElementById('receiptItems');
-            itemsContainer.innerHTML = '';
-            data.items.forEach(item => {
-                const itemElement = document.createElement('div');
-                itemElement.className = 'flex justify-between text-sm';
-                itemElement.innerHTML = `
-                    <span>${item.name} (${item.quantity}x)</span>
-                    <span>₱${(item.price * item.quantity).toFixed(2)}</span>
-                `;
-                itemsContainer.appendChild(itemElement);
-            });
-
-            receiptModal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-    }
-
-    function closeReceiptModal() {
-        receiptModal.classList.add('hidden');
-        document.body.style.overflow = 'auto';
-    }
-
-    // Print receipt function
-    function printReceipt() {
-        const receiptContent = receiptModal.querySelector('.bg-white.p-6').cloneNode(true);
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(`
-            <!DOCTYPE html>
+        w.document.write(`
             <html>
             <head>
-                <title>Receipt - ${document.getElementById('receiptTransactionId').textContent}</title>
+                <title>Receipt</title>
+                <meta name="viewport" content="width=device-width,initial-scale=1" />
                 <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; }
-                    .text-center { text-align: center; }
-                    .border-b { border-bottom: 1px solid #000; }
-                    .border-t { border-top: 1px solid #000; }
-                    .border-y { border-top: 1px solid #000; border-bottom: 1px solid #000; }
-                    .flex { display: flex; }
-                    .justify-between { justify-content: space-between; }
-                    .font-bold { font-weight: bold; }
-                    .text-sm { font-size: 12px; }
-                    .text-xs { font-size: 10px; }
-                    .mb-2 { margin-bottom: 8px; }
-                    .mb-4 { margin-bottom: 16px; }
-                    .mt-2 { margin-top: 8px; }
-                    .py-3 { padding-top: 12px; padding-bottom: 12px; }
-                    .pb-4 { padding-bottom: 16px; }
-                    .pt-4 { padding-top: 16px; }
-                    .space-y-2 > * + * { margin-top: 8px; }
+                    /* Basic styles for printing - adjust if you need your Tailwind compiled print styles */
+                    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial; padding: 20px; color: #111; }
+                    table { width: 100%; border-collapse: collapse; }
+                    td, th { padding: 6px; vertical-align: top; }
+                    .text-right { text-align: right; }
+                    .border-top { border-top: 1px solid #ddd; margin-top: 8px; padding-top: 8px; }
                 </style>
             </head>
             <body>
-                ${receiptContent.outerHTML}
-                <script>
-                    window.onload = function() {
-                        window.print();
-                        setTimeout(function() {
-                            window.close();
-                        }, 500);
-                    }
-                <\/script>
+                ${receiptContent}
             </body>
             </html>
         `);
-        printWindow.document.close();
-    }
+        w.document.close();
+        w.focus();
 
-    // Event Listeners
-    exportBtn.addEventListener('click', openExportModal);
-    closeExportBtns.forEach(btn => btn.addEventListener('click', closeExportModal));
-    exportModal.addEventListener('click', function(e) {
-        if (e.target === exportModal) closeExportModal();
+        // Wait a tick then print
+        setTimeout(() => { w.print(); }, 250);
     });
 
-    closeViewBtns.forEach(btn => btn.addEventListener('click', closeViewModal));
-    viewModal.addEventListener('click', function(e) {
-        if (e.target === viewModal) closeViewModal();
+    document.getElementById('downloadReceiptBtn')?.addEventListener('click', function () {
+        // Use the same print dialog (user can save as PDF) - or implement html2pdf if you want
+        document.getElementById('printReceiptBtn')?.click();
     });
-
-    viewBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const transactionId = this.getAttribute('data-transaction-id');
-            openViewModal(transactionId);
-        });
-    });
-
-    // Void transaction from view modal
-    voidTransactionBtn.addEventListener('click', function() {
-        if (currentTransactionId) {
-            openVoidModal(currentTransactionId);
-        }
-    });
-
-    // Void transaction from table
-    voidBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const transactionId = this.getAttribute('data-transaction-id');
-            openVoidModal(transactionId);
-        });
-    });
-
-    closeVoidBtns.forEach(btn => btn.addEventListener('click', closeVoidModal));
-    voidModal.addEventListener('click', function(e) {
-        if (e.target === voidModal) closeVoidModal();
-    });
-
-    // Void confirmation logic
-    confirmVoidCheckbox.addEventListener('change', function() {
-        confirmVoidBtn.disabled = !this.checked;
-    });
-
-    voidReasonSelect.addEventListener('change', function() {
-        if (this.value === 'other') {
-            otherReasonContainer.classList.remove('hidden');
-        } else {
-            otherReasonContainer.classList.add('hidden');
-        }
-    });
-
-    confirmVoidBtn.addEventListener('click', confirmVoidTransaction);
-
-    closeReceiptBtns.forEach(btn => btn.addEventListener('click', closeReceiptModal));
-    receiptModal.addEventListener('click', function(e) {
-        if (e.target === receiptModal) closeReceiptModal();
-    });
-
-    printReceiptBtn.addEventListener('click', printReceipt);
-
-    receiptBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const transactionId = this.getAttribute('data-transaction-id');
-            openReceiptModal(transactionId);
-        });
-    });
-
-    // Export form submission
-    exportForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        showToast('Your report is being generated. You will receive it shortly.', 'success');
-        closeExportModal();
-    });
-
-    // Close modals with Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeExportModal();
-            closeViewModal();
-            closeVoidModal();
-            closeReceiptModal();
-        }
-    });
-
-    // Use the global `showToast(message, type)` provided by resources/js/utils/toast.js
 });
 </script>
 @endpush

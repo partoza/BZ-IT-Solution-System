@@ -169,6 +169,7 @@ Route::middleware(['auth:employee'])->group(function () {
         Route::post('/pos/sales', [SaleController::class, 'store'])->name('pos.sales.store');
         Route::get('/pos/sales', [App\Http\Controllers\SaleController::class, 'index'])
             ->name('pos.sales.index');
+        Route::get('sales/{sale}/json', [SaleController::class, 'showJson'])->name('sales.show.json');
 
         // Purchase Orders
         Route::get('/history/purchase-order', [PurchaseOrderController::class, 'index'])

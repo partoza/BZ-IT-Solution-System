@@ -225,7 +225,7 @@
                 </div>
                 <div class="flex gap-3">
                     <input type="text" id="amountPaid" placeholder="Enter amount" class="flex-1 border border-gray-300 rounded-lg px-4 py-3 text-sm" />
-                    <div class="flex-1 border border-gray-300 rounded-lg px-4 py-3 text-sm bg-gray-50 flex items-center justify-center font-medium">0.00</div>
+                    <div id="changeDisplay" class="flex-1 border border-gray-300 rounded-lg px-4 py-3 text-sm bg-gray-50 flex items-center justify-center font-medium">₱0.00</div>
                 </div>
             </div>
             
@@ -677,12 +677,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Get total and amount paid
-            const totalText = document.getElementById('totalAmount')?.textContent.replace(/[₱,]/g, '').trim();
-            const total = parseFloat(totalText) || 0;
-            const amountPaidInput = document.getElementById('amountPaid');
-            const amountPaid = parseFloat(amountPaidInput?.value || 0);
+            // Ensure totals are current (in case something changed)
+            if (typeof recalculateTotals === 'function') recalculateTotals();
 
+            const totalEl = document.getElementById('totalAmount');
+            let total = 0;
+            if (totalEl) {
+                const t = (totalEl.textContent || totalEl.innerText || '₱0.00').replace(/[₱,]/g, '').trim();
+                total = parseFloat(t) || 0;
+            }
+
+            // parse amountPaid robustly (strip commas/currency if any)
+            const amountPaidInput = document.getElementById('amountPaid');
+            let amountPaid = 0;
+            if (amountPaidInput) {
+                const raw = String(amountPaidInput.value || '').replace(/[₱,]/g, '').trim();
+                amountPaid = parseFloat(raw) || 0;
+            }
+
+            // compute change here (client-side only for UX). Server must still compute and persist
+            const change = Math.max(0, +(amountPaid - total).toFixed(2));
+
+            // Optional: update change UI if present
+            const changeDisplay = document.getElementById('changeDisplay');
+            if (changeDisplay) {
+                changeDisplay.textContent = '₱' + change.toFixed(2);
+            }
+
+            // Basic validation
             if (amountPaid <= 0) {
                 showToast('Please enter an amount paid', 'error');
                 amountPaidInput?.focus();
@@ -695,7 +717,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 customer_id: document.getElementById('customerId') ? (document.getElementById('customerId').value || null) : null,
                 payment_method: 'cash', // cash-only for now
                 payment_reference: null,
-                amount_paid: amountPaid,
+                amount_paid: parseFloat(amountPaid.toFixed(2)), // send amount_paid
+                change: parseFloat(change.toFixed(2)),           // send change
                 status: 'completed',
                 items: items
             };
@@ -726,6 +749,63 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     // --------- END CHECKOUT ----------
+
+    // ----------------- small patch: live change display -----------------
+    function parseNumber(s) {
+    if (!s && s !== 0) return 0;
+    // accept strings like "₱1,234.56" or "1234.56"
+    const cleaned = String(s).replace(/[^0-9\.\-]/g, '');
+    return parseFloat(cleaned) || 0;
+    }
+
+    function formatPHP(value) {
+    return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(Number(value || 0));
+    }
+
+    function updateChangeDisplay() {
+    const totalEl = document.getElementById('totalAmount');
+    const changeEl = document.getElementById('changeDisplay');
+    const amountPaidInput = document.getElementById('amountPaid');
+
+    if (!changeEl) return; // nothing to update
+
+    const total = totalEl ? parseNumber(totalEl.textContent || totalEl.innerText) : 0;
+    const amountPaid = amountPaidInput ? parseNumber(amountPaidInput.value) : 0;
+
+    // show change only when amountPaid > total (otherwise 0.00)
+    const change = Math.max(0, +(amountPaid - total).toFixed(2));
+    changeEl.textContent = formatPHP(change);
+    }
+
+    // attach listener to amountPaid input (live update)
+    const amountPaidInput = document.getElementById('amountPaid');
+    if (amountPaidInput) {
+    amountPaidInput.addEventListener('input', updateChangeDisplay);
+
+    // Optional: format input nicely on blur (won't interrupt typing)
+    amountPaidInput.addEventListener('blur', () => {
+        const v = parseNumber(amountPaidInput.value);
+        amountPaidInput.value = v ? v.toFixed(2) : '';
+    });
+
+    // If user presses Enter on amountPaid, trigger checkout helper (prevent accidental form submit)
+    amountPaidInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+        e.preventDefault();
+        // find the checkout button and focus/click it (non-invasive)
+        const checkoutBtn = Array.from(document.querySelectorAll('button'))
+                                .find(b => b.innerText && b.innerText.trim().startsWith('Checkout Now'));
+        if (checkoutBtn) checkoutBtn.focus();
+        }
+    });
+    }
+
+    // ensure change shows correct initial value after totals are computed
+    if (typeof recalculateTotals === 'function') {
+    // you already call recalculateTotals() earlier; call updateChangeDisplay after it
+    updateChangeDisplay();
+    }
+    
 
 });
 </script>
