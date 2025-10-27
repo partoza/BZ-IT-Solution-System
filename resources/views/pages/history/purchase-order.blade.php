@@ -656,9 +656,15 @@
 
                                 items.forEach(item => {
                                     const div = document.createElement('div');
-                                    div.className = 'border rounded p-3';
-                                    div.dataset.productId = item.product_id;
-                                    div.dataset.poItemId = item.id;
+                                    // add a specific class so we only select top-level product cards later
+                                    div.className = 'border rounded p-3 po-receive-item';
+
+                                    // store structured dataset values (strings are fine; we'll parse them later)
+                                    div.dataset.productId = item.product_id ?? '';
+                                    div.dataset.poItemId = item.id ?? '';
+                                    // keep quantity explicitly in dataset so we don't have to parse text
+                                    div.dataset.qty = String(item.quantity_ordered ?? 0);
+
 
                                     // store base purchase price (unit price from PO item)
                                     const basePrice = parseFloat(item.unit_price || 0);
@@ -796,58 +802,84 @@
 
                 // Submit receive form
                 document.getElementById('receive-form').addEventListener('submit', e => {
-                    e.preventDefault();
-                    if (!currentPoId) return;
+                e.preventDefault();
+                if (!currentPoId) return;
 
-                    const itemsPayload = [];
-                    let hasInvalid = false;
+                const itemsPayload = [];
+                let hasInvalid = false;
+                const invalidEntries = [];
 
-                    receiveProductsContainer.querySelectorAll('div.border').forEach(div => {
-                        const productId = div.dataset.productId;
-                        const poItemId = div.dataset.poItemId;
-                        const qty = parseInt((div.querySelector('.qty-span') || div.querySelector('span:last-child')).textContent.split(' ')[0]) || 0;
-                        const basePrice = parseFloat(div.dataset.basePrice || 0);
+                // ONLY select the top-level product cards we created earlier
+                receiveProductsContainer.querySelectorAll('.po-receive-item').forEach(div => {
+                    // read dataset (strings) — parse safely
+                    const productIdRaw = div.dataset.productId;
+                    const poItemIdRaw = div.dataset.poItemId;
+                    const qtyRaw = div.dataset.qty;
 
-                        const markupInputEl = div.querySelector('.markup-input');
-                        const unitCostEl = div.querySelector('.unit-cost-input');
-                        const serialInputs = div.querySelectorAll('.serial-inputs input');
+                    const productId = productIdRaw ? (isNaN(productIdRaw) ? productIdRaw : parseInt(productIdRaw)) : null;
+                    const poItemId  = poItemIdRaw  ? (isNaN(poItemIdRaw)  ? poItemIdRaw  : parseInt(poItemIdRaw))  : null;
+                    const qty       = parseInt(qtyRaw || '0', 10) || 0;
 
-                        const serials = [];
-                        serialInputs.forEach(inp => { if (inp.value.trim()) serials.push(inp.value.trim()); });
+                    const basePrice = parseFloat(div.dataset.basePrice || 0);
 
-                        const unit_cost = parseFloat(unitCostEl?.value) || basePrice;
-                        const markup = parseFloat(markupInputEl?.value) || Math.round(((unit_cost / basePrice) - 1) * 100 * 100) / 100 || 0;
+                    const markupInputEl = div.querySelector('.markup-input');
+                    const unitCostEl   = div.querySelector('.unit-cost-input');
+                    const serialInputs = div.querySelectorAll('.serial-inputs input');
 
-                        if (div.dataset.invalid === '1' || markup < 0) {
-                            hasInvalid = true;
-                        }
+                    const serials = [];
+                    serialInputs.forEach(inp => { if (inp.value.trim()) serials.push(inp.value.trim()); });
 
-                        itemsPayload.push({
-                            po_item_id: poItemId,
-                            product_id: productId,
-                            quantity: qty,
-                            serials: serials,
-                            markup: markup,
-                            unit_cost: unit_cost
-                        });
-                    });
-
-                    if (hasInvalid) {
-                        showToast('One or more items have invalid unit cost / negative markup. Please fix before submitting.', 'error');
-                        return;
+                    const unit_cost = parseFloat(unitCostEl?.value) || basePrice;
+                    let markup = parseFloat(markupInputEl?.value);
+                    if (isNaN(markup)) {
+                    markup = basePrice > 0 ? (((unit_cost / basePrice) - 1) * 100) : 0;
+                    markup = Math.round(markup * 100) / 100;
                     }
 
-                    axios.post(`/purchase-orders/${currentPoId}/receive`, { items: itemsPayload })
-                        .then(res => {
-                            showToast(res.data.message || 'PO received successfully', 'success');
-                            receiveModal.classList.add('hidden');
-                            window.location.reload();
-                        })
-                        .catch(err => {
-                            console.error(err);
-                            showToast(err.response?.data?.message || 'Failed to receive PO', 'error');
-                        });
+                    // validate minimal server requirements before pushing
+                    if (!poItemId || !productId || qty < 1) {
+                    hasInvalid = true;
+                    invalidEntries.push({ poItemId, productId, qty });
+                    // Optionally mark UI
+                    div.classList.add('ring', 'ring-red-300');
+                    return; // skip adding invalid entry
+                    } else {
+                    // ensure any previous error highlight is removed
+                    div.classList.remove('ring', 'ring-red-300');
+                    }
+
+                    itemsPayload.push({
+                    po_item_id: poItemId,
+                    product_id: productId,
+                    quantity: qty,
+                    // rename to whichever key your backend expects; you used "serials" in your code
+                    serials: serials,
+                    markup: parseFloat(markup.toFixed(2)),
+                    unit_cost: parseFloat(unit_cost.toFixed(2))
+                    });
                 });
+
+                if (hasInvalid) {
+                    console.warn('Invalid receive items:', invalidEntries);
+                    showToast('One or more items are missing required data (po_item_id / product_id / quantity). Please refresh or re-open the modal.', 'error');
+                    return;
+                }
+
+                // Debug: inspect payload in console (Network tab will show same payload)
+                console.log('receive itemsPayload', JSON.parse(JSON.stringify(itemsPayload)));
+
+                axios.post(`/purchase-orders/${currentPoId}/receive`, { items: itemsPayload })
+                    .then(res => {
+                    showToast(res.data.message || 'PO received successfully', 'success');
+                    receiveModal.classList.add('hidden');
+                    window.location.reload();
+                    })
+                    .catch(err => {
+                    console.error('Receive POST failed:', err, err?.response?.data);
+                    showToast(err.response?.data?.message || 'Failed to receive PO', 'error');
+                    });
+                });
+
 
                 //View Items Modal Logic
 
