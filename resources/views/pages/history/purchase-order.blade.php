@@ -336,7 +336,7 @@
 
     <!-- Receive Modal -->
     <div id="receive-modal"
-        class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm global-focus">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-4xl overflow-hidden max-h-[90vh] flex flex-col">
             <!-- Header -->
             <div
@@ -379,12 +379,12 @@
 
             <!-- Footer -->
             <div class="flex items-center justify-end p-5 border-t border-gray-200 bg-white">
-                
+
                 <div class="flex items-center gap-3">
                     <button id="receive-cancel" type="button"
-                        class="px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium transition-colors">Cancel</button>
+                        class="px-5 py-2.5 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-medium transition-colors">Cancel</button>
                     <button form="receive-form" type="submit" id="confirm-receive-btn"
-                        class="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors shadow-sm disabled:bg-gray-400 disabled:cursor-not-allowed">Confirm
+                        class="px-5 py-2.5 bg-primary hover:bg-emerald-700 text-white rounded-lg hover:bg-green-700 font-medium transition-colors shadow-sm disabled:bg-gray-400 disabled:cursor-not-allowed">Confirm
                         Receive</button>
                 </div>
             </div>
@@ -396,7 +396,7 @@
         class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-4xl overflow-hidden max-h-[90vh] flex flex-col">
             <!-- Header -->
-            <div class="flex items-start gap-4 p-5 border-b border-gray-200 bg-gray-50">
+            <div class="flex items-start gap-4 p-5 border-b border-gray-200 bg-gradient-to-r from-green-50 to-blue-50">
                 <div class="flex items-start gap-4">
                     <div class="rounded-full bg-primary/20 p-3">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
@@ -657,7 +657,7 @@
                                 items.forEach(item => {
                                     const div = document.createElement('div');
                                     // add a specific class so we only select top-level product cards later
-                                    div.className = 'border rounded p-3 po-receive-item';
+                                    div.className = 'border border-2 border-dashed rounded p-3 po-receive-item';
 
                                     // store structured dataset values (strings are fine; we'll parse them later)
                                     div.dataset.productId = item.product_id ?? '';
@@ -672,57 +672,71 @@
 
                                     // Build markup + unit cost UI
                                     div.innerHTML = `
-                                                <div class="flex justify-between items-center mb-2">
-                                                    <span class="font-semibold">${item.product_name}</span>
-                                                    <span class="qty-span">${item.quantity_ordered} units</span>
-                                                </div>
-
-                                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
-                                                    <div>
-                                                        <label class="block mb-1 text-xs text-gray-500">Purchase Price</label>
-                                                        <div class="text-sm font-medium">₱ ${basePrice.toFixed(2)}</div>
-                                                        <div class="mt-2 track-info">
-                                                            <div class="serial-inputs mt-1"></div>
+                                                        <div class="flex justify-between items-center mb-2">
+                                                            <span class="font-semibold">${item.product_name}</span>
+                                                            <span class="qty-span font-medium">Qty: ${item.quantity_ordered}</span>
                                                         </div>
-                                                    </div>
 
-                                                    <div>
-                                                        <label class="block mb-1 font-medium">Unit Cost (₱)</label>
-                                                        <input type="number" min="0" step="0.01" class="border rounded px-2 py-1 w-full unit-cost-input" value="${(basePrice * 1.2).toFixed(2)}">
-                                                    </div>
+                                                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-start">
+                                                            <div class="mt-1">
+                                                                <label class="block mb-1 text-sm font-medium text-gray-500">Purchase Price</label>
+                                                                <div class="font-medium">₱ ${basePrice.toFixed(2)}</div>
+                                                            </div>
 
-                                                    <div>
-                                                        <label class="block mb-1 font-medium">Markup %</label>
-                                                        <input type="number" min="0" step="0.01" value="20" class="border rounded px-2 py-1 w-full markup-input">
-                                                    </div>
-                                                </div>
+                                                            <div class="flex flex-col justify-center">
+                                                                <label class="block mb-1 font-medium">Unit Cost (₱)</label>
+                                                                <input type="number" min="0" step="0.01" class="border rounded px-2 py-1 w-full unit-cost-input" value="${(basePrice * 1.2).toFixed(2)}">
+                                                            </div>
 
-                                                <div class="mt-2">
-                                                    <div class="receive-error text-red-600 text-sm mt-2 hidden">Unit cost must be >= purchase price (no negative markup allowed).</div>
-                                                </div>
-                                            `;
+                                                            <div class="flex flex-col justify-center">
+                                                                <label class="block mb-1 font-medium">Markup %</label>
+                                                                <input type="number" min="0" step="0.01" value="20" class="border rounded px-2 py-1 w-full markup-input">
+                                                            </div>
+                                                        </div>
 
+
+                                                        <div class="mt-2 track-info">
+                                                        <hr class="my-3 border-t">
+                                                            <label class="block mb-1 font-medium">Serial Numbers</label>
+                                                                    <div class="serial-inputs mt-1" style="display:block"></div>
+                                                                </div>
+
+                                                        <div class="mt-2">
+                                                            <div class="receive-error text-red-600 text-sm mt-2 hidden">Unit cost must be >= purchase price (no negative markup allowed).</div>
+                                                        </div>
+                                                    `;
                                     // Serial inputs container
                                     const serialInputsContainer = div.querySelector('.serial-inputs');
 
                                     if (item.track_serials) {
+                                        // Use a responsive grid: up to 3 columns; if more inputs than columns, grid will create new rows
+                                        const cols = Math.min(item.quantity_ordered, 3) || 1;
+                                        serialInputsContainer.style.display = 'grid';
+                                        serialInputsContainer.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+                                        serialInputsContainer.style.gap = '8px';
+                                        serialInputsContainer.style.alignItems = 'start';
+
                                         for (let i = 0; i < item.quantity_ordered; i++) {
+                                            const wrapper = document.createElement('div');
+                                            wrapper.className = 'flex';
                                             const input = document.createElement('input');
                                             input.type = 'text';
                                             input.placeholder = 'Serial #' + (i + 1);
-                                            input.className = 'border rounded px-2 py-1 w-48 mb-1 block';
-                                            serialInputsContainer.appendChild(input);
+                                            // make inputs fill the column — for narrow screens they will be full width
+                                            input.className = 'border rounded px-2 py-1 w-full block';
+                                            wrapper.appendChild(input);
+                                            serialInputsContainer.appendChild(wrapper);
                                         }
                                     } else {
                                         // show not-tracked message similar to view modal
                                         serialInputsContainer.innerHTML = `
-                                                    <div class="flex items-center gap-3 p-3 bg-amber-50 rounded-lg border border-amber-100">
-                                                        <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                        </svg>
-                                                        <span class="text-amber-700">This product does not use serial numbers.</span>
-                                                    </div>
-                                                `;
+                                                            <div class="flex items-center gap-3 p-3 bg-amber-50 rounded-lg border border-amber-100">
+                                                                <svg class="w-3  h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                                </svg>
+                                                                <span class="text-amber-700 text-xs">This product does not use serial numbers.</span>
+                                                            </div>
+                                                        `;
                                     }
 
                                     receiveProductsContainer.appendChild(div);
@@ -802,82 +816,82 @@
 
                 // Submit receive form
                 document.getElementById('receive-form').addEventListener('submit', e => {
-                e.preventDefault();
-                if (!currentPoId) return;
+                    e.preventDefault();
+                    if (!currentPoId) return;
 
-                const itemsPayload = [];
-                let hasInvalid = false;
-                const invalidEntries = [];
+                    const itemsPayload = [];
+                    let hasInvalid = false;
+                    const invalidEntries = [];
 
-                // ONLY select the top-level product cards we created earlier
-                receiveProductsContainer.querySelectorAll('.po-receive-item').forEach(div => {
-                    // read dataset (strings) — parse safely
-                    const productIdRaw = div.dataset.productId;
-                    const poItemIdRaw = div.dataset.poItemId;
-                    const qtyRaw = div.dataset.qty;
+                    // ONLY select the top-level product cards we created earlier
+                    receiveProductsContainer.querySelectorAll('.po-receive-item').forEach(div => {
+                        // read dataset (strings) — parse safely
+                        const productIdRaw = div.dataset.productId;
+                        const poItemIdRaw = div.dataset.poItemId;
+                        const qtyRaw = div.dataset.qty;
 
-                    const productId = productIdRaw ? (isNaN(productIdRaw) ? productIdRaw : parseInt(productIdRaw)) : null;
-                    const poItemId  = poItemIdRaw  ? (isNaN(poItemIdRaw)  ? poItemIdRaw  : parseInt(poItemIdRaw))  : null;
-                    const qty       = parseInt(qtyRaw || '0', 10) || 0;
+                        const productId = productIdRaw ? (isNaN(productIdRaw) ? productIdRaw : parseInt(productIdRaw)) : null;
+                        const poItemId = poItemIdRaw ? (isNaN(poItemIdRaw) ? poItemIdRaw : parseInt(poItemIdRaw)) : null;
+                        const qty = parseInt(qtyRaw || '0', 10) || 0;
 
-                    const basePrice = parseFloat(div.dataset.basePrice || 0);
+                        const basePrice = parseFloat(div.dataset.basePrice || 0);
 
-                    const markupInputEl = div.querySelector('.markup-input');
-                    const unitCostEl   = div.querySelector('.unit-cost-input');
-                    const serialInputs = div.querySelectorAll('.serial-inputs input');
+                        const markupInputEl = div.querySelector('.markup-input');
+                        const unitCostEl = div.querySelector('.unit-cost-input');
+                        const serialInputs = div.querySelectorAll('.serial-inputs input');
 
-                    const serials = [];
-                    serialInputs.forEach(inp => { if (inp.value.trim()) serials.push(inp.value.trim()); });
+                        const serials = [];
+                        serialInputs.forEach(inp => { if (inp.value.trim()) serials.push(inp.value.trim()); });
 
-                    const unit_cost = parseFloat(unitCostEl?.value) || basePrice;
-                    let markup = parseFloat(markupInputEl?.value);
-                    if (isNaN(markup)) {
-                    markup = basePrice > 0 ? (((unit_cost / basePrice) - 1) * 100) : 0;
-                    markup = Math.round(markup * 100) / 100;
+                        const unit_cost = parseFloat(unitCostEl?.value) || basePrice;
+                        let markup = parseFloat(markupInputEl?.value);
+                        if (isNaN(markup)) {
+                            markup = basePrice > 0 ? (((unit_cost / basePrice) - 1) * 100) : 0;
+                            markup = Math.round(markup * 100) / 100;
+                        }
+
+                        // validate minimal server requirements before pushing
+                        if (!poItemId || !productId || qty < 1) {
+                            hasInvalid = true;
+                            invalidEntries.push({ poItemId, productId, qty });
+                            // Optionally mark UI
+                            div.classList.add('ring', 'ring-red-300');
+                            return; // skip adding invalid entry
+                        } else {
+                            // ensure any previous error highlight is removed
+                            div.classList.remove('ring', 'ring-red-300');
+                        }
+
+                        itemsPayload.push({
+                            po_item_id: poItemId,
+                            product_id: productId,
+                            quantity: qty,
+                            // rename to whichever key your backend expects; you used "serials" in your code
+                            serials: serials,
+                            markup: parseFloat(markup.toFixed(2)),
+                            unit_cost: parseFloat(unit_cost.toFixed(2))
+                        });
+                    });
+
+                    if (hasInvalid) {
+                        console.warn('Invalid receive items:', invalidEntries);
+                        showToast('One or more items are missing required data (po_item_id / product_id / quantity). Please refresh or re-open the modal.', 'error');
+                        return;
                     }
 
-                    // validate minimal server requirements before pushing
-                    if (!poItemId || !productId || qty < 1) {
-                    hasInvalid = true;
-                    invalidEntries.push({ poItemId, productId, qty });
-                    // Optionally mark UI
-                    div.classList.add('ring', 'ring-red-300');
-                    return; // skip adding invalid entry
-                    } else {
-                    // ensure any previous error highlight is removed
-                    div.classList.remove('ring', 'ring-red-300');
-                    }
+                    // Debug: inspect payload in console (Network tab will show same payload)
+                    console.log('receive itemsPayload', JSON.parse(JSON.stringify(itemsPayload)));
 
-                    itemsPayload.push({
-                    po_item_id: poItemId,
-                    product_id: productId,
-                    quantity: qty,
-                    // rename to whichever key your backend expects; you used "serials" in your code
-                    serials: serials,
-                    markup: parseFloat(markup.toFixed(2)),
-                    unit_cost: parseFloat(unit_cost.toFixed(2))
-                    });
-                });
-
-                if (hasInvalid) {
-                    console.warn('Invalid receive items:', invalidEntries);
-                    showToast('One or more items are missing required data (po_item_id / product_id / quantity). Please refresh or re-open the modal.', 'error');
-                    return;
-                }
-
-                // Debug: inspect payload in console (Network tab will show same payload)
-                console.log('receive itemsPayload', JSON.parse(JSON.stringify(itemsPayload)));
-
-                axios.post(`/purchase-orders/${currentPoId}/receive`, { items: itemsPayload })
-                    .then(res => {
-                    showToast(res.data.message || 'PO received successfully', 'success');
-                    receiveModal.classList.add('hidden');
-                    window.location.reload();
-                    })
-                    .catch(err => {
-                    console.error('Receive POST failed:', err, err?.response?.data);
-                    showToast(err.response?.data?.message || 'Failed to receive PO', 'error');
-                    });
+                    axios.post(`/purchase-orders/${currentPoId}/receive`, { items: itemsPayload })
+                        .then(res => {
+                            showToast(res.data.message || 'PO received successfully', 'success');
+                            receiveModal.classList.add('hidden');
+                            window.location.reload();
+                        })
+                        .catch(err => {
+                            console.error('Receive POST failed:', err, err?.response?.data);
+                            showToast(err.response?.data?.message || 'Failed to receive PO', 'error');
+                        });
                 });
 
 
@@ -932,10 +946,10 @@
                 const buildPrintableHtml = ({ po, items }) => {
                     // small inline logo SVG
                     const logoSvg = `
-                                                <svg width="120" height="36" viewBox="0 0 240 72" xmlns="http://www.w3.org/2000/svg">
-                                                    <rect rx="8" width="240" height="72" fill="#10b981"></rect>
-                                                    <text x="28" y="46" font-family="Arial, Helvetica, sans-serif" font-size="28" fill="#ffffff">BZ Solutions</text>
-                                                </svg>`;
+                                                        <svg width="120" height="36" viewBox="0 0 240 72" xmlns="http://www.w3.org/2000/svg">
+                                                            <rect rx="8" width="240" height="72" fill="#10b981"></rect>
+                                                            <text x="28" y="46" font-family="Arial, Helvetica, sans-serif" font-size="28" fill="#ffffff">BZ Solutions</text>
+                                                        </svg>`;
 
                     const poNumber = po.po_number || '—';
                     const supplier = po.supplier?.company_name || '—';
@@ -949,87 +963,87 @@
                         const qty = parseInt(it.quantity_ordered || 0) || 0;
                         const line = unit * qty;
                         return `
-                                                    <tr>
-                                                        <td class="td">${it.product_name || '—'}</td>
-                                                        <td class="td">${it.sku || '—'}</td>
-                                                        <td class="td" style="text-align:center">${qty}</td>
-                                                        <td class="td" style="text-align:right">${unit ? `₱ ${unit.toFixed(2)}` : '—'}</td>
-                                                        <td class="td" style="text-align:right">₱ ${line.toFixed(2)}</td>
-                                                    </tr>
-                                                `;
+                                                            <tr>
+                                                                <td class="td">${it.product_name || '—'}</td>
+                                                                <td class="td">${it.sku || '—'}</td>
+                                                                <td class="td" style="text-align:center">${qty}</td>
+                                                                <td class="td" style="text-align:right">${unit ? `₱ ${unit.toFixed(2)}` : '—'}</td>
+                                                                <td class="td" style="text-align:right">₱ ${line.toFixed(2)}</td>
+                                                            </tr>
+                                                        `;
                     }).join('');
 
                     const totalAmount = (items || []).reduce((s, it) => s + (parseFloat(it.unit_price || 0) * (parseInt(it.quantity_ordered || 0) || 0)), 0);
 
                     return `
-                                            <!doctype html>
-                                            <html>
-                                            <head>
-                                                <meta charset="utf-8" />
-                                                <title>PO ${poNumber}</title>
-                                                <meta name="viewport" content="width=device-width,initial-scale=1" />
-                                                <style>
-                                                    body { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color: #111827; padding: 24px; }
-                                                    .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
-                                                    .meta { text-align:right; }
-                                                    h1 { margin:0; font-size:20px; }
-                                                    .box { border:1px solid #e5e7eb; padding:12px; border-radius:6px; }
-                                                    table { width:100%; border-collapse:collapse; margin-top:12px; }
-                                                    th { text-align:left; padding:8px 6px; border-bottom:1px solid #e5e7eb; font-size:12px; color:#6b7280; }
-                                                    td.td { padding:10px 6px; border-bottom:1px solid #f3f4f6; font-size:13px; }
-                                                    .totals { margin-top:12px; text-align:right; font-weight:600; }
-                                                    @media print { @page { size: A4; margin: 20mm; } body { padding:0; } .no-print { display:none !important } }
-                                                </style>
-                                            </head>
-                                            <body>
-                                                <div class="header">
-                                                    <div class="brand">${logoSvg}</div>
-                                                    <div class="meta">
-                                                        <div style="font-size:12px;color:#6b7280">Purchase Order</div>
-                                                        <h1>PO ${poNumber}</h1>
-                                                        <div style="font-size:12px;color:#374151">${supplier}</div>
-                                                    </div>
-                                                </div>
+                                                    <!doctype html>
+                                                    <html>
+                                                    <head>
+                                                        <meta charset="utf-8" />
+                                                        <title>PO ${poNumber}</title>
+                                                        <meta name="viewport" content="width=device-width,initial-scale=1" />
+                                                        <style>
+                                                            body { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color: #111827; padding: 24px; }
+                                                            .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+                                                            .meta { text-align:right; }
+                                                            h1 { margin:0; font-size:20px; }
+                                                            .box { border:1px solid #e5e7eb; padding:12px; border-radius:6px; }
+                                                            table { width:100%; border-collapse:collapse; margin-top:12px; }
+                                                            th { text-align:left; padding:8px 6px; border-bottom:1px solid #e5e7eb; font-size:12px; color:#6b7280; }
+                                                            td.td { padding:10px 6px; border-bottom:1px solid #f3f4f6; font-size:13px; }
+                                                            .totals { margin-top:12px; text-align:right; font-weight:600; }
+                                                            @media print { @page { size: A4; margin: 20mm; } body { padding:0; } .no-print { display:none !important } }
+                                                        </style>
+                                                    </head>
+                                                    <body>
+                                                        <div class="header">
+                                                            <div class="brand">${logoSvg}</div>
+                                                            <div class="meta">
+                                                                <div style="font-size:12px;color:#6b7280">Purchase Order</div>
+                                                                <h1>PO ${poNumber}</h1>
+                                                                <div style="font-size:12px;color:#374151">${supplier}</div>
+                                                            </div>
+                                                        </div>
 
-                                                <div class="grid" style="display:flex; gap:12px; margin-bottom:12px;">
-                                                    <div class="box" style="flex:1">
-                                                        <div style="font-size:12px;color:#6b7280">Order Date</div>
-                                                        <div style="font-weight:600">${orderDate}</div>
-                                                    </div>
-                                                    <div class="box" style="flex:1">
-                                                        <div style="font-size:12px;color:#6b7280">Received Date</div>
-                                                        <div style="font-weight:600">${receivedDate}</div>
-                                                    </div>
-                                                    <div class="box" style="flex:1">
-                                                        <div style="font-size:12px;color:#6b7280">Created By</div>
-                                                        <div style="font-weight:600">${createdBy}</div>
-                                                    </div>
-                                                    <div class="box" style="flex:1">
-                                                        <div style="font-size:12px;color:#6b7280">Status</div>
-                                                        <div style="font-weight:600">${status}</div>
-                                                    </div>
-                                                </div>
+                                                        <div class="grid" style="display:flex; gap:12px; margin-bottom:12px;">
+                                                            <div class="box" style="flex:1">
+                                                                <div style="font-size:12px;color:#6b7280">Order Date</div>
+                                                                <div style="font-weight:600">${orderDate}</div>
+                                                            </div>
+                                                            <div class="box" style="flex:1">
+                                                                <div style="font-size:12px;color:#6b7280">Received Date</div>
+                                                                <div style="font-weight:600">${receivedDate}</div>
+                                                            </div>
+                                                            <div class="box" style="flex:1">
+                                                                <div style="font-size:12px;color:#6b7280">Created By</div>
+                                                                <div style="font-weight:600">${createdBy}</div>
+                                                            </div>
+                                                            <div class="box" style="flex:1">
+                                                                <div style="font-size:12px;color:#6b7280">Status</div>
+                                                                <div style="font-weight:600">${status}</div>
+                                                            </div>
+                                                        </div>
 
-                                                <table>
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Item</th>
-                                                            <th>SKU</th>
-                                                            <th style="text-align:center">Qty</th>
-                                                            <th style="text-align:right">Unit</th>
-                                                            <th style="text-align:right">Line Total</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        ${rows}
-                                                    </tbody>
-                                                </table>
+                                                        <table>
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Item</th>
+                                                                    <th>SKU</th>
+                                                                    <th style="text-align:center">Qty</th>
+                                                                    <th style="text-align:right">Unit</th>
+                                                                    <th style="text-align:right">Line Total</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                ${rows}
+                                                            </tbody>
+                                                        </table>
 
-                                                <div class="totals">Estimated Total: ₱ ${totalAmount.toFixed(2)}</div>
+                                                        <div class="totals">Estimated Total: ₱ ${totalAmount.toFixed(2)}</div>
 
-                                            </body>
-                                            </html>
-                                            `;
+                                                    </body>
+                                                    </html>
+                                                    `;
                 };
 
                 // NOTE: removed named openPrintableWindow per request; handlers below inline the open/print flow
@@ -1050,38 +1064,38 @@
                         '<span class="px-2 py-1 text-xs rounded bg-amber-100 text-amber-800 border border-amber-200">Not tracked</span>';
 
                     card.innerHTML = `
-                                                <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                                                    <div class="flex-1">
-                                                        <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-                                                            <h5 class="font-semibold text-gray-800 text-lg">${item.product_name || 'Unnamed product'}</h5>
-                                                            <div class="flex flex-wrap gap-2">
-                                                                ${skuLabel}
-                                                                ${trackingBadge}
+                                                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                                                            <div class="flex-1">
+                                                                <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                                                                    <h5 class="font-semibold text-gray-800 text-lg">${item.product_name || 'Unnamed product'}</h5>
+                                                                    <div class="flex flex-wrap gap-2">
+                                                                        ${skuLabel}
+                                                                        ${trackingBadge}
+                                                                    </div>
+                                                                </div>
+                                                                <div class="text-sm text-gray-600 mt-2">
+                                                                    <div class="flex flex-wrap gap-4">
+                                                                        <span>Ordered: <strong class="text-gray-800">${qtyOrdered}</strong> unit(s)</span>
+                                                                        ${unitPrice ? `<span>Unit Price: <strong class="text-gray-800">${formatCurrency(unitPrice)}</strong></span>` : ''}
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="text-sm text-gray-600 mt-2">
-                                                            <div class="flex flex-wrap gap-4">
-                                                                <span>Ordered: <strong class="text-gray-800">${qtyOrdered}</strong> unit(s)</span>
-                                                                ${unitPrice ? `<span>Unit Price: <strong class="text-gray-800">${formatCurrency(unitPrice)}</strong></span>` : ''}
-                                                            </div>
-                                                        </div>
-                                                    </div>
 
-                                                    <div class="text-right">
-                                                        <div class="text-sm font-medium text-gray-500">Line Total</div>
-                                                        <div class="text-xl font-bold text-primary">${formatCurrency(lineTotal)}</div>
-                                                    </div>
-                                                </div>
-                                                <div class="mt-4 pt-4 border-t border-gray-100">
-                                                    <div class="flex items-center gap-2 mb-2">
-                                                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                                        </svg>
-                                                        <h6 class="text-sm font-medium text-gray-700">Serial ID</h6>
-                                                    </div>
-                                                    <div class="text-sm text-gray-700" id="serials-${item.product_id}"></div>
-                                                </div>
-                                            `;
+                                                            <div class="text-right">
+                                                                <div class="text-sm font-medium text-gray-500">Line Total</div>
+                                                                <div class="text-xl font-bold text-primary">${formatCurrency(lineTotal)}</div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mt-4 pt-4 border-t border-gray-100">
+                                                            <div class="flex items-center gap-2 mb-2">
+                                                                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                                </svg>
+                                                                <h6 class="text-sm font-medium text-gray-700">Serial ID</h6>
+                                                            </div>
+                                                            <div class="text-sm text-gray-700" id="serials-${item.product_id}"></div>
+                                                        </div>
+                                                    `;
 
                     return { card, lineTotal, qtyOrdered, productId: item.product_id };
                 };
@@ -1093,22 +1107,22 @@
 
                     if (!trackSerials) {
                         serialsEl.innerHTML = `
-                                                    <div class="flex items-center gap-3 p-3 bg-amber-50 rounded-lg border border-amber-100">
-                                                        <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                                        </svg>
-                                                        <span class="text-amber-700">This product does not use serial numbers.</span>
-                                                    </div>
-                                                `;
+                                                            <div class="flex items-center gap-3 p-3 bg-amber-50 rounded-lg border border-amber-100">
+                                                                <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                                                </svg>
+                                                                <span class="text-amber-700">This product does not use serial numbers.</span>
+                                                            </div>
+                                                        `;
                     } else if (inventoryItems.length === 0) {
                         serialsEl.innerHTML = `
-                                                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                                        <svg class="w-5 h-5 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m8-8V4a1 1 0 00-1-1h-2a1 1 0 00-1 1v1M9 7h6"></path>
-                                                        </svg>
-                                                        <span class="text-gray-600">No serials recorded for this product.</span>
-                                                    </div>
-                                                `;
+                                                            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                                                <svg class="w-5 h-5 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m8-8V4a1 1 0 00-1-1h-2a1 1 0 00-1 1v1M9 7h6"></path>
+                                                                </svg>
+                                                                <span class="text-gray-600">No serials recorded for this product.</span>
+                                                            </div>
+                                                        `;
                     } else {
                         const tableContainer = document.createElement('div');
                         // give a small horizontal margin so the table doesn't stretch too wide
@@ -1119,21 +1133,21 @@
                         table.className = 'w-full divide-y divide-gray-200 text-center text-sm';
 
                         table.innerHTML = `
-                                                    <thead class="bg-gray-50">
-                                                        <tr>
-                                                            <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                                                            <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Serial Number</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody class="bg-white divide-y divide-gray-200">
-                                                        ${inventoryItems.map(inv => `
-                                                            <tr class="hover:bg-gray-50">
-                                                                <td class="px-2 py-3 text-sm text-gray-700">${inv.id}</td>
-                                                                <td class="px-2 py-3 text-sm text-gray-700 font-mono">${inv.serial_number || 'N/A'}</td>
-                                                            </tr>
-                                                        `).join('')}
-                                                    </tbody>
-                                                `;
+                                                            <thead class="bg-gray-50">
+                                                                <tr>
+                                                                    <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                                                    <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Serial Number</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody class="bg-white divide-y divide-gray-200">
+                                                                ${inventoryItems.map(inv => `
+                                                                    <tr class="hover:bg-gray-50">
+                                                                        <td class="px-2 py-3 text-sm text-gray-700">${inv.id}</td>
+                                                                        <td class="px-2 py-3 text-sm text-gray-700 font-mono">${inv.serial_number || 'N/A'}</td>
+                                                                    </tr>
+                                                                `).join('')}
+                                                            </tbody>
+                                                        `;
 
                         tableContainer.appendChild(table);
                         serialsEl.appendChild(tableContainer);
@@ -1177,11 +1191,11 @@
 
                         // Show loading state
                         viewContainer.innerHTML = `
-                                                    <div class="flex justify-center items-center py-12">
-                                                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                                                        <span class="ml-3 text-gray-600">Loading purchase order details...</span>
-                                                    </div>
-                                                `;
+                                                            <div class="flex justify-center items-center py-12">
+                                                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                                                                <span class="ml-3 text-gray-600">Loading purchase order details...</span>
+                                                            </div>
+                                                        `;
 
                         viewModal.classList.remove('hidden');
 
@@ -1208,17 +1222,17 @@
                             .catch(err => {
                                 console.error('Failed to fetch PO items:', err);
                                 viewContainer.innerHTML = `
-                                                            <div class="text-center py-8">
-                                                                <svg class="w-12 h-12 text-red-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                                </svg>
-                                                                <h3 class="text-lg font-medium text-gray-900 mb-2">Failed to load purchase order</h3>
-                                                                <p class="text-gray-600 mb-4">Please try again or contact support if the problem persists.</p>
-                                                                <button onclick="viewModal.classList.add('hidden')" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
-                                                                    Close
-                                                                </button>
-                                                            </div>
-                                                        `;
+                                                                    <div class="text-center py-8">
+                                                                        <svg class="w-12 h-12 text-red-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                                        </svg>
+                                                                        <h3 class="text-lg font-medium text-gray-900 mb-2">Failed to load purchase order</h3>
+                                                                        <p class="text-gray-600 mb-4">Please try again or contact support if the problem persists.</p>
+                                                                        <button onclick="viewModal.classList.add('hidden')" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                                                                            Close
+                                                                        </button>
+                                                                    </div>
+                                                                `;
                                 showToast('Failed to fetch purchase order details', 'error');
                             });
                     });

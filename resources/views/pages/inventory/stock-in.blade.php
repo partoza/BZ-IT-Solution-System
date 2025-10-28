@@ -517,12 +517,12 @@
 
                     poItems.forEach((item, itemIndex) => {
                         const div = document.createElement('div');
-                        div.className = 'po-item border rounded-lg p-3 px-5 flex flex-col gap-2 bg-white global-focus';
+                        div.className = 'po-item border rounded-lg p-3 px-5 flex flex-col gap-2 bg-white';
 
                         // Bulk (non-serial) row: qty + cost editable (no markup)
                         if (!item.serials) {
                             div.innerHTML = `
-                                                                                   <div class="flex justify-between items-center">
+                                        <div class="flex justify-between items-center">
                                                   <span class="font-medium text-md">${escapeHtml(item.name)}</span>
                                                   <button class="remove-item" data-index="${itemIndex}" aria-label="Remove item">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
@@ -535,7 +535,7 @@
                                                 </div>
 
                                                 <!-- Image + Inputs Column -->
-                                                <div class="flex items-start gap-6">
+                                                <div class="flex items-start gap-6 global-focus">
                                                   <!-- Product Image -->
                                                   <div class="flex-shrink-0">
                                                     <img src="${item.image || '/placeholder-image.jpg'}"
