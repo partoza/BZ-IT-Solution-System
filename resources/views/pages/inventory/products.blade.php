@@ -134,7 +134,7 @@
                 <h3 class="text-2xl font-semibold text-gray-900">{{ $lowStock }}</h3>
                 <p class="text-xs text-gray-500 mt-1">Need Restock</p>
                 <div class="flex items-center gap-2 mt-2">
-                    <div class="relative inline-block group">
+                    <div class="relative inline-block group" tabindex="0" aria-label="Low stock">
                         @php
                             $noProducts = isset($totalProducts) && $totalProducts == 0;
                         @endphp
@@ -144,8 +144,9 @@
                             <svg class="size-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 @if($noProducts)
                                     <!-- Info icon for no products (blue) -->
-                                      <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/>
-                                        
+                                    <path
+                                        d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2" />
+
                                 @elseif($lowStock > 0)
                                     <!-- Warning icon for low stock -->
                                     <path fill-rule="evenodd"
@@ -194,23 +195,25 @@
 
                             <!-- Tooltip: list of products that need restock (positioned below icon) -->
                             <div
-                                class="z-50 pointer-events-none opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-150 absolute top-full mt-3 left-1/2 transform -translate-x-1/2 w-60 bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-sm text-gray-700">
+                                class="z-50 pointer-events-none opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-150 absolute top-full mt-3 left-1 transform -translate-x-1/2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-sm text-gray-700">
                                 <div class="font-medium text-red-600 mb-2">Products Needing Restock</div>
-                                <div class="space-y-2 max-h-44 overflow-auto">
+                                <div class="space-y-3 max-h-36 overflow-auto">
                                     @forelse($tooltipProducts as $p)
                                         @php
                                             $name = $p->product_name ?? $p->name ?? $p->title ?? 'Unnamed Product';
                                             $stock = $p->stock_count ?? $p->stock ?? $p->quantity ?? 0;
                                         @endphp
-                                        <div class="flex items-center justify-between">
-                                            <div class="flex items-center gap-2 min-w-0">
+                                        <div class="flex items-start justify-between py-2">
+                                            <div class="flex items-start gap-3 min-w-0 flex-1">
                                                 <span
-                                                    class="w-2 h-2 rounded-full {{ $stock == 0 ? 'bg-red-400' : 'bg-yellow-400' }} inline-block"></span>
-                                                <span class="text-xs text-gray-600 truncate">{{ $name }}</span>
+                                                    class="w-2 h-2 rounded-full {{ $stock == 0 ? 'bg-red-400' : 'bg-yellow-400' }} inline-block mt-1"></span>
+                                                <span class="tooltip-name text-xs text-gray-600">{{ $name }}</span>
                                             </div>
-                                            <span class="font-semibold text-gray-800 text-xs">
-                                                {{ $stock == 0 ? 'Out of Stock' : $stock . ' left' }}
-                                            </span>
+                                            <div class="flex-shrink-0 ms-3">
+                                                <span class="font-semibold text-gray-800 text-xs whitespace-nowrap">
+                                                    {{ $stock == 0 ? 'Out of Stock' : $stock . ' left' }}
+                                                </span>
+                                            </div>
                                         </div>
                                     @empty
                                         <div class="text-xs text-gray-600">No product details available.</div>
@@ -225,20 +228,53 @@
     </div>
     <!-- Products Table -->
     <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
-        <!-- Products List Header -->
-        <div class="bg-white shadow-sm p-5 mb-2">
-            <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
-                <!-- Title -->
-                <h2 class="text-xl font-semibold text-primary mb-4 xl:mb-0">Products</h2>
+        <style>
+            /* Limit table cell content to 2 lines and hide overflow */
+            .cell-text {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                line-height: 1.25rem;
+                /* adjust to change row height */
+                max-height: calc(2 * 1.25rem);
+                /* Ensure the text container is block-level so clamp works inside table cells */
+                display: block;
+            }
 
-                <!-- Filters and Actions Container -->
-                <div class="flex flex-col xl:flex-row gap-4 w-full xl:w-auto">
-                    <!-- Search and Filters -->
-                    <form method="GET" class="flex flex-col md:flex-row gap-3 flex-1 global-focus">
-                        <!-- Search Input -->
-                        <div class="relative flex-1 md:max-w-60">
-                            <input type="text" name="search" value="{{ $search }}" placeholder="Search Product..."
-                                class="w-full px-3 py-2 pl-10 border border-gray-300 rounded-lg text-sm" />
+            /* Tooltip product name clamp (max 2 lines) */
+            .tooltip-name {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                line-height: 1rem;
+                max-height: calc(2 * 1rem);
+                display: block;
+            }
+        </style>
+        <!-- Products List Header (Improved balanced layout) -->
+        <div class="bg-white shadow-sm p-5 mb-2">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <!-- Left: Title -->
+                <div class="flex items-start gap-4">
+                    <div>
+                        <h2 class="text-xl font-semibold text-primary">Product List</h2>
+                        {{-- showing text removed from header to align with pagination below --}}
+                    </div>
+                </div>
+
+                <!-- Center: Search (stays centered on wide screens, full width on mobile) -->
+                <div class="w-full lg:max-w-xl mx-auto">
+                    <form id="searchForm" method="GET"
+                        class="flex items-center bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                        <!-- keep per_page to ensure consistent 5 per page -->
+                        <input type="hidden" name="per_page" value="5" />
+
+                        <div class="relative flex-1">
+                            <input type="text" name="search" value="{{ request('search', $search ?? '') }}"
+                                placeholder="Search Product..." aria-label="Search products"
+                                class="w-full px-3 py-2 pl-10 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500" />
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -247,190 +283,250 @@
                             </div>
                         </div>
 
-                        <!-- Filter Dropdowns -->
-                        <div class="flex flex-wrap gap-3">
-                            <select name="status"
-                                class="px-3 py-2 border border-gray-300 rounded-lg text-sm flex-1 min-w-32">
-                                <option value="">All Status</option>
-                                <option value="Active" {{ $status === 'Active' ? 'selected' : '' }}>Active</option>
-                                <option value="Inactive" {{ $status === 'Inactive' ? 'selected' : '' }}>Inactive</option>
-                            </select>
-
-                            <select id="mainCategorySelect" name="category"
-                                class="px-3 py-2 border border-gray-300 rounded-lg text-sm flex-2 min-w-32">
-                                <option value="">All Categories</option>
-                                @foreach ($categories as $cat)
-                                    <option value="{{ $cat->id }}" {{ $category == $cat->id ? 'selected' : '' }}>
-                                        {{ $cat->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-
-                            <!-- <select id="subCategorySelect" name="sub_category"
-                                        class="px-3 py-2 border border-gray-300 rounded-lg text-sm flex-1 min-w-32" {{ $subCategories ? '' : 'disabled' }}>
-                                        <option value="">All Subcategories</option>
-                                        @if($subCategories)
-                                            @foreach($subCategories as $sub)
-                                                <option value="{{ $sub->id }}" {{ $subCategory == $sub->id ? 'selected' : '' }}>
-                                                    {{ $sub->name }}
-                                                </option>
-                                            @endforeach
-                                        @endif
-                                    </select> -->
-
-                            <select name="stock"
-                                class="px-3 py-2 border border-gray-300 rounded-lg text-sm flex-1 min-w-32">
-                                <option value="">All Stocks</option>
-                                <option value="High" {{ $stockLevel === 'High' ? 'selected' : '' }}>High</option>
-                                <option value="Low" {{ $stockLevel === 'Low' ? 'selected' : '' }}>Low</option>
-                                <option value="Out" {{ $stockLevel === 'Out' ? 'selected' : '' }}>Out of Stock</option>
-                            </select>
-                            <!-- Action Buttons (submit inside the form) -->
-                            <div class="flex gap-3">
-                                <button type="submit"
-                                    class="px-5 py-2 bg-primary text-white rounded-lg hover:bg-emerald-700 text-sm font-medium">
-                                    Filter
-                                </button>
-                            </div>
-                        </div>
+                        <!-- Search submit button -->
+                        <button type="submit"
+                            class="px-4 py-2 bg-primary text-white text-sm font-medium hover:bg-emerald-700 transition-colors">
+                            Search
+                        </button>
                     </form>
+                </div>
 
-                    <!-- Add Product Button (separate link) -->
-                    <div class="flex gap-3">
-                        <a href="{{ route('products.create') }}"
-                            class="px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium flex items-center justify-center">
-                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
-                                </path>
-                            </svg>
-                            Add Product
-                        </a>
+                <!-- Right: Action buttons -->
+                <div class="flex items-center gap-3">
+                    <a href="{{ route('products.create') }}"
+                        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        Add
+                    </a>
+
+                    <a href=""
+                        class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium flex items-center">
+                        <svg class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM13 3.5L18.5 9H13V3.5zM8 13h8v2H8v-2zm0-4h8v2H8V9z" />
+                        </svg>
+                        Export
+                    </a>
+                </div>
+            </div>
+
+            <!-- Filters Row: separated for clarity; responsive layout -->
+            <div class="mt-4">
+                <form id="filtersForm" method="GET"
+                    class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <!-- keep per_page here too so filters + search keep the 5 per page behavior -->
+                    <input type="hidden" name="per_page" value="5" />
+
+                    <div class="flex flex-wrap gap-3 items-center w-full md:w-auto">
+                        <select name="status" class="px-3 py-2 border border-gray-300 rounded-lg text-sm min-w-[140px]">
+                            <option value="">All Status</option>
+                            <option value="Active" {{ request('status', $status ?? '') === 'Active' ? 'selected' : '' }}>
+                                Active</option>
+                            <option value="Inactive" {{ request('status', $status ?? '') === 'Inactive' ? 'selected' : '' }}>
+                                Inactive</option>
+                        </select>
+
+                        <select id="mainCategorySelect" name="category"
+                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm min-w-[160px]">
+                            <option value="">All Categories</option>
+                            @foreach ($categories as $cat)
+                                <option value="{{ $cat->id }}" {{ (string) request('category', $category ?? '') === (string) $cat->id ? 'selected' : '' }}>
+                                    {{ $cat->name }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        <!-- Subcategory select (populated by JS when category changes) -->
+                        <select id="subCategorySelect" name="subcategory"
+                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm min-w-[160px]"
+                            @if(!request('category')) disabled @endif>
+                            <option value="">All Subcategories</option>
+                        </select>
+
+                        <select name="stock" class="px-3 py-2 border border-gray-300 rounded-lg text-sm min-w-[140px]">
+                            <option value="">All Stocks</option>
+                            <option value="High" {{ request('stock', $stockLevel ?? '') === 'High' ? 'selected' : '' }}>High
+                            </option>
+                            <option value="Low" {{ request('stock', $stockLevel ?? '') === 'Low' ? 'selected' : '' }}>Low
+                            </option>
+                            <option value="Out" {{ request('stock', $stockLevel ?? '') === 'Out' ? 'selected' : '' }}>Out of
+                                Stock</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center gap-3 justify-end w-full md:w-auto">
+                        <button type="submit"
+                            class="px-5 py-2 bg-primary text-white rounded-lg hover:bg-emerald-700 text-sm font-medium">
+                            Filter
+                        </button>
+
+                        <!-- Reset will be handled by JS to clear both forms and go back to default (per_page=5) -->
+                        <button id="resetFilters" type="button"
+                            class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
+                            Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- End improved header -->
+
+        <div class="h-[430px] bg-white flex flex-col">
+            <!-- Scrollable table wrapper (takes available space) -->
+            <div class="flex-1">
+                <!-- Use fixed table layout so columns are equally spaced -->
+                <table class="table-fixed min-w-full divide-y divide-gray-200 text-sm">
+                    <thead class="bg-gray-50    ">
+                        <tr>
+                            <th class="px-6 py-3 align-middle text-left font-medium text-gray-700 uppercase tracking-wide"
+                                style="width:12.5%">Product</th>
+                            <th class="px-6 py-3 align-middle text-left font-medium text-gray-700 uppercase tracking-wide"
+                                style="width:12.5%">Brand</th>
+                            <th class="px-6 py-3 align-middle text-left font-medium text-gray-700 uppercase tracking-wide"
+                                style="width:12.5%">Category</th>
+                            <th class="px-6 py-3 align-middle text-left font-medium text-gray-700 uppercase tracking-wide"
+                                style="width:12.5%">Stock</th>
+                            <th class="px-6 py-3 align-middle text-left font-medium text-gray-700 uppercase tracking-wide"
+                                style="width:12.5%">Stock Status</th>
+                            <!-- <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Price</th> -->
+                            <th class="px-6 py-3 align-middle text-left font-medium text-gray-700 uppercase tracking-wide"
+                                style="width:12.5%">Warranty</th>
+                            <th class="px-6 py-3 align-middle text-left font-medium text-gray-700 uppercase tracking-wide"
+                                style="width:12.5%">Status</th>
+                            <th class="px-6 py-3 align-middle text-left font-medium text-gray-700 uppercase tracking-wide"
+                                style="width:12.5%">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-100 px-4">
+                        @forelse ($products as $product)
+                            <tr class="hover:bg-gray-50 transition-colors text-sm h-16">
+                                <!-- Wrap cell contents in a clamp container to limit to 2 lines -->
+                                <td class="px-6 py-3 align-middle text-gray-800 font-medium w-1/4">
+                                    <div class="cell-text">{{ $product->product_name }}</div>
+                                </td>
+                                <td class="px-6 py-3 align-middle text-gray-600">
+                                    <div class="cell-text">{{ $product->brand->name ?? '—' }}</div>
+                                </td>
+                                <td class="px-6 py-3 align-middle text-gray-600">
+                                    <div class="cell-text">{{ $product->category->name ?? '—' }}</div>
+                                </td>
+                                <td class="px-6 py-3 align-middle text-gray-600">
+                                    <div class="cell-text">{{ $product->stock_count }}</div>
+                                </td>
+                                <td class="px-6 py-3 align-middle w-1/6">
+                                    @php
+                                        $stock = $product->stock_count ?? 0;
+                                        $low = $product->low_threshold ?? 10;
+
+                                        $stockBadge = $stock == 0
+                                            ? ['Out of Stock', 'bg-red-100 text-red-800']
+                                            : ($stock <= $low
+                                                ? ['Low', 'bg-yellow-100 text-yellow-800']
+                                                : ['High', 'bg-green-100 text-green-800']);
+                                    @endphp
+                                    <div class="cell-text">
+                                        <span class="px-2.5 py-0.5 text-xs font-medium rounded-full {{ $stockBadge[1] }}">
+                                            {{ $stockBadge[0] }}
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <!-- <td class="px-6 py-3 text-gray-600">
+                                                        ₱{{ number_format($product->currentPrice(auth()->guard('employee')->user()?->branch_id), 2) }}
+                                                    </td>  -->
+                                <td class="px-6 py-3 align-middle text-gray-600">
+                                    <div class="cell-text">{{ $product->warranty_period ?? '—' }} Months</div>
+                                </td>
+
+                                <td class="px-6 py-3 align-middle">
+                                    @php
+                                        $isActive = $product->active_status; // boolean
+                                        $statusText = $isActive ? 'Active' : 'Inactive';
+                                        $statusClass = $isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-600';
+                                    @endphp
+
+                                    <div class="cell-text">
+                                        <span class="px-2.5 py-0.5 text-xs font-medium rounded-full {{ $statusClass }}">
+                                            {{ $statusText }}
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <td class="px-6 py-3 align-middle">
+                                    <div class="flex space-x-2">
+                                        <!-- View Button -->
+                                        <div class="relative group">
+                                            <button
+                                                class="text-gray-600 hover:text-primary/90 transition-colors duration-200 p-1 rounded">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                                    fill="currentColor">
+                                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                                    <path fill-rule="evenodd"
+                                                        d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                                        clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                            <div
+                                                class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-primary rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-10">
+                                                View Product
+                                                <div
+                                                    class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-primary">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Edit Button -->
+                                        <div class="relative group">
+                                            <button
+                                                class="text-gray-600 hover:text-primary/90 transition-colors duration-200 p-1 rounded">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                                    fill="currentColor">
+                                                    <path
+                                                        d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                                </svg>
+                                            </button>
+                                            <div
+                                                class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-primary rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-10">
+                                                Edit Product
+                                                <div
+                                                    class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-primary">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="9" class="px-6 py-3 text-center text-gray-500">No products found.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination: always at bottom -->
+            <div class="mt-auto bg-white px-6 py-4 border-t border-gray-200 text-xs sticky bottom-0 z-20">
+                <div class="flex flex-col sm:flex-row items-center sm:justify-between gap-3">
+                    <div class="text-xs text-gray-600">
+                        Showing {{ $products->count() }} of {{ $products->total() }} products
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        {!! $products->appends(request()->except('page'))->links('vendor.pagination.circular') !!}
                     </div>
                 </div>
             </div>
         </div>
-
-
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sms">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Product</th>
-                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Brand</th>
-                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Category</th>
-                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Stock</th>
-                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Stock Status</th>
-                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Price</th>
-                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Warranty</th>
-                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Status</th>
-                        <th class="px-6 py-3 text-left font-medium text-gray-700 uppercase tracking-wide">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-100">
-                    @forelse ($products as $product)
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-3 text-gray-800 font-medium">{{ $product->product_name }}</td>
-                            <td class="px-6 py-3 text-gray-600">{{ $product->brand->name ?? '—' }}</td>
-                            <td class="px-6 py-3 text-gray-600">{{ $product->category->name ?? '—' }}</td>
-                            <td class="px-6 py-3 text-gray-600">
-                                {{ $product->stock_count }}
-                            </td>
-                            <td class="px-6 py-3">
-                                @php
-                                    $stock = $product->stock_count ?? 0;
-                                    $low = $product->low_threshold ?? 10;
-
-                                    $stockBadge = $stock == 0
-                                        ? ['Out of Stock', 'bg-red-100 text-red-800']
-                                        : ($stock <= $low
-                                            ? ['Low', 'bg-yellow-100 text-yellow-800']
-                                            : ['High', 'bg-green-100 text-green-800']);
-                                @endphp
-                                <span class="px-2.5 py-0.5 text-xs font-medium rounded-full {{ $stockBadge[1] }}">
-                                    {{ $stockBadge[0] }}
-                                </span>
-                            </td>
-
-                            <td class="px-6 py-3 text-gray-600">
-                                ₱{{ number_format($product->currentPrice(auth()->guard('employee')->user()?->branch_id), 2) }}
-                            </td>
-                            <td class="px-6 py-3 text-gray-600">{{ $product->warranty_period ?? '—' }} Months</td>
-
-                            <td class="px-6 py-3">
-                                @php
-                                    $isActive = $product->active_status; // boolean
-                                    $statusText = $isActive ? 'Active' : 'Inactive';
-                                    $statusClass = $isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-600';
-                                @endphp
-
-                                <span class="px-2.5 py-0.5 text-xs font-medium rounded-full {{ $statusClass }}">
-                                    {{ $statusText }}
-                                </span>
-                            </td>
-
-                            <td class="px-6 py-3">
-                                <div class="flex space-x-2">
-                                    <!-- View Button -->
-                                    <div class="relative group">
-                                        <button
-                                            class="text-gray-600 hover:text-primary/90 transition-colors duration-200 p-1 rounded">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
-                                                fill="currentColor">
-                                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                                                <path fill-rule="evenodd"
-                                                    d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                        </button>
-                                        <div
-                                            class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-primary rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-10">
-                                            View Product
-                                            <div
-                                                class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-primary">
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Edit Button -->
-                                    <div class="relative group">
-                                        <button
-                                            class="text-gray-600 hover:text-primary/90 transition-colors duration-200 p-1 rounded">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
-                                                fill="currentColor">
-                                                <path
-                                                    d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                            </svg>
-                                        </button>
-                                        <div
-                                            class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-primary rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-10">
-                                            Edit Product
-                                            <div
-                                                class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-primary">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="9" class="px-6 py-3 text-center text-gray-500">No products found.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Pagination -->
-        <div class="bg-white px-6 py-4 border-t border-gray-200">
-            {{ $products->links() }}
-        </div>
-    </div>
     </div>
 
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function () {
+                // Existing category/subcategory axios code (unchanged)
                 const mainCategorySelect = document.getElementById('mainCategorySelect');
                 const subCategorySelect = document.getElementById('subCategorySelect');
 
@@ -464,6 +560,119 @@
                             subCategorySelect.disabled = true;
                             // optional: showToast('Error loading subcategories', 'error');
                         });
+                });
+
+                // Populate subcategory if category and subcategory exist in request (useful on reload)
+                (function populateSubOnLoad() {
+                    const selectedCategory = '{{ request('category', '') }}';
+                    const selectedSub = '{{ request('subcategory', '') }}';
+                    if (selectedCategory && selectedSub) {
+                        axios.get(`/categories/${selectedCategory}/subcategories`)
+                            .then(response => {
+                                const subcategories = response.data;
+                                if (subcategories.length > 0) {
+                                    subcategories.forEach(sub => {
+                                        const option = new Option(sub.name, sub.id);
+                                        if (String(sub.id) === String(selectedSub)) option.selected = true;
+                                        subCategorySelect.add(option);
+                                    });
+                                    subCategorySelect.disabled = false;
+                                }
+                            }).catch(() => {/* ignore */ });
+                    }
+                })();
+
+                // Reset button clears both search + filters and returns to default (per_page=5)
+                document.getElementById('resetFilters').addEventListener('click', function () {
+                    // clear search input
+                    const searchForm = document.getElementById('searchForm');
+                    const filtersForm = document.getElementById('filtersForm');
+
+                    if (searchForm) {
+                        const inp = searchForm.querySelector('input[name="search"]');
+                        if (inp) inp.value = '';
+                    }
+
+                    if (filtersForm) {
+                        // reset selects and inputs
+                        filtersForm.querySelectorAll('select').forEach(s => { s.selectedIndex = 0; });
+                        filtersForm.querySelectorAll('input[type="hidden"][name="per_page"]').forEach(h => h.value = 5);
+                    }
+
+                    // navigate to base URL with per_page=5 to ensure default pagination
+                    window.location = '{{ url()->current() . '?per_page=5' }}';
+                });
+
+                // Tooltip: sticky behavior for low-stock tooltip (existing logic)
+                document.querySelectorAll('.tooltip-wrapper').forEach(wrapper => {
+                    const toggle = wrapper.querySelector('.tooltip-toggle');
+                    const content = wrapper.querySelector('.tooltip-content');
+                    if (!toggle || !content) return;
+
+                    const openTooltip = () => {
+                        content.classList.remove('opacity-0', 'pointer-events-none');
+                        content.classList.add('opacity-100', 'pointer-events-auto');
+                        content.setAttribute('aria-hidden', 'false');
+                        toggle.setAttribute('aria-expanded', 'true');
+                        wrapper.classList.add('tooltip-open');
+                    };
+
+                    const closeTooltip = () => {
+                        content.classList.remove('opacity-100', 'pointer-events-auto');
+                        content.classList.add('opacity-0', 'pointer-events-none');
+                        content.setAttribute('aria-hidden', 'true');
+                        toggle.setAttribute('aria-expanded', 'false');
+                        wrapper.classList.remove('tooltip-open');
+                    };
+
+                    // Toggle on click
+                    toggle.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        if (wrapper.classList.contains('tooltip-open')) {
+                            closeTooltip();
+                        } else {
+                            // close other open tooltips first
+                            document.querySelectorAll('.tooltip-wrapper.tooltip-open').forEach(w => {
+                                if (w !== wrapper) {
+                                    const c = w.querySelector('.tooltip-content');
+                                    const t = w.querySelector('.tooltip-toggle');
+                                    if (c) { c.classList.remove('opacity-100', 'pointer-events-auto'); c.classList.add('opacity-0', 'pointer-events-none'); c.setAttribute('aria-hidden', 'true'); }
+                                    if (t) t.setAttribute('aria-expanded', 'false');
+                                    w.classList.remove('tooltip-open');
+                                }
+                            });
+                            openTooltip();
+                        }
+                    });
+
+                    // Prevent clicks inside tooltip from closing via document click
+                    content.addEventListener('click', function (e) { e.stopPropagation(); });
+                });
+
+                // Close any open tooltip when clicking outside
+                document.addEventListener('click', function (e) {
+                    document.querySelectorAll('.tooltip-wrapper.tooltip-open').forEach(wrapper => {
+                        if (!wrapper.contains(e.target)) {
+                            const content = wrapper.querySelector('.tooltip-content');
+                            const toggle = wrapper.querySelector('.tooltip-toggle');
+                            if (content) { content.classList.remove('opacity-100', 'pointer-events-auto'); content.classList.add('opacity-0', 'pointer-events-none'); content.setAttribute('aria-hidden', 'true'); }
+                            if (toggle) toggle.setAttribute('aria-expanded', 'false');
+                            wrapper.classList.remove('tooltip-open');
+                        }
+                    });
+                });
+
+                // Close on Escape key
+                document.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape') {
+                        document.querySelectorAll('.tooltip-wrapper.tooltip-open').forEach(wrapper => {
+                            const content = wrapper.querySelector('.tooltip-content');
+                            const toggle = wrapper.querySelector('.tooltip-toggle');
+                            if (content) { content.classList.remove('opacity-100', 'pointer-events-auto'); content.classList.add('opacity-0', 'pointer-events-none'); content.setAttribute('aria-hidden', 'true'); }
+                            if (toggle) toggle.setAttribute('aria-expanded', 'false');
+                            wrapper.classList.remove('tooltip-open');
+                        });
+                    }
                 });
             });
         </script>

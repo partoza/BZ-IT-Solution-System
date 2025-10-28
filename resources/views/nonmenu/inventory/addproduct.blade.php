@@ -111,22 +111,22 @@
                     <div class="flex flex-col space-y-3">
                         <!--Pricing Panel-->
                         <!-- <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                                                                        <h3 class="font-semibold text-gray-800 mb-3">Pricing</h3>
-                                                                        <div class="grid grid-rows-1 md:grid-rows-2 space-y-3">
-                                                                            <div>
-                                                                                <label class="block text-sm font-medium text-gray-700 mb-2">Base Price</label>
-                                                                                <input type="text" name="price"
-                                                                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:font-normal placeholder:text-gray-400"
-                                                                                    placeholder="Enter price">
+                                                                            <h3 class="font-semibold text-gray-800 mb-3">Pricing</h3>
+                                                                            <div class="grid grid-rows-1 md:grid-rows-2 space-y-3">
+                                                                                <div>
+                                                                                    <label class="block text-sm font-medium text-gray-700 mb-2">Base Price</label>
+                                                                                    <input type="text" name="price"
+                                                                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:font-normal placeholder:text-gray-400"
+                                                                                        placeholder="Enter price">
+                                                                                </div>
+                                                                                <div>
+                                                                                    <label class="block text-sm font-medium text-gray-700 mb-2">Discounted Price</label>
+                                                                                    <input type="text" name="discounted_price"
+                                                                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:font-normal placeholder:text-gray-400"
+                                                                                        placeholder="Enter discounted price">
+                                                                                </div>
                                                                             </div>
-                                                                            <div>
-                                                                                <label class="block text-sm font-medium text-gray-700 mb-2">Discounted Price</label>
-                                                                                <input type="text" name="discounted_price"
-                                                                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:font-normal placeholder:text-gray-400"
-                                                                                    placeholder="Enter discounted price">
-                                                                            </div>
-                                                                        </div>
-                                                                    </div> -->
+                                                                        </div> -->
 
                         <!-- Classification Panel -->
                         <div class="bg-white rounded-lg shadow-sm p-6 py-4 addEventListener">
@@ -204,9 +204,10 @@
                                 </div>
                             </div>
 
-                             <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2">
                                 <input type="hidden" name="track_serials" value="0">
-                                <input type="checkbox" name="track_serials" id="trackSerials" value="1" checked class="accent-primary">
+                                <input type="checkbox" name="track_serials" id="trackSerials" value="1" checked
+                                    class="accent-primary">
                                 <label for="trackSerials" class="text-gray-700">Track serials for this product</label>
                             </div>
 
@@ -221,7 +222,7 @@
                                 </select>
                             </div>
 
-                           
+
 
                         </div>
                         <div class="mt-4">

@@ -99,7 +99,6 @@ class SupplierController extends Controller
             'contact_person' => $supplier->contact_person,
             'email' => $supplier->email,
             'phone_number' => $supplier->phone_number,
-            'category' => $supplier->category
         ]);
     }
 

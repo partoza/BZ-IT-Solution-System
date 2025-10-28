@@ -36,8 +36,7 @@
                                     class="supplier-select w-full border border-gray-300 rounded-lg px-3 py-2 text-sm transition">
                                     <option value="" diasbled selected>Select Supplier</option>
                                     @foreach($suppliers as $supplier)
-                                        <option value="{{ $supplier->id }}">{{ $supplier->company_name }} -
-                                            {{ $supplier->category ?? 'N/A' }}
+                                        <option value="{{ $supplier->id }}">{{ $supplier->company_name }}
                                         </option>
                                     @endforeach
                                 </select>

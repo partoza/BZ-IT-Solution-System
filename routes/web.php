@@ -164,6 +164,9 @@ Route::middleware(['auth:employee'])->group(function () {
         Route::get('dashboard/pos', [POSController::class, 'index'])
             ->name('pos.index');
         Route::post('/pos/checkout', [PosController::class, 'checkout'])->name('pos.checkout');
+        Route::get('/pos/checkout', function() {
+            return redirect()->route('pos.index');
+        });
         Route::post('/pos/validate-serials', [POSController::class, 'validateSerials'])
             ->name('pos.validate-serials');
         Route::post('/pos/sales', [SaleController::class, 'store'])->name('pos.sales.store');

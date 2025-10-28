@@ -175,7 +175,7 @@
 
                                     <!-- Sign In Button -->
                                     <button type="submit"
-                                        class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-xl font-poppins">
+                                        class="w-full bg-primary hover:bg-emerald-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-95 shadow-lg hover:shadow-xl font-poppins">
                                         Sign In
                                     </button>
                                 </form>

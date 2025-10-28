@@ -92,7 +92,7 @@ export function showToast(message, type = 'info', options = {}) {
 
   const toast = document.createElement('div');
   // make toast relative so we can absolutely position the close button at
-  toast.className = 'relative bg-white border border-gray-100 shadow-lg rounded-lg pl-0 pr-2 py-2 flex flex-col transform transition-all duration-300 ease-out opacity-0 translate-y-2';
+  toast.className = 'relative bg-white border border-gray-100 shadow-lg rounded-lg p-5 flex flex-col transform transition-all duration-300 ease-out opacity-0 translate-y-2';
   // ensure the toast accepts pointer events (in case a parent container uses
   // pointer-events utilities)
   toast.style.pointerEvents = 'auto';
