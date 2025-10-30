@@ -14,7 +14,8 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $branchId = auth()->guard('employee')->user()?->branch_id;
-        $perPage = intval($request->query('per_page', 10));
+    // Default per page should match the UI hidden inputs (5)
+    $perPage = intval($request->query('per_page', 5));
 
         // Filters
         $search = $request->query('search');

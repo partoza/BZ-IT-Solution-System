@@ -206,7 +206,7 @@
 
                             <div class="flex items-center gap-2">
                                 <input type="hidden" name="track_serials" value="0">
-                                <input type="checkbox" name="track_serials" id="trackSerials" value="1" checked
+                                <input type="checkbox" name="track_serials" id="trackSerials" value="1"
                                     class="accent-primary">
                                 <label for="trackSerials" class="text-gray-700">Track serials for this product</label>
                             </div>

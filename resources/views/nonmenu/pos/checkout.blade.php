@@ -188,7 +188,7 @@
 
                 <!-- Checkout Button -->
                 <button
-                    class="w-full mt-8 py-4 bg-primary text-white rounded-lg font-medium text-lg flex items-center justify-center gap-3 hover:bg-emerald-600 transition-colors shadow-md">
+                    class="w-full mt-8 py-3 bg-primary text-white rounded-lg font-medium text-md flex items-center justify-center gap-3 hover:bg-emerald-600 transition-colors shadow-md">
                     <span>Checkout Now</span>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">

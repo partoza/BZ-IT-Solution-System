@@ -71,7 +71,7 @@
             </div>
 
             <!-- Search Button -->
-            <button type="submit" id="categoriesSearchBtn" class="px-5 py-2.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+            <button type="submit" id="categoriesSearchBtn" class="px-5 py-2.5 text-sm bg-primary hover:bg-emerald-700 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
                 Search
             </button>
 
@@ -89,7 +89,7 @@
             </select>
 
             <!-- Add Category -->
-            <button id="addCategoryBtn" type="button" class="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center justify-center">
+            <button id="addCategoryBtn" type="button" class="px-5 py-2.5 bg-primary hover:bg-emerald-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center justify-center">
                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
@@ -189,132 +189,80 @@
         </div>
     </div>
 
-    <!-- Add Category Modal -->
-    <div id="addCategoryModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <div class="relative top-20 mx-auto p-8 border w-full max-w-6xl shadow-lg rounded-2xl bg-white">
-            <!-- Modal Header -->
-            <div class="flex justify-between items-center pb-4 border-b">
+    <!-- Add Category Modal (styled like addproduct's brandModal) -->
+    <div id="addCategoryModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 backdrop-blur-sm">
+        <div class="bg-white p-5 rounded-2xl shadow-2xl w-full max-w-4xl mx-4 border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800">Add New Category</h2>
+                    <h2 class="text-2xl font-bold text-primary">Add New Category</h2>
                     <p class="text-sm text-gray-600 mt-1">Please fill up all the required fields to add new category.</p>
                 </div>
-                <button type="button" class="closeModalBtn text-gray-400 hover:text-gray-600">
+                <button type="button" class="closeModalBtn text-gray-400 hover:text-red-600 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
 
-            <!-- Modal Content -->
-            <form id="categoryForm" enctype="multipart/form-data">
-                <div class="mt-8">
-                    <!-- Two-column layout -->
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                        <!-- Left Column: Category Information (wider) -->
-                        <div class="lg:col-span-2">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Category Information</h3>
+            <hr class="mb-2">
 
-                            <!-- Category Name -->
-                            <div class="mb-5">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Category Name</label>
-                                <input type="text" name="name" required
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Electronics">
-                            </div>
+            <form id="categoryForm" enctype="multipart/form-data" class="global-focus flex flex-col">
+                <!-- Scrollable body -->
+                <div class="overflow-y-auto max-h-[60vh] space-y-4 mt-4">
+                    <div>
+                        <label for="categoryName" class="block text-sm font-medium text-gray-700 mb-2">Category Name</label>
+                        <input id="categoryName" type="text" name="name" required placeholder="Electronics"
+                            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50">
+                    </div>
 
-                            <!-- Category Type -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Category Type</label>
-                                    <select name="category_type" id="categoryTypeSelect"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white">
-                                        <option value="product">Product</option>
-                                        <option value="service">Service</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Parent Category</label>
-                                    <select name="parent_id" id="parentCategorySelect"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white">
-                                        <option value="">None</option>
-                                        @foreach($categories->where('parent_id', null) as $parent)
-                                            <option value="{{ $parent->id }}" 
-                                                data-type="{{ $parent->category_type }}"
-                                            >
-                                                {{ $parent->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Description -->
-                            <div class="mb-5">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                                <textarea name="description" rows="3"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Brief description of the category"></textarea>
-                            </div>
-
-                            <!-- Status -->
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-3">Status</label>
-                                <div class="flex items-center gap-3 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg">
-                                    <input type="checkbox" name="is_active" id="isActive"
-                                        class="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" checked>
-                                    <label for="isActive" class="text-sm text-gray-800 select-none cursor-pointer">Active</label>
-                                </div>
-                            </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Category Type</label>
+                            <select name="category_type" id="categoryTypeSelect"
+                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white">
+                                <option value="product">Product</option>
+                                <option value="service">Service</option>
+                            </select>
                         </div>
-
-                        <!-- Right Column: Upload Image -->
-                        <div class="flex flex-col">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Category Image</h3>
-
-                            <input type="file" name="image" id="imageInput" class="hidden" accept="image/*">
-                            <!-- Image Upload Area -->
-                            <div id="imageUploadArea" class="border-2 border-dashed border-gray-300 rounded-lg p-6 h-[250px] mb-4 
-                                        flex items-center justify-center text-center cursor-pointer flex-col">
-                                
-                                <!-- Image preview container -->
-                                <div id="imagePreviewContainer" class="w-full h-full flex items-center justify-center">
-                                    <img id="imagePreview" class="max-h-full hidden rounded-lg" src="" alt="Preview">
-                                </div>
-
-                                <!-- Text / SVG container -->
-                                <div id="imageTextContainer" class="flex flex-col items-center justify-center">
-                                    <svg class="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                    <p class="text-sm text-gray-600 mb-2">Drag and drop your image here or click to browse</p>
-                                    <p class="text-xs text-gray-500">Accepted file types: .jpg, .png</p>
-                                </div>
-                            </div>
-
-                            <!-- Action Buttons - Stacked with same width -->
-                            <div class="flex flex-col gap-3 w-full">
-                                <button type="button" id="changeImageBtn"
-                                    class="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
-                                    Change Image
-                                </button>
-                                <button type="reset"
-                                    class="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium">
-                                    Reset
-                                </button>
-                            </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Parent Category</label>
+                            <select name="parent_id" id="parentCategorySelect"
+                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white">
+                                <option value="">None</option>
+                                @foreach($categories->where('parent_id', null) as $parent)
+                                    <option value="{{ $parent->id }}" data-type="{{ $parent->category_type }}">
+                                        {{ $parent->name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
 
-                    <!-- Modal Footer -->
-                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t mt-8">
-                        <button type="button" class="closeModalBtn w-full sm:w-auto px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
-                            Back
-                        </button>
-                        <button type="submit"
-                            class="w-full sm:w-auto px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
-                            Create Category
-                        </button>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                        <textarea name="description" rows="3"
+                            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
+                            placeholder="Brief description of the category"></textarea>
                     </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                        <div class="flex items-center gap-3 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl">
+                            <input type="checkbox" name="is_active" id="isActive"
+                                class="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" checked>
+                            <label for="isActive" class="text-sm text-gray-800 select-none cursor-pointer">Active</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer pinned to bottom -->
+                <div class="mt-4 pt-4 border-t flex justify-end gap-3">
+                    <button type="button" class="closeModalBtn px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors font-medium">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-3 bg-primary hover:bg-emerald-700 text-white rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-200">
+                        Create Category
+                    </button>
                 </div>
             </form>
         </div>
@@ -346,7 +294,7 @@ document.addEventListener("DOMContentLoaded", function () {
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-    // ----- Image preview -----
+    // ----- Image preview (guarded) -----
     const imageInput = document.getElementById('imageInput');
     const imagePreview = document.getElementById('imagePreview');
     const imagePreviewContainer = document.getElementById('imagePreviewContainer');
@@ -354,26 +302,37 @@ document.addEventListener("DOMContentLoaded", function () {
     const imageUploadArea = document.getElementById('imageUploadArea');
     const changeImageBtn = document.getElementById('changeImageBtn');
 
-    imageUploadArea.addEventListener('click', () => imageInput.click());
-    changeImageBtn.addEventListener('click', () => imageInput.click());
+    if (imageUploadArea && imageInput) {
+        imageUploadArea.addEventListener('click', () => imageInput.click());
+    }
 
-    imageInput.addEventListener('change', function () {
-        const file = this.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = e => {
-                imagePreview.src = e.target.result;
-                imagePreview.classList.remove('hidden');
-                imageTextContainer.classList.add('hidden');
-            };
-            reader.readAsDataURL(file);
-        }
-    });
+    if (changeImageBtn && imageInput) {
+        changeImageBtn.addEventListener('click', () => imageInput.click());
+    }
+
+    if (imageInput) {
+        imageInput.addEventListener('change', function () {
+            const file = this.files && this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    if (imagePreview) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.classList.remove('hidden');
+                    }
+                    if (imageTextContainer) imageTextContainer.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
 
     function resetImagePreview() {
-        imagePreview.src = '';
-        imagePreview.classList.add('hidden');
-        imageTextContainer.classList.remove('hidden');
+        if (imagePreview) {
+            imagePreview.src = '';
+            imagePreview.classList.add('hidden');
+        }
+        if (imageTextContainer) imageTextContainer.classList.remove('hidden');
     }
 
 

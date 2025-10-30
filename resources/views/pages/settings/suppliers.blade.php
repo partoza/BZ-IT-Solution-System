@@ -45,7 +45,7 @@
         <!-- Supplier List Header -->
         <div class="bg-white shadow-sm p-5 mb-2">
             <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3">
-                <h2 class="text-lg font-semibold text-gray-800">Supplier Orders</h2>
+                <h2 class="text-lg font-semibold text-gray-800">Suppliers</h2>
                 
                 <div class="flex flex-col xl:flex-row gap-3 w-full xl:w-auto">
                     <!-- Search Input -->
@@ -63,7 +63,7 @@
                     </div>
 
                     <!-- Buttons and Filters -->
-                    <button class="px-5 py-2.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+                    <button class="px-5 py-2.5 text-sm bg-primary hover:bg-primary-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
                         Search
                     </button>
 
@@ -75,7 +75,7 @@
                     </select>
 
                     <!-- Add Supplier -->
-                    <button id="addSupplierBtn" class="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center justify-center">
+                    <button id="addSupplierBtn" class="px-5 py-2.5 bg-primary hover:bg-emerald-600 text-white rounded-lg transition-colors text-sm font-medium flex items-center justify-center">
                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
@@ -104,11 +104,12 @@
                             <td class="px-6 py-4 text-gray-600">{{ $supplier->email }}</td>
                             <td class="px-6 py-4 text-gray-600">{{ $supplier->phone_number }}</td>
                             <td class="px-6 py-4">
-                                @if ($supplier->status === 'active')
+                                <span class="px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Active</span>
+                                <!-- @if ($supplier->status === 'active')
                                     <span class="px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Active</span>
                                 @else
                                     <span class="px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">Inactive</span>
-                                @endif
+                                @endif -->
                             </td>
                         </tr>
                     @empty
@@ -134,71 +135,72 @@
         </div>
     </div>
 
-    <!-- Add Supplier Modal -->
-    <div id="addSupplierModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <div class="relative top-20 mx-auto p-8 border w-full max-w-4xl shadow-lg rounded-2xl bg-white">
-            <!-- Modal Header -->
-            <div class="flex justify-between items-center pb-4">
+    <!-- Add Supplier Modal (addproduct style) -->
+    <div id="addSupplierModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 backdrop-blur-sm">
+        <div class="bg-white p-5 rounded-2xl shadow-2xl w-full max-w-4xl mx-4 border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
                 <div>
                     <h2 class="text-2xl font-bold text-gray-800">Add New Supplier</h2>
                     <p class="text-sm text-gray-600 mt-1">Please fill up all the required fields to add new supplier.</p>
                 </div>
-                <button type="button" class="closeModalBtn text-gray-400 hover:text-gray-600">
+                <button type="button" class="closeModalBtn text-gray-400 hover:text-red-600 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
 
-            <!-- Modal Content -->
-            <form id="supplierForm" enctype="multipart/form-data">
+            <hr class="mb-2">
+
+            <form id="supplierForm" enctype="multipart/form-data" class="global-focus flex flex-col">
                 @csrf
-                <div class="grid grid-cols-1 gap-8">
-                    <!-- Supplier Information Only -->
+
+                <!-- Scrollable body -->
+                <div class="overflow-y-auto max-h-[60vh] space-y-4 mt-4">
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-800 mb-6 pb-3 border-b nt-4 border-gray-200">Supplier Information</h3>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Supplier Information</h3>
 
                         <!-- Company Name -->
-                        <div class="mb-6">
+                        <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Company Name <span class="text-red-500">*</span></label>
                             <input type="text" name="company_name"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:font-normal placeholder:text-gray-400 transition-colors"
+                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:font-normal placeholder:text-gray-400 transition-all duration-200 bg-gray-50"
                                 placeholder="NVIDIA Supplier"
                                 required>
                         </div>
 
                         <!-- Contact Person -->
-                        <div class="mb-6">
+                        <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Contact Person <span class="text-red-500">*</span></label>
                             <input type="text" name="contact_person"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:font-normal placeholder:text-gray-400 transition-colors"
+                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:font-normal placeholder:text-gray-400 transition-all duration-200 bg-gray-50"
                                 placeholder="John Rex"
                                 required>
                         </div>
 
                         <!-- Email & Phone Row -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Email Address <span class="text-red-500">*</span></label>
                                 <input type="email" name="email"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:font-normal placeholder:text-gray-400 transition-colors"
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:font-normal placeholder:text-gray-400 transition-all duration-200 bg-gray-50"
                                     placeholder="contact@nvidia.com"
                                     required>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number <span class="text-red-500">*</span></label>
                                 <input type="tel" name="phone_number"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:font-normal placeholder:text-gray-400 transition-colors"
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:font-normal placeholder:text-gray-400 transition-all duration-200 bg-gray-50"
                                     placeholder="09123456789"
                                     required>
                             </div>
                         </div>
 
                         <!-- Address -->
-                        <div class="mb-6">
+                        <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Complete Address <span class="text-red-500">*</span></label>
                             <textarea name="address" rows="3"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:font-normal placeholder:text-gray-400 transition-colors"
+                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:font-normal placeholder:text-gray-400 transition-all duration-200 bg-gray-50"
                                 placeholder="Enter complete supplier address including street, city, and postal code"
                                 required></textarea>
                         </div>
@@ -207,23 +209,21 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
                             <textarea name="notes" rows="2"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:font-normal placeholder:text-gray-400 transition-colors"
+                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:font-normal placeholder:text-gray-400 transition-all duration-200 bg-gray-50"
                                 placeholder="Any additional information about this supplier"></textarea>
                             <p class="text-xs text-gray-500 mt-1">Optional: Special requirements, payment terms, or other relevant details</p>
                         </div>
                     </div>
                 </div>
 
-                    <!-- Modal Footer -->
-                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t mt-8">
-                        <button type="button" class="closeModalBtn w-full sm:w-auto px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
-                            Back
-                        </button>
-                        <button type="submit"
-                            class="w-full sm:w-auto px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
-                            Add Supplier
-                        </button>
-                    </div>
+                <!-- Footer pinned to bottom -->
+                <div class="mt-4 pt-4 border-t flex justify-end gap-3">
+                    <button type="button" class="closeModalBtn px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors font-medium">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-3 bg-primary hover:bg-emerald-600 text-white rounded-xl font-medium shadow-sm hover:shadow-md transition-all duration-200">
+                        Add Supplier
+                    </button>
                 </div>
             </form>
         </div>
@@ -235,37 +235,39 @@ document.addEventListener("DOMContentLoaded", function () {
     const modal = document.getElementById('addSupplierModal');
     const form = document.getElementById('supplierForm');
     const openBtn = document.getElementById('addSupplierBtn');
-    const closeBtns = modal.querySelectorAll('.closeModalBtn');
+    const closeBtns = modal ? modal.querySelectorAll('.closeModalBtn') : [];
 
-    function openModal() { modal.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
-    function closeModal() { modal.classList.add('hidden'); document.body.style.overflow = 'auto'; }
+    function openModal() { if (!modal) return; modal.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+    function closeModal() { if (!modal) return; modal.classList.add('hidden'); document.body.style.overflow = 'auto'; }
 
-    openBtn.addEventListener('click', openModal);
-    closeBtns.forEach(btn => btn.addEventListener('click', closeModal));
-    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+    if (openBtn) openBtn.addEventListener('click', openModal);
+    if (closeBtns && closeBtns.length) closeBtns.forEach(btn => btn.addEventListener('click', closeModal));
+    if (modal) modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
     // AJAX Submission
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        let formData = new FormData(form);
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            let formData = new FormData(form);
 
-        axios.post("{{ route('suppliers.store') }}", formData)
-            .then(response => {
-                showToast(response.data.message, 'success');
-                closeModal();
-                setTimeout(() => window.location.reload(), 1000);
-            })
-            .catch(error => {
-                if (error.response && error.response.data.errors) {
-                    Object.values(error.response.data.errors).forEach(errArray => {
-                        errArray.forEach(msg => showToast(msg, 'error'));
-                    });
-                } else {
-                    showToast('Something went wrong.', 'error');
-                }
-            });
-    });
+            axios.post("{{ route('suppliers.store') }}", formData)
+                .then(response => {
+                    showToast(response.data.message, 'success');
+                    closeModal();
+                    setTimeout(() => window.location.reload(), 1000);
+                })
+                .catch(error => {
+                    if (error.response && error.response.data.errors) {
+                        Object.values(error.response.data.errors).forEach(errArray => {
+                            errArray.forEach(msg => showToast(msg, 'error'));
+                        });
+                    } else {
+                        showToast('Something went wrong.', 'error');
+                    }
+                });
+        });
+    }
 
     // Use the global `showToast(message, type)` provided by resources/js/utils/toast.js
 });

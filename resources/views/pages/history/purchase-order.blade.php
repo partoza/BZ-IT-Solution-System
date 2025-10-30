@@ -182,7 +182,7 @@
         <!-- Stock Orders Header -->
         <div class="bg-white shadow-sm p-5 mb-2">
             <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3">
-                <h2 class="text-lg font-semibold text-gray-800">Stock Orders History</h2>
+                <h2 class="text-lg font-semibold text-gray-800">Purchase Orders History</h2>
 
                 <div class="flex flex-col xl:flex-row gap-3 w-full xl:w-auto">
                     <!-- Search Form -->
@@ -1135,15 +1135,15 @@
                         table.innerHTML = `
                                                             <thead class="bg-gray-50">
                                                                 <tr>
-                                                                    <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                                                                     <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Serial Number</th>
+                                                                    <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Cost Price</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody class="bg-white divide-y divide-gray-200">
                                                                 ${inventoryItems.map(inv => `
                                                                     <tr class="hover:bg-gray-50">
-                                                                        <td class="px-2 py-3 text-sm text-gray-700">${inv.id}</td>
                                                                         <td class="px-2 py-3 text-sm text-gray-700 font-mono">${inv.serial_number || 'N/A'}</td>
+                                                                        <td class="px-2 py-3 text-sm text-gray-700">${inv.unit_price ? ('₱ ' + parseFloat(inv.unit_price).toFixed(2)) : '—'}</td>
                                                                     </tr>
                                                                 `).join('')}
                                                             </tbody>

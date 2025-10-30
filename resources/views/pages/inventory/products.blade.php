@@ -231,6 +231,7 @@
         <style>
             /* Limit table cell content to 2 lines and hide overflow */
             .cell-text {
+                /* multiline clamp (webkit) */
                 display: -webkit-box;
                 -webkit-line-clamp: 2;
                 -webkit-box-orient: vertical;
@@ -238,8 +239,9 @@
                 line-height: 1.25rem;
                 /* adjust to change row height */
                 max-height: calc(2 * 1.25rem);
-                /* Ensure the text container is block-level so clamp works inside table cells */
-                display: block;
+                /* fallback for non-webkit: single-line ellipsis */
+                text-overflow: ellipsis;
+                white-space: normal;
             }
 
             /* Tooltip product name clamp (max 2 lines) */
@@ -298,7 +300,7 @@
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
-                        Add
+                        Add Product
                     </a>
 
                     <a href=""
@@ -340,7 +342,7 @@
                         </select>
 
                         <!-- Subcategory select (populated by JS when category changes) -->
-                        <select id="subCategorySelect" name="subcategory"
+                        <select id="subCategorySelect" name="sub_category"
                             class="px-3 py-2 border border-gray-300 rounded-lg text-sm min-w-[160px]"
                             @if(!request('category')) disabled @endif>
                             <option value="">All Subcategories</option>
@@ -405,7 +407,26 @@
                             <tr class="hover:bg-gray-50 transition-colors text-sm h-16">
                                 <!-- Wrap cell contents in a clamp container to limit to 2 lines -->
                                 <td class="px-6 py-3 align-middle text-gray-800 font-medium w-1/4">
-                                    <div class="cell-text">{{ $product->product_name }}</div>
+                                    <div class="flex items-center gap-3 min-w-0 flex-nowrap">
+                                        @php
+                                            // Determine image URL: prefer product->image stored via storage, else fallback asset
+                                            $imgUrl = $product->image ? asset('storage/' . $product->image) : asset('assets/img/no-image.png');
+                                        @endphp
+
+                                        <div class="relative group flex-none">
+                                            <img src="{{ $imgUrl }}" alt="{{ $product->product_name }}" title="{{ $product->product_name }}" class="w-10 h-10 rounded-md object-cover" />
+                                            <!-- Tooltip on hover shows full product name -->
+                                            <div
+                                                class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-primary rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-10 max-w-xs overflow-hidden text-ellipsis">
+                                                {{ $product->product_name }}
+                                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-primary"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="cell-text min-w-0 flex-1">
+                                            {{ $product->product_name }}
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-3 align-middle text-gray-600">
                                     <div class="cell-text">{{ $product->brand->name ?? '—' }}</div>
@@ -516,7 +537,12 @@
                     </div>
 
                     <div class="flex items-center gap-2">
-                        {!! $products->appends(request()->except('page'))->links('vendor.pagination.circular') !!}
+                        @if (view()->exists('vendor.pagination.circular'))
+                            {!! $products->appends(request()->except('page'))->links('vendor.pagination.circular') !!}
+                        @else
+                            {{-- Fallback to default pagination view when custom view is missing --}}
+                            {!! $products->appends(request()->except('page'))->links() !!}
+                        @endif
                     </div>
                 </div>
             </div>
@@ -565,7 +591,7 @@
                 // Populate subcategory if category and subcategory exist in request (useful on reload)
                 (function populateSubOnLoad() {
                     const selectedCategory = '{{ request('category', '') }}';
-                    const selectedSub = '{{ request('subcategory', '') }}';
+                    const selectedSub = '{{ request('sub_category', '') }}';
                     if (selectedCategory && selectedSub) {
                         axios.get(`/categories/${selectedCategory}/subcategories`)
                             .then(response => {
@@ -584,23 +610,10 @@
 
                 // Reset button clears both search + filters and returns to default (per_page=5)
                 document.getElementById('resetFilters').addEventListener('click', function () {
-                    // clear search input
-                    const searchForm = document.getElementById('searchForm');
-                    const filtersForm = document.getElementById('filtersForm');
-
-                    if (searchForm) {
-                        const inp = searchForm.querySelector('input[name="search"]');
-                        if (inp) inp.value = '';
-                    }
-
-                    if (filtersForm) {
-                        // reset selects and inputs
-                        filtersForm.querySelectorAll('select').forEach(s => { s.selectedIndex = 0; });
-                        filtersForm.querySelectorAll('input[type="hidden"][name="per_page"]').forEach(h => h.value = 5);
-                    }
-
-                    // navigate to base URL with per_page=5 to ensure default pagination
-                    window.location = '{{ url()->current() . '?per_page=5' }}';
+                    // Redirect to the same path with only per_page=5 to clear search, filters and page
+                    const base = window.location.pathname;
+                    const perPage = 5;
+                    window.location.href = `${base}?per_page=${perPage}`;
                 });
 
                 // Tooltip: sticky behavior for low-stock tooltip (existing logic)

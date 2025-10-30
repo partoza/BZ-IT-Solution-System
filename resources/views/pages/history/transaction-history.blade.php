@@ -1,34 +1,130 @@
 @extends('layout.sidebarmenu')
 
 @section('pages-content')
-    <!-- Stats Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 gap-5 mb-8">
+    <!-- Stats Section (styled like products) -->
+    @php
+        $totalTx = $totalSales ?? 0;
+        $completedPct = $totalTx > 0 ? round(($completedSales / $totalTx) * 100) : 0;
+        $cancelledPct = $totalTx > 0 ? round(($cancelledSales / $totalTx) * 100) : 0;
+        $reservedPct = $totalTx > 0 ? round(($reservedSales / $totalTx) * 100) : 0;
+    @endphp
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 gap-3 mb-3">
         <!-- Total Transactions Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
-            <h2 class="text-base font-medium text-gray-700 mb-1">Total Transactions</h2>
-            <h3 class="text-2xl font-semibold text-gray-900">{{ number_format($totalSales) }}</h3>
-            <p class="text-sm text-gray-500 mt-1">Overall recorded sales</p>
+            <div class="flex items-center gap-3 mb-1">
+                <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <div class="w-8 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-center"
+                        style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 text-white">
+                            <path d="M3 3h18v2H3z" />
+                            <path d="M5 7h14v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7z" />
+                        </svg>
+                    </div>
+                </div>
+                <h2 class="text-base font-medium text-gray-700">Total Sales</h2>
+            </div>
+            <div class="ps-14">
+                <h3 class="text-2xl font-semibold text-gray-900">{{ number_format($totalTx) }}</h3>
+                <p class="text-xs text-gray-500 mt-1">Overall recorded sales</p>
+                <div class="flex items-center gap-2 mt-2">
+                    <div class="flex items-center text-green-600 text-xs">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5 10a1 1 0 012 0v4a1 1 0 11-2 0v-4z" clip-rule="evenodd" />
+                        </svg>
+                        <span>{{ $completedPct }}% Completed</span>
+                    </div>
+                    <div class="flex items-center text-red-600 text-xs">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM8 9l2 2 4-4" />
+                        </svg>
+                        <span>{{ $cancelledPct }}% Cancelled</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Total Revenue Card -->
+        <!-- Completed Sales Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
-            <h2 class="text-base font-medium text-gray-700 mb-1">Completed Sales</h2>
-            <h3 class="text-2xl font-semibold text-green-700">{{ number_format($completedSales) }}</h3>
-            <p class="text-sm text-gray-500 mt-1">₱{{ number_format($salesThisMonth ?? 0, 2) }} this month</p>
+            <div class="flex items-center gap-3 mb-1">
+                <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <div class="w-8 h-8 bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-center"
+                        style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check2-circle size-4 text-white" viewBox="0 0 16 16">
+                            <path d="M2.5 8a5.5 5.5 0 1111 0 5.5 5.5 0 01-11 0z" />
+                            <path d="M10.97 5.97a.235.235 0 00-.02-.022L7.477 9.417 6.354 8.293a.75.75 0 10-1.06 1.06l1.732 1.732a.75.75 0 001.06 0l3.386-3.388a.75.75 0 00-.002-1.01z" />
+                        </svg>
+                    </div>
+                </div>
+                <h2 class="text-base font-medium text-gray-700">Completed Sales</h2>
+            </div>
+            <div class="ps-14">
+                <h3 class="text-2xl font-semibold text-green-700">{{ number_format($completedSales) }}</h3>
+                <p class="text-xs text-gray-500 mt-1">₱{{ number_format($salesThisMonth ?? 0, 2) }} this month</p>
+                <div class="flex items-center gap-2 mt-2">
+                    <div class="flex items-center text-green-600 text-xs">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 10a8 8 0 1116 0A8 8 0 012 10z" />
+                        </svg>
+                        <span>{{ $completedPct }}% of Total</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Average Transaction Card -->
+        <!-- Cancelled Sales Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
-            <h2 class="text-base font-medium text-gray-700 mb-1">Cancelled Sales</h2>
-            <h3 class="text-2xl font-semibold text-red-600">{{ number_format($cancelledSales) }}</h3>
-            <p class="text-sm text-gray-500 mt-1">₱{{ number_format($cancelledValue ?? 0, 2) }} total cancelled</p>
+            <div class="flex items-center gap-3 mb-1">
+                <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <div class="w-8 h-8 bg-gradient-to-r from-rose-600 to-rose-500 flex items-center justify-center"
+                        style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
+                        <svg width="16" height="16" fill="currentColor" class="bi bi-x-circle size-4 text-white" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 108 1a7 7 0 000 14z" />
+                            <path d="M4.646 4.646a.5.5 0 01.708 0L8 7.293l2.646-2.647a.5.5 0 11.708.708L8.707 8l2.647 2.646a.5.5 0 01-.708.708L8 8.707l-2.646 2.647a.5.5 0 01-.708-.708L7.293 8 4.646 5.354a.5.5 0 010-.708z" />
+                        </svg>
+                    </div>
+                </div>
+                <h2 class="text-base font-medium text-gray-700">Cancelled Sales</h2>
+            </div>
+            <div class="ps-14">
+                <h3 class="text-2xl font-semibold text-red-600">{{ number_format($cancelledSales) }}</h3>
+                <p class="text-xs text-gray-500 mt-1">₱{{ number_format($cancelledValue ?? 0, 2) }} total cancelled</p>
+                <div class="flex items-center gap-2 mt-2">
+                    <div class="flex items-center text-red-600 text-xs">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 2a8 8 0 100 16 8 8 0 000-16z" />
+                        </svg>
+                        <span>{{ $cancelledPct }}% of Total</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Pending Transactions Card -->
+        <!-- Reserved Sales Card -->
         <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
-            <h2 class="text-base font-medium text-gray-700 mb-1">Reserved Sales</h2>
-            <h3 class="text-2xl font-semibold text-amber-600">{{ number_format($reservedSales) }}</h3>
-            <p class="text-sm text-gray-500 mt-1">₱{{ number_format($reservedValue ?? 0, 2) }} reserved value</p>
+            <div class="flex items-center gap-3 mb-1">
+                <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <div class="w-8 h-8 bg-gradient-to-r from-amber-600 to-amber-500 flex items-center justify-center"
+                        style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 text-white">
+                            <path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z" />
+                        </svg>
+                    </div>
+                </div>
+                <h2 class="text-base font-medium text-gray-700">Reserved Sales</h2>
+            </div>
+            <div class="ps-14">
+                <h3 class="text-2xl font-semibold text-amber-600">{{ number_format($reservedSales) }}</h3>
+                <p class="text-xs text-gray-500 mt-1">₱{{ number_format($reservedValue ?? 0, 2) }} reserved value</p>
+                <div class="flex items-center gap-2 mt-2">
+                    <div class="flex items-center text-amber-600 text-xs">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 2a8 8 0 100 16 8 8 0 000-16z" />
+                        </svg>
+                        <span>{{ $reservedPct }}% of Total</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -37,10 +133,12 @@
         <!-- Transaction List Header -->
         <div class="bg-white shadow-sm p-5 mb-2">
             <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3">
-                <h2 class="text-lg font-semibold text-gray-800">Transaction History</h2>
+                <h2 class="text-lg font-semibold text-gray-800">Sales History</h2>
                 
                 <div class="flex flex-col xl:flex-row gap-3 w-full xl:w-auto">
-                    <form method="GET" class="flex flex-wrap gap-3">
+                    <form id="transactionSearchForm" method="GET" class="flex flex-wrap gap-3 global-focus">
+                        <!-- keep per_page sync with UI defaults -->
+                        <input type="hidden" name="per_page" value="5" />
                         <!-- Search -->
                         <div class="relative flex-1 xl:w-72">
                             <input 
@@ -78,17 +176,17 @@
 
                         <!-- Buttons -->
                         <button type="submit"
-                            class="px-5 py-2.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
-                            Search
+                            class="px-5 py-2.5 text-sm bg-primary hover:bg-emerald-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+                            Filter
                         </button>
 
-                        <a href="{{ route('pos.sales.index') }}"
+                        <button id="resetFilters" type="button"
                             class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium flex items-center justify-center">
                             Clear
-                        </a>
+                        </button>
 
                         <button type="button"
-                            class="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center justify-center">
+                            class="px-5 py-2.5 bg-primary hover:bg-primary-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center justify-center">
                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -150,17 +248,40 @@
                                 </span>
                             </td>
                             <td class="px-6 py-3">
-                                <div class="flex space-x-2">
-                                    <a href="#" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">View</a>
+                                <div class="flex items-center space-x-2">
+                                    <!-- View button (opens transaction details modal) -->
                                     <button
                                         type="button"
-                                        class="openReceiptBtn text-green-600 hover:text-green-900 text-sm font-medium"
+                                        class="openViewBtn text-gray-600 hover:text-primary/90 transition-colors duration-200 p-1 rounded"
                                         data-sale-id="{{ $sale->id }}"
+                                        aria-label="View Transaction"
                                     >
-                                        Receipt
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                                        </svg>
                                     </button>
+
+                                    <!-- Receipt button (existing behavior) -->
+                                    <button
+                                        type="button"
+                                        class="openReceiptBtn text-green-600 hover:text-green-900 transition-colors duration-200 p-1 rounded"
+                                        data-sale-id="{{ $sale->id }}"
+                                        aria-label="Open Receipt"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14M12 3v4" />
+                                        </svg>
+                                    </button>
+
+                                    <!-- Void button -->
                                     @if($sale->status !== 'cancelled')
-                                        <a href="#" class="text-red-600 hover:text-red-900 text-sm font-medium">Void</a>
+                                        <button type="button" class="text-red-600 hover:text-red-900 transition-colors duration-200 p-1 rounded voidBtn" data-sale-id="{{ $sale->id }}" aria-label="Void Transaction">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6" />
+                                            </svg>
+                                        </button>
                                     @endif
                                 </div>
                             </td>
@@ -178,7 +299,13 @@
 
         <!-- Pagination -->
         <div class="bg-white px-6 py-4 border-t border-gray-200">
-            {{ $sales->links() }}
+            <div class="flex items-center justify-end">
+                @if (view()->exists('vendor.pagination.circular'))
+                    {!! $sales->appends(request()->except('page'))->links('vendor.pagination.circular') !!}
+                @else
+                    {!! $sales->appends(request()->except('page'))->links() !!}
+                @endif
+            </div>
         </div>
     </div>
 
@@ -813,6 +940,103 @@ document.addEventListener("DOMContentLoaded", function () {
         // Use the same print dialog (user can save as PDF) - or implement html2pdf if you want
         document.getElementById('printReceiptBtn')?.click();
     });
+
+    // --- Additional UI wiring: View modal, Reset button, Void modal handlers ---
+    const viewModalEl = document.getElementById('viewModal');
+    const openViewBtns = document.querySelectorAll('.openViewBtn');
+    const closeViewBtns = document.querySelectorAll('.closeViewModalBtn');
+
+    // View modal elements
+    const vTransactionId = document.getElementById('viewTransactionId');
+    const vDate = document.getElementById('viewDateTime');
+    const vStatus = document.getElementById('viewStatus');
+    const vPaymentMethod = document.getElementById('viewPaymentMethod');
+    const vCustomerName = document.getElementById('viewCustomerName');
+    const vCustomerPhone = document.getElementById('viewCustomerPhone');
+    const vCustomerEmail = document.getElementById('viewCustomerEmail');
+    const vItemsList = document.getElementById('viewItemsList');
+    const vSubtotal = document.getElementById('viewSubtotal');
+    const vVat = document.getElementById('viewVat');
+    const vDiscount = document.getElementById('viewDiscount');
+    const vTotal = document.getElementById('viewTotal');
+    const vAmountPaid = document.getElementById('viewAmountPaid');
+    const vChange = document.getElementById('viewChange');
+    const vNotes = document.getElementById('viewNotes');
+
+    function openViewModal() { viewModalEl.classList.remove('hidden'); }
+    function closeViewModal() { viewModalEl.classList.add('hidden'); }
+
+    openViewBtns.forEach(b => {
+        b.addEventListener('click', async (ev) => {
+            ev.preventDefault();
+            const saleId = b.dataset.saleId;
+            if (!saleId) return;
+            const data = await fetchSaleJson(saleId);
+            if (!data || !data.success) return;
+            const sale = data.sale;
+
+            vTransactionId.textContent = sale.sales_number ? `#${sale.sales_number}` : `#${sale.id}`;
+            vDate.textContent = formatDate(sale.sold_at ?? new Date().toISOString());
+            vStatus.textContent = (sale.status || '').toString().replace(/^(.)/, s => s.toUpperCase());
+            vPaymentMethod.textContent = (sale.payment_method || '—').toUpperCase();
+            vCustomerName.textContent = sale.customer ?? 'Walk-in';
+            vCustomerPhone.textContent = sale.customer_phone ?? '—';
+            vCustomerEmail.textContent = sale.customer_email ?? '—';
+
+            // Items list (simple list with name and qty)
+            vItemsList.innerHTML = '';
+            (sale.items || []).forEach(it => {
+                const el = document.createElement('div');
+                el.className = 'flex items-center justify-between';
+                el.innerHTML = `<div class="text-sm text-gray-700">${it.product_name}</div><div class="text-sm font-medium text-gray-800">${it.qty}×</div>`;
+                vItemsList.appendChild(el);
+            });
+
+            vSubtotal.textContent = formatCurrency(sale.subtotal || 0);
+            vVat.textContent = formatCurrency(sale.vat || 0);
+            vDiscount.textContent = (sale.discount && sale.discount > 0) ? `-${formatCurrency(sale.discount)}` : formatCurrency(0);
+            vTotal.textContent = formatCurrency(sale.grand_total || 0);
+            vAmountPaid.textContent = formatCurrency(sale.amount_paid || 0);
+            vChange.textContent = formatCurrency(sale.change || 0);
+            vNotes.textContent = sale.notes ?? '';
+
+            openViewModal();
+        });
+    });
+
+    closeViewBtns.forEach(b => b.addEventListener('click', (e) => { e.preventDefault(); closeViewModal(); }));
+    // close when clicking outside
+    viewModalEl?.addEventListener('click', function (e) { if (e.target === viewModalEl) closeViewModal(); });
+
+    // Reset button behavior: redirect to base path with per_page=5
+    document.getElementById('resetFilters')?.addEventListener('click', function () {
+        const base = window.location.pathname;
+        const perPage = 5;
+        window.location.href = `${base}?per_page=${perPage}`;
+    });
+
+    // Void modal wiring: open/close and confirm enable
+    const voidModal = document.getElementById('voidModal');
+    const voidButtons = document.querySelectorAll('.voidBtn');
+    const closeVoidBtns = document.querySelectorAll('.closeVoidModalBtn');
+    const voidTransactionIdEl = document.getElementById('voidTransactionId');
+    const confirmVoidCheckbox = document.getElementById('confirmVoid');
+    const confirmVoidBtn = document.getElementById('confirmVoidBtn');
+
+    voidButtons.forEach(b => b.addEventListener('click', function () {
+        const id = b.dataset.saleId;
+        if (!id) return;
+        voidTransactionIdEl.textContent = id;
+        voidModal.classList.remove('hidden');
+    }));
+
+    closeVoidBtns.forEach(b => b.addEventListener('click', function (e) { e.preventDefault(); voidModal.classList.add('hidden'); }));
+
+    if (confirmVoidCheckbox && confirmVoidBtn) {
+        confirmVoidCheckbox.addEventListener('change', function () {
+            confirmVoidBtn.disabled = !this.checked;
+        });
+    }
 });
 </script>
 @endpush

@@ -74,7 +74,7 @@
                     </div>
 
                     <!-- Buttons and Filters -->
-                    <button class="px-5 py-2.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+                    <button class="px-5 py-2.5 text-sm bg-primary hover:bg-emerald-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
                         Search
                     </button>
 
@@ -93,7 +93,7 @@
                     </select>
 
                     <!-- Add Employee -->
-                    <button id="addEmployeeBtn" class="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center justify-center">
+                    <button id="addEmployeeBtn" class="px-5 py-2.5 bg-primary hover:bg-emerald-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center justify-center">
                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
@@ -166,26 +166,28 @@
     </div>
 
 
-<!-- Add Employee Modal -->
-<div id="addEmployeeModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-8 border w-full max-w-6xl shadow-lg rounded-2xl bg-white">
-        <!-- Modal Header -->
-        <div class="flex justify-between items-center pb-4 border-b">
+<!-- Add Employee Modal (styled like addproduct's brandModal) -->
+<div id="addEmployeeModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 backdrop-blur-sm">
+    <div class="bg-white p-5 rounded-2xl shadow-2xl w-full max-w-4xl mx-4 border border-gray-100">
+        <div class="flex items-center justify-between mb-4">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800">Add New Employee</h2>
                 <p class="text-sm text-gray-600 mt-1">Please fill up all the required fields to add new employee.</p>
             </div>
-            <button type="button" class="closeModalBtn text-gray-400 hover:text-gray-600">
+            <button type="button" class="closeModalBtn text-gray-400 hover:text-red-600 transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
         </div>
 
-        <!-- Modal Content -->
-        <form id="employeeForm" enctype="multipart/form-data">
+        <hr class="mb-2">
+
+        <form id="employeeForm" enctype="multipart/form-data" class="global-focus flex flex-col p-5">
             @csrf
-            <div class="mt-8">
+
+            <!-- Scrollable body -->
+            <div class="overflow-y-auto max-h-[60vh] space-y-4 mt-4">
                 <!-- Two-column layout with adjusted widths -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
                     <!-- Left Column: Employee Information (wider) -->
@@ -197,13 +199,13 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
                                 <input type="text" name="first_name"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:font-normal placeholder:text-gray-400"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:font-normal placeholder:text-gray-400 bg-gray-50"
                                     placeholder="Juan">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
                                 <input type="text" name="last_name"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:font-normal placeholder:text-gray-400"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:font-normal placeholder:text-gray-400 bg-gray-50"
                                     placeholder="Dela Cruz">
                             </div>
                         </div>
@@ -213,13 +215,13 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
                                 <input type="email" name="email_address"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:font-normal placeholder:text-gray-400"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:font-normal placeholder:text-gray-400 bg-gray-50"
                                     placeholder="juan@gmail.com">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
                                 <input type="tel" name="phone_number"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:font-normal placeholder:text-gray-400"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:font-normal placeholder:text-gray-400 bg-gray-50"
                                     placeholder="09498521132">
                             </div>
                         </div>
@@ -229,7 +231,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Branch</label>
                                 <select name="branch_id" 
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white">
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white">
                                     @foreach(\App\Models\Branch::all() as $branch)
                                         <option value="{{ $branch->branch_id }}">{{ $branch->name }} ({{ $branch->location }})</option>
                                     @endforeach
@@ -242,7 +244,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
                                 <select name="role" id="roleSelect"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white">
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white">
                                     @if(auth()->user()->role === 'superadmin')
                                         <option value="cashier">Cashier</option>
                                         <option value="admin">Admin</option>
@@ -258,7 +260,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
                                 <input type="text" name="username"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:font-normal placeholder:text-gray-400"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:font-normal placeholder:text-gray-400 bg-gray-50"
                                     placeholder="juancashier12">
                             </div>
                         </div>
@@ -272,7 +274,7 @@
                                     type="password" 
                                     name="password"
                                     id="password"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:font-normal placeholder:text-gray-400 pr-10"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:font-normal placeholder:text-gray-400 pr-10 bg-gray-50"
                                     placeholder="••••••••">
                                 <button 
                                     type="button" 
@@ -301,7 +303,7 @@
                                     type="password" 
                                     name="password_confirmation"
                                     id="confirmPassword"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:font-normal placeholder:text-gray-400 pr-10"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:font-normal placeholder:text-gray-400 pr-10 bg-gray-50"
                                     placeholder="••••••••">
                                 <button 
                                     type="button" 
@@ -331,7 +333,7 @@
 
                         <input type="file" name="avatar" id="avatarInput" class="hidden" accept="image/*">
                         <!-- Profile Image Upload Area -->
-                        <div id="avatarUploadArea" class="border-2 border-dashed border-gray-300 rounded-lg p-6 h-[250px] mb-4 
+                        <div id="avatarUploadArea" class="border-2 border-dashed border-gray-300 rounded-xl p-6 h-[250px] mb-4 
                                     flex items-center justify-center text-center cursor-pointer flex-col">
                             
                             <!-- Image preview container -->
@@ -350,27 +352,26 @@
                         <!-- Action Buttons - Stacked with same width -->
                         <div class="flex flex-col gap-3 w-full">
                             <button type="button"
-                                class="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
+                                class="w-full px-4 py-3 bg-primary hover:bg-emerald-600 text-white rounded-xl hover:bg-green-700 transition-colors text-sm font-medium">
                                 Change Profile
                             </button>
                             <button type="reset"
-                                class="w-full px-4- py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium">
+                                class="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors text-sm font-medium">
                                 Reset
                             </button>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Modal Footer -->
-                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t mt-8">
-                    <button type="button" class="closeModalBtn w-full sm:w-auto px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
-                        Back
-                    </button>
-                    <button type="submit"
-                        class="w-full sm:w-auto px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
-                        Create Account
-                    </button>
-                </div>
+            <!-- Footer pinned to bottom -->
+            <div class="mt-4 pt-4 border-t flex justify-end gap-3">
+                <button type="button" class="closeModalBtn px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors font-medium">
+                    Cancel
+                </button>
+                <button type="submit" class="px-4 py-3 bg-primary hover:bg-emerald-600 text-white rounded-xl hover:bg-green-700 transition-colors font-medium">
+                    Create Account
+                </button>
             </div>
         </form>
     </div>
@@ -392,24 +393,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Open modal
     function openModal() {
+        if (!modal) return;
         modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
 
     // Close modal
     function closeModal() {
+        if (!modal) return;
         modal.classList.add('hidden');
         document.body.style.overflow = 'auto';
     }
 
     // Attach open button event
-    openBtn.addEventListener('click', openModal);
+    if (openBtn) openBtn.addEventListener('click', openModal);
 
     // Close modal with all designated close buttons
-    closeBtns.forEach(btn => btn.addEventListener('click', closeModal));
+    if (closeBtns && closeBtns.length) closeBtns.forEach(btn => btn.addEventListener('click', closeModal));
 
     // Close modal when clicking outside
-    modal.addEventListener('click', function(e) {
+    if (modal) modal.addEventListener('click', function(e) {
         if (e.target === modal) closeModal();
     });
 
@@ -419,32 +422,42 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Avatar upload area click
-    avatarArea.addEventListener('click', () => avatarInput.click());
+    if (avatarArea && avatarInput) {
+        avatarArea.addEventListener('click', () => avatarInput.click());
+    }
 
     // Avatar input change
-    avatarInput.addEventListener('change', function () {
-        if (this.files && this.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                avatarPreview.src = e.target.result;
-                avatarPreview.classList.remove('hidden');
-                avatarTextContainer.classList.add('hidden');
-            };
-            reader.readAsDataURL(this.files[0]);
-        }
-    });
+    if (avatarInput) {
+        avatarInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (avatarPreview) {
+                        avatarPreview.src = e.target.result;
+                        avatarPreview.classList.remove('hidden');
+                    }
+                    if (avatarTextContainer) avatarTextContainer.classList.add('hidden');
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    }
 
     // Reset button
-    const resetBtn = form.querySelector('button[type="reset"]');
-    resetBtn.addEventListener('click', () => {
-        // Reset avatar preview
-        avatarPreview.src = '';
-        avatarPreview.classList.add('hidden');
-        avatarTextContainer.classList.remove('hidden');
+    const resetBtn = form ? form.querySelector('button[type="reset"]') : null;
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            // Reset avatar preview
+            if (avatarPreview) {
+                avatarPreview.src = '';
+                avatarPreview.classList.add('hidden');
+            }
+            if (avatarTextContainer) avatarTextContainer.classList.remove('hidden');
 
-        // Clear file input
-        avatarInput.value = '';
-    });
+            // Clear file input
+            if (avatarInput) avatarInput.value = '';
+        });
+    }
 
     // AJAX submission for toast + reload page
     form.addEventListener('submit', function(e) {
@@ -488,12 +501,14 @@ document.addEventListener("DOMContentLoaded", function () {
     const eyeIcon = document.getElementById('eyeIcon');
     const eyeOffIcon = document.getElementById('eyeOffIcon');
 
-    togglePassword.addEventListener('click', () => {
-        const isHidden = passwordInput.type === 'password';
-        passwordInput.type = isHidden ? 'text' : 'password';
-        eyeIcon.classList.toggle('hidden', !isHidden);
-        eyeOffIcon.classList.toggle('hidden', isHidden);
-    });
+    if (togglePassword && passwordInput && eyeIcon && eyeOffIcon) {
+        togglePassword.addEventListener('click', () => {
+            const isHidden = passwordInput.type === 'password';
+            passwordInput.type = isHidden ? 'text' : 'password';
+            eyeIcon.classList.toggle('hidden', !isHidden);
+            eyeOffIcon.classList.toggle('hidden', isHidden);
+        });
+    }
 
     // Confirm password toggle
     const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
@@ -501,12 +516,14 @@ document.addEventListener("DOMContentLoaded", function () {
     const eyeIconConfirm = document.getElementById('eyeIconConfirm');
     const eyeOffIconConfirm = document.getElementById('eyeOffIconConfirm');
 
-    toggleConfirmPassword.addEventListener('click', () => {
-        const isHidden = confirmPasswordInput.type === 'password';
-        confirmPasswordInput.type = isHidden ? 'text' : 'password';
-        eyeIconConfirm.classList.toggle('hidden', !isHidden);
-        eyeOffIconConfirm.classList.toggle('hidden', isHidden);
-    });
+    if (toggleConfirmPassword && confirmPasswordInput && eyeIconConfirm && eyeOffIconConfirm) {
+        toggleConfirmPassword.addEventListener('click', () => {
+            const isHidden = confirmPasswordInput.type === 'password';
+            confirmPasswordInput.type = isHidden ? 'text' : 'password';
+            eyeIconConfirm.classList.toggle('hidden', !isHidden);
+            eyeOffIconConfirm.classList.toggle('hidden', isHidden);
+        });
+    }
 });
 </script>
 @endpush
